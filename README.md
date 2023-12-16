@@ -59,6 +59,22 @@ curl -X 'GET' \
   'http://localhost:15003/api/Wallet/balance?WalletName=1&AccountName=account%200' \
   -H 'accept: */*'
 
+- Start mining
+  curl -X 'POST' \
+  'http://localhost:15003/api/Mining/generate' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json-patch+json' \
+  -d '{
+  "blockCount": 1
+}'
+
+- Stop mining
+  curl -X 'POST' \
+  'http://localhost:15003/api/Mining/stopmining' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json-patch+json' \
+  -d 'true'
+
 - Start staking
   curl -X 'POST' \
   'http://localhost:15003/api/Staking/startstaking' \
