@@ -32,3 +32,7 @@ Windows
 - Open Browser, input http://localhost:15003
 
 Liunx
+- Install .NET 6 https://learn.microsoft.com/zh-cn/dotnet/core/install/linux-scripted-manual#set-environment-variables-system-wide
+- Dwonload last Sealink Node.
+- Unzip file,run dotnet Blockcore.Node.dll
+- Open Browser, input http://localhost:15003
