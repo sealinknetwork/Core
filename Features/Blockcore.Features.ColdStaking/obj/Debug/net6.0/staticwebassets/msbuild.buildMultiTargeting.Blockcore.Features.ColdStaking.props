@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\Blockcore.Features.ColdStaking.props" />
+</Project>

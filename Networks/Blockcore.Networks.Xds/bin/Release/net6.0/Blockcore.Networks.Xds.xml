@@ -1,0 +1,157 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Blockcore.Networks.Xds</name>
+    </assembly>
+    <members>
+        <member name="M:Blockcore.Networks.Xds.Configuration.MemoryPoolConfiguration.UseObsidianXMempool(Blockcore.Builder.IFullNodeBuilder)">
+            <summary>
+            Include the memory pool feature and related services in the full node.
+            </summary>
+            <param name="fullNodeBuilder">Full node builder.</param>
+            <returns>Full node builder.</returns>
+        </member>
+        <member name="P:Blockcore.Networks.Xds.Configuration.XdsMempoolValidator.ConsensusOptions">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.Xds.Configuration.XdsMempoolValidator.PerformanceCounter">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Networks.Xds.Configuration.XdsMempoolValidator.AcceptToMemoryPool(Blockcore.Features.MemoryPool.MempoolValidationState,Blockcore.Consensus.TransactionInfo.Transaction)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Networks.Xds.Configuration.XdsMempoolValidator.AcceptToMemoryPoolWithTime(Blockcore.Features.MemoryPool.MempoolValidationState,Blockcore.Consensus.TransactionInfo.Transaction)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Networks.Xds.Configuration.XdsMempoolValidator.SanityCheck">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Networks.Xds.Configuration.XdsMempoolValidator.AcceptToMemoryPoolWorkerAsync(Blockcore.Features.MemoryPool.MempoolValidationState,Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Validates and then adds a transaction to memory pool.
+            </summary>
+            <param name="state">Validation state for creating the validation context.</param>
+            <param name="tx">The transaction to validate.</param>
+        </member>
+        <member name="M:Blockcore.Networks.Xds.Configuration.XdsMempoolValidator.IsCurrentForFeeEstimation">
+            <summary>
+            Whether chain is currently valid for fee estimation.
+            It should only count for fee estimation if the node is not behind.
+            </summary>
+            <returns>Whether current for fee estimation.</returns>
+        </member>
+        <member name="M:Blockcore.Networks.Xds.Configuration.XdsMempoolValidator.LimitMempoolSize(System.Int64,System.Int64)">
+            <summary>
+            Trims memory pool to a new size.
+            First expires transactions older than age.
+            Then trims memory pool to limit if necessary.
+            </summary>
+            <param name="limit">New size.</param>
+            <param name="age">AAge to use for calculating expired transactions.</param>
+        </member>
+        <member name="T:Blockcore.Networks.Xds.Configuration.XdsPreMempoolChecksMempoolRule">
+            <summary>
+            Checks that are done before touching the memory pool.
+            These checks don't need to run under the memory pool lock,
+            but since we run them now in the rules engine, they do.
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Blockcore.Networks.Xds.Configuration.XdsPreMempoolChecksMempoolRule.CheckStandardTransaction(Blockcore.Features.MemoryPool.MempoolValidationContext)" -->
+        <member name="M:Blockcore.Networks.Xds.Configuration.XdsPreMempoolChecksMempoolRule.CheckFinalTransaction(Blockcore.Consensus.Chain.ChainIndexer,Blockcore.Utilities.IDateTimeProvider,Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Validates that the transaction is the final transaction with the time rules
+            according to BIP-113 rules.
+            </summary>
+            <param name="chainIndexer">Block chain used for computing time-locking on the transaction.</param>
+            <param name="dateTimeProvider">Provides the current date and time.</param>
+            <param name="tx">The transaction to validate.</param>
+            <returns>Whether the final transaction was valid.</returns>
+            <seealso cref="M:Blockcore.Consensus.TransactionInfo.Transaction.IsFinal(System.DateTimeOffset,System.Int32)"/>
+        </member>
+        <member name="T:Blockcore.Networks.Xds.Consensus.XdsConsensusOptions">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Networks.Xds.Consensus.XdsConsensusOptions.GetStakeMinConfirmations(System.Int32,Blockcore.Networks.Network)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Networks.Xds.Deployments.XdsBIP9Deployments.#ctor">
+            <summary>
+            Constructs the BIP9 deployments array.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.Xds.Deployments.XdsBIP9Deployments.GetFlags(System.Int32)">
+            <summary>
+            Gets the deployment flags to set when the deployment activates.
+            </summary>
+            <param Command="deployment">The deployment number.</param>
+            <returns>The deployment flags.</returns>
+        </member>
+        <member name="T:Blockcore.Networks.Xds.Policies.XdsStandardScriptsRegistry">
+            <summary>
+            ObsidianX-specific standard transaction definitions.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Networks.Xds.Rules.XdsCheckFeeMempoolRule">
+            <summary>
+            Validates the transaction fee is valid, so that the transaction can be mined eventually.
+            Checks whether the fee meets minimum fee, free transactions have sufficient priority, and absurdly high fees.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Networks.Xds.Rules.XdsEmptyScriptSigMempoolRule">
+            <summary>
+            Checks if transactions match the white-listing criteria. This rule and <see cref="T:Blockcore.Networks.Xds.Rules.XdsOutputNotWhitelistedRule"/> must correspond.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Networks.Xds.Rules.XdsEmptyScriptSigRule">
+            <summary>
+            Checks <see cref="T:Blockcore.Networks.Xds.XdsMain"/> transaction inputs have empty ScriptSig fields.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Networks.Xds.Rules.XdsHeaderVersionRule">
+            <summary>
+            Checks if <see cref="T:Blockcore.Networks.Xds.XdsMain"/> network block's header has a valid block version.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.Xds.Rules.XdsHeaderVersionRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadVersion">Thrown if block's version is outdated or otherwise invalid.</exception>
+        </member>
+        <member name="T:Blockcore.Networks.Xds.Rules.XdsOutputNotWhitelistedMempoolRule">
+            <summary>
+            Checks if transactions match the white-listing criteria. This rule and <see cref="T:Blockcore.Networks.Xds.Rules.XdsOutputNotWhitelistedRule"/> must correspond.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Networks.Xds.Rules.XdsOutputNotWhitelistedRule">
+            <summary>
+            Checks if transactions match the white-listing criteria. This rule and <see cref="T:Blockcore.Networks.Xds.Rules.XdsOutputNotWhitelistedMempoolRule"/> must correspond.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.Xds.Rules.XdsPosCoinviewRule.GetProofOfWorkReward(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Networks.Xds.Rules.XdsPosCoinviewRule.GetProofOfStakeReward(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Networks.Xds.Rules.XdsPosCoinviewRule.CheckMaturity(Blockcore.Utilities.UnspentOutput,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Networks.Xds.Rules.XdsRequireWitnessMempoolRule">
+            <summary>
+            Checks weather the transaction has witness.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Networks.Xds.Rules.XdsRequireWitnessRule">
+            <summary>
+            Checks if all transaction in the block have witness.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Networks.Xds.XdsMain.AbsoluteMinTxFee">
+            <summary>
+                An absolute (flat) minimum fee per transaction, independent of the transaction
+                size in bytes or weight. Transactions with a lower fees will be rejected,
+                transactions with equal or higher fees are allowed. This property
+                Will not be used if the value is null.
+            </summary>
+        </member>
+    </members>
+</doc>

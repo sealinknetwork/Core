@@ -1,0 +1,2269 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Blockcore.Features.Consensus</name>
+    </assembly>
+    <members>
+        <member name="T:Blockcore.Features.Consensus.Behaviors.ProvenHeadersConsensusManagerBehavior">
+            <summary>
+            Behavior that takes care of proven headers protocol. It also keeps the notion of peer's consensus tip.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.Behaviors.ProvenHeadersConsensusManagerBehavior.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.Behaviors.ProvenHeadersConsensusManagerBehavior.isGateway">
+            <summary>
+            Specify if the node is a gateway or not.
+            Gateway are used internally by Stratis to prevent network split during the transition from Headers to ProvenHeaders protocol.
+            Gateways can only receive headers and blocks from whitelisted nodes.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Behaviors.ProvenHeadersConsensusManagerBehavior.OnMessageReceivedAsync(Blockcore.P2P.Peer.INetworkPeer,Blockcore.P2P.Protocol.IncomingMessage)">
+            <inheritdoc />
+            <summary>
+            Processes and incoming message from the peer.
+            </summary>
+            <param name="peer">Peer from which the message was received.</param>
+            <param name="message">Received message to process.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Behaviors.ProvenHeadersConsensusManagerBehavior.CanConsumeCache">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Behaviors.ProvenHeadersConsensusManagerBehavior.ConstructHeadersPayload(Blockcore.P2P.Protocol.Payloads.GetHeadersPayload,Blockcore.Consensus.Chain.ChainedHeader@)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Behaviors.ProvenHeadersConsensusManagerBehavior.Clone">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Behaviors.ProvenHeadersConsensusManagerBehavior.CanPeerProcessProvenHeaders(Blockcore.P2P.Peer.INetworkPeer)">
+            <summary>
+            Determines whether the specified peer supports Proven Headers and PH has been activated.
+            </summary>
+            <param name="peer">The peer.</param>
+            <returns>
+              <c>true</c> if is peer is PH enabled; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Behaviors.ProvenHeadersConsensusManagerBehavior.GetCurrentHeight">
+            <summary>
+            If the last checkpoint is bellow consensus tip we do not need proven headers.
+            </summary>
+            <returns> <c>true</c> if  we need to validate proven headers.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Behaviors.ProvenHeadersConsensusManagerBehavior.BuildGetHeadersPayload">
+            <summary>
+            Builds the <see cref="T:Blockcore.P2P.Protocol.Payloads.GetHeadersPayload"/>.
+            </summary>
+            <returns>The <see cref="T:Blockcore.P2P.Protocol.Payloads.GetHeadersPayload"/> instance.
+            If the node is a gateway and the peer is not whitelisted, return null (gateways can sync only from whitelisted peers).
+            If the peer can serve PH, <see cref="T:Blockcore.P2P.Protocol.Payloads.GetProvenHeadersPayload" /> is returned, otherwise if it's a legacy peer but it's whitelisted,
+            <see cref="T:Blockcore.P2P.Protocol.Payloads.GetHeadersPayload"/> is returned.
+            If the attached peer is a legacy peer and it's not whitelisted, returns null.
+            </returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Behaviors.ProvenHeadersConsensusManagerBehavior.ProcessHeadersAsync(Blockcore.P2P.Peer.INetworkPeer,System.Collections.Generic.List{Blockcore.Consensus.BlockInfo.BlockHeader})">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Behaviors.ProvenHeadersConsensusManagerBehavior.ProcessLegacyHeadersAsync(Blockcore.P2P.Peer.INetworkPeer,System.Collections.Generic.List{Blockcore.Consensus.BlockInfo.BlockHeader})">
+            <summary>
+            Processes the legacy GetHeaders message.
+            Only whitelisted legacy peers are allowed to handle this message.
+            </summary>
+            <param name="peer">The peer.</param>
+            <param name="headers">The headers.</param>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.Behaviors.ProvenHeadersReservedSlotsBehavior.MinimumRequiredPeerSupportingPH">
+            <summary>
+            The minimum peers supporting Proven Headers that we require to be connected to us.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.Behaviors.ProvenHeadersReservedSlotsBehavior.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Behaviors.ProvenHeadersReservedSlotsBehavior.OnMessageReceivedAsync(Blockcore.P2P.Peer.INetworkPeer,Blockcore.P2P.Protocol.IncomingMessage)">
+            <summary>
+            Processes and incoming message from the peer.
+            </summary>
+            <param name="peer">Peer from which the message was received.</param>
+            <param name="message">Received message to process.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Behaviors.ProvenHeadersReservedSlotsBehavior.ProcessVersionAsync(Blockcore.P2P.Peer.INetworkPeer,Blockcore.P2P.Protocol.Payloads.VersionPayload)">
+            <summary>
+            Processes "version" message received from the peer.
+            Ensures we leave some available connection slots to nodes that are enabled to serve Proven Headers, if the number of minimum PH enabled nodes connected isn't met.
+            </summary>
+            <param name="peer">Peer from which the message was received.</param>
+            <param name="version">Payload of "version" message to process.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Behaviors.ProvenHeadersReservedSlotsBehavior.Clone">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.Consensus.CoinviewPrefetcher">
+            <summary>
+            Pre-fetches coins (UTXOs) for blocks that are likely to be validated in the near future.
+            <para>
+            This speeds up full block validation.
+            </para>
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinviewPrefetcher.Lookahead">
+            <summary>
+            How many blocks ahead pre-fetching will look.
+            When header at height X is dequeued block with header at height <c>X + Lookahead</c> will be pre-fetching in case block data is downloaded.
+            </summary>
+            <remarks>
+            TODO maybe make it dynamic so the value is increased when we are too close to the tip after pre-fetching was completed
+            and decreased if we are too far from the tip.
+            </remarks>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinviewPrefetcher.headersQueue">
+            <summary>Queue of headers that were added when block associated with such header was fully validated.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinviewPrefetcher.OnHeaderEnqueued(Blockcore.Consensus.Chain.ChainedHeader,System.Threading.CancellationToken)">
+            <summary>
+            Pre-fetch UTXOs for a block and some blocks with higher height.
+            <para>
+            This task runs in the background.
+            </para>
+            </summary>
+            <param name="header">Header of a block that is about to be partially validated and that requires pre-fetching.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinviewPrefetcher.Prefetch(Blockcore.Consensus.Chain.ChainedHeader)">
+            <summary>
+            Pre-fetches UTXOs for a block and some blocks with higher height.
+            <para>
+            Pre-fetching is done in the background.
+            </para>
+            </summary>
+            <param name="header">Header of a block that was fully validated and requires pre-fetching.</param>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.CoinViews.BackendPerformanceCounter">
+            <summary>
+            Performance statistics used to measure the time it takes for the DBreeze backend
+            to perform database operations.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.BackendPerformanceCounter.start">
+            <summary>UTC timestamp when the performance counter was created.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.BackendPerformanceCounter.Start">
+            <summary>UTC timestamp when the performance counter was created.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.BackendPerformanceCounter.insertedEntities">
+            <summary>Number of entities inserted to the database.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.BackendPerformanceCounter.InsertedEntities">
+            <summary>Number of entities inserted to the database.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.BackendPerformanceCounter.queriedEntities">
+            <summary>Number of queried entities from the database.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.BackendPerformanceCounter.QueriedEntities">
+            <summary>Number of queried entities from the database.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.BackendPerformanceCounter.Elapsed">
+            <summary>Time span since the performance counter was created.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.BackendPerformanceCounter.insertTime">
+            <summary>Time in ticks it took the database to perform insert operations.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.BackendPerformanceCounter.InsertTime">
+            <summary>Time it took the database to perform insert operations.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.BackendPerformanceCounter.queryTime">
+            <summary>Time in ticks it took the database to perform query operations.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.BackendPerformanceCounter.QueryTime">
+            <summary>Time it took the database to perform query operations.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.BackendPerformanceCounter.dateTimeProvider">
+            <summary>Provider of date time functionality.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.BackendPerformanceCounter.#ctor(Blockcore.Utilities.IDateTimeProvider)">
+            <summary>
+            Initializes an instance of the object.
+            </summary>
+            <param name="dateTimeProvider">The date time provider for the node.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.BackendPerformanceCounter.ToString">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.BackendPerformanceCounter.AddInsertTime(System.Int64)">
+            <summary>
+            Adds sample for database insert operation to the performance counter.
+            </summary>
+            <param name="count">Time in ticks it took the database to perform the insert operation.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.BackendPerformanceCounter.AddInsertedEntities(System.Int64)">
+            <summary>
+            Increases the number of inserted entities in the performance counter.
+            </summary>
+            <param name="count">Number of newly inserted entities to add.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.BackendPerformanceCounter.AddQueryTime(System.Int64)">
+            <summary>
+            Adds sample for database query operation to the performance counter.
+            </summary>
+            <param name="count">Time in ticks it took the database to perform the query operation.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.BackendPerformanceCounter.AddQueriedEntities(System.Int64)">
+            <summary>
+            Increases the number of queried entities in the performance counter.
+            </summary>
+            <param name="count">Number of newly queried entities to add.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.BackendPerformanceCounter.Snapshot">
+            <summary>
+            Creates a snapshot of the current state of the performance counter.
+            </summary>
+            <returns>Newly created snapshot.</returns>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.CoinViews.BackendPerformanceSnapshot">
+            <summary>
+            Snapshot of a state of a performance counter taken at a certain time.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.BackendPerformanceSnapshot.totalQueriedEntities">
+            <summary>Number of queried entities from the database.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.BackendPerformanceSnapshot.TotalQueriedEntities">
+            <summary>Number of queried entities from the database.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.BackendPerformanceSnapshot.totalQueryTime">
+            <summary>Time in ticks it took the database to perform query operations.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.BackendPerformanceSnapshot.TotalQueryTime">
+            <summary>Time it took the database to perform query operations.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.BackendPerformanceSnapshot.totalInsertTime">
+            <summary>Time in ticks it took the database to perform insert operations.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.BackendPerformanceSnapshot.TotalInsertTime">
+            <summary>Time it took the database to perform insert operations.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.BackendPerformanceSnapshot.totalInsertedEntities">
+            <summary>Number of entities inserted to the database.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.BackendPerformanceSnapshot.TotalInsertedEntities">
+            <summary>Number of entities inserted to the database.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.BackendPerformanceSnapshot.Start">
+            <summary>UTC timestamp when the snapshotted performance counter was created.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.BackendPerformanceSnapshot.Taken">
+            <summary>UTC timestamp when the snapshot was taken.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.BackendPerformanceSnapshot.Elapsed">
+            <summary>Time span between the creation of the performance counter and the creation of its snapshot.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.BackendPerformanceSnapshot.#ctor(System.Int64,System.Int64,System.Int64,System.Int64)">
+            <summary>
+            Initializes the instance of the object.
+            </summary>
+            <param name="insertedEntities">Number of entities inserted to the database.</param>
+            <param name="insertTime">Time in ticks it took the database to perform insert operations.</param>
+            <param name="queriedEntities">Number of queried entities from the database.</param>
+            <param name="queryTime">Time it took the database to perform query operations.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.BackendPerformanceSnapshot.op_Subtraction(Blockcore.Features.Consensus.CoinViews.BackendPerformanceSnapshot,Blockcore.Features.Consensus.CoinViews.BackendPerformanceSnapshot)">
+            <summary>
+            Creates a snapshot based on difference of two performance counter snapshots.
+            <para>
+            This is used to obtain statistic information about performance of the backend
+            during certain period.</para>
+            </summary>
+            <param name="end">Newer performance counter snapshot.</param>
+            <param name="start">Older performance counter snapshot.</param>
+            <returns>Snapshot of the difference between the two performance counter snapshots.</returns>
+            <remarks>The two snapshots should be taken from a single performance counter.
+            Otherwise the start times of the snapshots will be different, which is not allowed.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.BackendPerformanceSnapshot.ToString">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.Consensus.CoinViews.CachedCoinView">
+            <summary>
+            Cache layer for coinview prevents too frequent updates of the data in the underlying storage.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.CoinViews.CachedCoinView.CacheItem">
+            <summary>
+            Item of the coinview cache that holds information about the unspent outputs
+            as well as the status of the item in relation to the underlying storage.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.CacheItem.Coins">
+            <summary>Information about transaction's outputs. Spent outputs are nulled.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.CacheItem.ExistInInner">
+            <summary><c>true</c> if the unspent output information is stored in the underlying storage, <c>false</c> otherwise.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.CacheItem.IsDirty">
+            <summary><c>true</c> if the information in the cache is different than the information in the underlying storage.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.CachedCoinView.CacheFlushTimeIntervalSeconds">
+            <summary>
+            Length of the coinview cache flushing interval in seconds, in case of a crash up to that number of seconds of syncing blocks are lost.
+            </summary>
+            <remarks>
+            The longer the time interval the better performant the coinview will be,
+            UTXOs that are added and deleted before they are flushed never reach the underline disk
+            this saves 3 operations to disk (write the coinview and later read and delete it).
+            However if this interval is too high the cache will be filled with dirty items
+            Also a crash will mean a big redownload of the chain.
+            </remarks>
+            <seealso cref="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.lastCacheFlushTime"/>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.CachedCoinView.MaxCacheSizeBytes">
+            <summary>Maximum number of transactions in the cache.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.CachedCoinView.performanceCounter">
+            <summary>Statistics of hits and misses in the cache.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.lockobj">
+            <summary>Lock object to protect access to <see cref="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.cachedUtxoItems"/>, <see cref="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.blockHash"/>, <see cref="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.cachedRewindData"/>, and <see cref="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.innerBlockHash"/>.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.blockHash">
+            <summary>Hash of the block headers of the tip of the coinview.</summary>
+            <remarks>All access to this object has to be protected by <see cref="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.lockobj"/>.</remarks>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.innerBlockHash">
+            <summary>Hash of the block headers of the tip of the underlaying coinview.</summary>
+            <remarks>All access to this object has to be protected by <see cref="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.lockobj"/>.</remarks>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.coindb">
+            <summary>Coin view at one layer below this implementaiton.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.cachedRewindData">
+            <summary>Pending list of rewind data to be persisted to a persistent storage.</summary>
+            <remarks>All access to this list has to be protected by <see cref="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.lockobj"/>.</remarks>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.CachedCoinView.ICoindb">
+            <inheritdoc />
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.stakeChainStore">
+            <summary>Storage of POS block information.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.rewindDataIndexCache">
+            <summary>
+            The rewind data index store.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.cachedUtxoItems">
+            <summary>Information about cached items mapped by transaction IDs the cached item's unspent outputs belong to.</summary>
+            <remarks>All access to this object has to be protected by <see cref="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.lockobj"/>.</remarks>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.CachedCoinView.cacheCount">
+            <summary>Number of items in the cache.</summary>
+            <remarks>The getter violates the lock contract on <see cref="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.cachedUtxoItems"/>, but the lock here is unnecessary as the <see cref="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.cachedUtxoItems"/> is marked as readonly.</remarks>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.CachedCoinView.rewindDataCount">
+            <summary>Number of items in the rewind data.</summary>
+            <remarks>The getter violates the lock contract on <see cref="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.cachedRewindData"/>, but the lock here is unnecessary as the <see cref="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.cachedRewindData"/> is marked as readonly.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.CachedCoinView.CacheCoins(Blockcore.Consensus.TransactionInfo.OutPoint[])">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.CachedCoinView.FetchCoins(Blockcore.Consensus.TransactionInfo.OutPoint[])">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.CachedCoinView.TryEvictCacheLocked">
+            <summary>
+            Deletes some items from the cache to free space for new items.
+            Only items that are persisted in the underlaying storage can be deleted from the cache.
+            </summary>
+            <remarks>Should be protected by <see cref="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.lockobj"/>.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.CachedCoinView.ShouldFlush">
+            <summary>
+            Check if periodic flush is required.
+            The conditions to flash the cache are if <see cref="P:Blockcore.Features.Consensus.CoinViews.CachedCoinView.CacheFlushTimeIntervalSeconds"/> is elapsed
+            or if <see cref="P:Blockcore.Features.Consensus.CoinViews.CachedCoinView.MaxCacheSizeBytes"/> is reached.
+            </summary>
+            <returns>True if the coinview needs to flush</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.CachedCoinView.Flush(System.Boolean)">
+            <summary>
+            Finds all changed records in the cache and persists them to the underlying coinview.
+            </summary>
+            <param name="force"><c>true</c> to enforce flush, <c>false</c> to flush only if <see cref="F:Blockcore.Features.Consensus.CoinViews.CachedCoinView.lastCacheFlushTime"/> is older than <see cref="P:Blockcore.Features.Consensus.CoinViews.CachedCoinView.CacheFlushTimeIntervalSeconds"/>.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.CachedCoinView.SaveChanges(System.Collections.Generic.IList{Blockcore.Utilities.UnspentOutput},Blockcore.Utilities.HashHeightPair,Blockcore.Utilities.HashHeightPair,System.Collections.Generic.List{Blockcore.Utilities.RewindData})">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.CachedCoinView.CalculateRewindWindow">
+            <summary>
+            Calculate the window of how many rewind items to keep in memory.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.CachedCoinView.GetRewindData(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter">
+            <summary>
+            Statistics to measure the hit rate of the cache.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.start">
+            <summary>UTC timestamp when the performance counter was created.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.Start">
+            <summary>UTC timestamp when the performance counter was created.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.missCount">
+            <summary>Number of cache queries for which the result was not found in the cache.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.MissCount">
+            <summary>Number of cache queries for which the result was not found in the cache.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.hitCount">
+            <summary>Number of cache queries for which the result was found in the cache.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.HitCount">
+            <summary>Number of cache queries for which the result was found in the cache.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.missCountCache">
+            <summary>Number of cache queries for which the result was not found in the cache.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.MissCountCache">
+            <summary>Number of cache queries for which the result was not found in the cache.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.hitCountCache">
+            <summary>Number of cache queries for which the result was found in the cache.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.HitCountCache">
+            <summary>Number of cache queries for which the result was found in the cache.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.Elapsed">
+            <summary>Time span since the performance counter was created.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.utxoSkipDisk">
+            <summary>Number of utxos that never got flushed to disk.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.UtxoSkipDisk">
+            <summary>Number of utxos that never got flushed to disk.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.dateTimeProvider">
+            <summary>Provider of date time functionality.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.#ctor(Blockcore.Utilities.IDateTimeProvider)">
+            <summary>
+            Initializes an instance of the object.
+            </summary>
+            <param name="dateTimeProvider">Provider of date time functionality.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.AddMissCount(System.Int64)">
+            <summary>
+            Adds new sample to the number of missed cache queries.
+            </summary>
+            <param name="count">Number of missed queries to add.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.AddHitCount(System.Int64)">
+            <summary>
+            Adds new sample to the number of hit cache queries.
+            </summary>
+            <param name="count">Number of hit queries to add.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.AddCacheMissCount(System.Int64)">
+            <summary>
+            Adds new sample to the number of missed cache queries.
+            </summary>
+            <param name="count">Number of missed queries to add.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.AddCacheHitCount(System.Int64)">
+            <summary>
+            Adds new sample to the number of hit cache queries.
+            </summary>
+            <param name="count">Number of hit queries to add.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.AddUtxoSkipDiskCount(System.Int64)">
+            <summary>
+            Adds new sample to the number of utxo that never got flushed.
+            </summary>
+            <param name="count">Number of hit queries to add.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.CachePerformanceCounter.Snapshot">
+            <summary>
+            Creates a snapshot of the current state of the performance counter.
+            </summary>
+            <returns>Newly created snapshot.</returns>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.CoinViews.CachePerformanceSnapshot">
+            <summary>
+            Snapshot of a state of a performance counter taken at a certain time.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachePerformanceSnapshot.hitCount">
+            <summary>Number of cache queries for which the result was found in the cache.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.CachePerformanceSnapshot.TotalHitCount">
+            <summary>Number of cache queries for which the result was found in the cache.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachePerformanceSnapshot.missCount">
+            <summary>Number of cache queries for which the result was not found in the cache.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.CachePerformanceSnapshot.TotalMissCount">
+            <summary>Number of cache queries for which the result was not found in the cache.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachePerformanceSnapshot.hitCountCache">
+            <summary>Number of cache queries for which the result was found in the cache.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.CachePerformanceSnapshot.TotalHitCountCache">
+            <summary>Number of cache queries for which the result was found in the cache.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.CachePerformanceSnapshot.missCountCache">
+            <summary>Number of cache queries for which the result was not found in the cache.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.CachePerformanceSnapshot.TotalMissCountCache">
+            <summary>Number of cache queries for which the result was not found in the cache.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.CachePerformanceSnapshot.Start">
+            <summary>UTC timestamp when the snapshotted performance counter was created.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.CachePerformanceSnapshot.Taken">
+            <summary>UTC timestamp when the snapshot was taken.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.CachePerformanceSnapshot.Elapsed">
+            <summary>Time span between the creation of the performance counter and the creation of its snapshot.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.CachePerformanceSnapshot.op_Subtraction(Blockcore.Features.Consensus.CoinViews.CachePerformanceSnapshot,Blockcore.Features.Consensus.CoinViews.CachePerformanceSnapshot)">
+            <summary>
+            Creates a snapshot based on difference of two performance counter snapshots.
+            <para>
+            This is used to obtain statistic information about performance of the cache
+            during certain period.</para>
+            </summary>
+            <param name="end">Newer performance counter snapshot.</param>
+            <param name="start">Older performance counter snapshot.</param>
+            <returns>Snapshot of the difference between the two performance counter snapshots.</returns>
+            <remarks>The two snapshots should be taken from a single performance counter.
+            Otherwise the start times of the snapshots will be different, which is not allowed.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.CachePerformanceSnapshot.ToString">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.Consensus.CoinViews.Coindb.DBreezeCoindb">
+            <summary>
+            Persistent implementation of coinview using dBreeze database.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.Coindb.DBreezeCoindb.blockHashKey">
+            <summary>Database key under which the block hash of the coin view's current tip is stored.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.Coindb.DBreezeCoindb.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.Coindb.DBreezeCoindb.network">
+            <summary>Specification of the network the node runs on - regtest/testnet/mainnet.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.Coindb.DBreezeCoindb.blockHash">
+            <summary>Hash of the block which is currently the tip of the coinview.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.Coindb.DBreezeCoindb.performanceCounter">
+            <summary>Performance counter to measure performance of the database insert and query operations.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.Coindb.DBreezeCoindb.dBreeze">
+            <summary>Access to dBreeze database.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.Coindb.DBreezeCoindb.GetTipHash(DBreeze.Transactions.Transaction)">
+            <summary>
+            Obtains a block header hash of the coinview's current tip.
+            </summary>
+            <param name="transaction">Open dBreeze transaction.</param>
+            <returns>Block header hash of the coinview's current tip.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.Coindb.DBreezeCoindb.CreateTransaction">
+            <summary>
+            Creates new disposable DBreeze transaction.
+            </summary>
+            <returns>Transaction object.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.Coindb.DBreezeCoindb.Rewind">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.Coindb.DBreezeCoindb.PutStake(System.Collections.Generic.IEnumerable{Blockcore.Features.Consensus.StakeItem})">
+            <summary>
+            Persists unsaved POS blocks information to the database.
+            </summary>
+            <param name="stakeEntries">List of POS block information to be examined and persists if unsaved.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.Coindb.DBreezeCoindb.PutStakeInternal(DBreeze.Transactions.Transaction,System.Collections.Generic.IEnumerable{Blockcore.Features.Consensus.StakeItem})">
+            <summary>
+            Persists unsaved POS blocks information to the database.
+            </summary>
+            <param name="transaction">Open dBreeze transaction.</param>
+            <param name="stakeEntries">List of POS block information to be examined and persists if unsaved.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.Coindb.DBreezeCoindb.GetStake(System.Collections.Generic.IEnumerable{Blockcore.Features.Consensus.StakeItem})">
+            <summary>
+            Retrieves POS blocks information from the database.
+            </summary>
+            <param name="blocklist">List of partially initialized POS block information that is to be fully initialized with the values from the database.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.Coindb.DBreezeCoindb.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.Coindb.FasterCoindb.blockHashKey">
+            <summary>Database key under which the block hash of the coin view's current tip is stored.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.Coindb.FasterCoindb.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.Coindb.FasterCoindb.network">
+            <summary>Specification of the network the node runs on - regtest/testnet/mainnet.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.Coindb.FasterCoindb.blockHash">
+            <summary>Hash of the block which is currently the tip of the coinview.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.Coindb.FasterCoindb.performanceCounter">
+            <summary>Performance counter to measure performance of the database insert and query operations.</summary>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.CoinViews.Coindb.ICoindb">
+            <summary>
+            Database of UTXOs.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.Coindb.ICoindb.Initialize">
+            <summary>
+            Initialize the coindb.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.Coindb.ICoindb.GetTipHash">
+            <summary>
+            Retrieves the block hash of the current tip of the coinview.
+            </summary>
+            <returns>Block hash of the current tip of the coinview.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.Coindb.ICoindb.SaveChanges(System.Collections.Generic.IList{Blockcore.Utilities.UnspentOutput},Blockcore.Utilities.HashHeightPair,Blockcore.Utilities.HashHeightPair,System.Collections.Generic.List{Blockcore.Utilities.RewindData})">
+            <summary>
+            Persists changes to the coinview (with the tip hash <paramref name="oldBlockHash" />) when a new block
+            (hash <paramref name="nextBlockHash" />) is added and becomes the new tip of the coinview.
+            <para>
+            This method is provided (in <paramref name="unspentOutputs" /> parameter) with information about all
+            transactions that are either new or were changed in the new block. It is also provided with information
+            (in <see cref="!:originalOutputs" />) about the previous state of those transactions (if any),
+            which is used for <see cref="M:Blockcore.Features.Consensus.CoinViews.Coindb.ICoindb.Rewind" /> operation.
+            </para>
+            </summary>
+            <param name="unspentOutputs">Information about the changes between the old block and the new block. An item in this list represents a list of all outputs
+            for a specific transaction. If a specific output was spent, the output is <c>null</c>.</param>
+            <param name="oldBlockHash">Block hash of the current tip of the coinview.</param>
+            <param name="nextBlockHash">Block hash of the tip of the coinview after the change is applied.</param>
+            <param name="rewindDataList">List of rewind data items to be persisted.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.Coindb.ICoindb.FetchCoins(Blockcore.Consensus.TransactionInfo.OutPoint[])">
+            <summary>
+            Obtains information about unspent outputs.
+            </summary>
+            <param name="utxos">Transaction identifiers for which to retrieve information about unspent outputs.</param>
+            <returns>
+            <para>
+            If an item of <see cref="P:Blockcore.Features.Consensus.CoinViews.FetchCoinsResponse.UnspentOutputs"/> is <c>null</c>, it means that outpoint is spent.
+            </para>
+            </returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.Coindb.ICoindb.Rewind">
+            <summary>
+            Rewinds the coinview to the last saved state.
+            <para>
+            This operation includes removing the UTXOs of the recent transactions
+            and restoring recently spent outputs as UTXOs.
+            </para>
+            </summary>
+            <returns>Hash of the block header which is now the tip of the rewound coinview.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.Coindb.ICoindb.GetRewindData(System.Int32)">
+            <summary>
+            Gets the rewind data by block height.
+            </summary>
+            <param name="height">The height of the block.</param>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.CoinViews.ICoinView">
+            <summary>
+            Database of UTXOs.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.ICoinView.GetTipHash">
+            <summary>
+            Retrieves the block hash of the current tip of the coinview.
+            </summary>
+            <returns>Block hash of the current tip of the coinview.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.ICoinView.SaveChanges(System.Collections.Generic.IList{Blockcore.Utilities.UnspentOutput},Blockcore.Utilities.HashHeightPair,Blockcore.Utilities.HashHeightPair,System.Collections.Generic.List{Blockcore.Utilities.RewindData})">
+            <summary>
+            Persists changes to the coinview (with the tip hash <paramref name="oldBlockHash" />) when a new block
+            (hash <paramref name="nextBlockHash" />) is added and becomes the new tip of the coinview.
+            <para>
+            This method is provided (in <paramref name="unspentOutputs" /> parameter) with information about all
+            transactions that are either new or were changed in the new block. It is also provided with information
+            (in <see cref="!:originalOutputs" />) about the previous state of those transactions (if any),
+            which is used for <see cref="M:Blockcore.Features.Consensus.CoinViews.ICoinView.Rewind" /> operation.
+            </para>
+            </summary>
+            <param name="unspentOutputs">Information about the changes between the old block and the new block. An item in this list represents a list of all outputs
+            for a specific transaction. If a specific output was spent, the output is <c>null</c>.</param>
+            <param name="oldBlockHash">Block hash of the current tip of the coinview.</param>
+            <param name="nextBlockHash">Block hash of the tip of the coinview after the change is applied.</param>
+            <param name="rewindDataList">List of rewind data items to be persisted.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.ICoinView.FetchCoins(Blockcore.Consensus.TransactionInfo.OutPoint[])">
+            <summary>
+            Obtains information about unspent outputs.
+            </summary>
+            <param name="utxos">Transaction identifiers for which to retrieve information about unspent outputs.</param>
+            <returns>
+            <para>
+            If an item of <see cref="P:Blockcore.Features.Consensus.CoinViews.FetchCoinsResponse.UnspentOutputs"/> is <c>null</c>, it means that outpoint is spent.
+            </para>
+            </returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.ICoinView.CacheCoins(Blockcore.Consensus.TransactionInfo.OutPoint[])">
+            <summary>
+            Check if given utxos are not in cache then pull them from disk and place them in to the cache
+            </summary>
+            <param name="utxos">Transaction output identifiers for which to retrieve information about unspent outputs.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.ICoinView.Rewind">
+            <summary>
+            Rewinds the coinview to the last saved state.
+            <para>
+            This operation includes removing the UTXOs of the recent transactions
+            and restoring recently spent outputs as UTXOs.
+            </para>
+            </summary>
+            <returns>Hash of the block header which is now the tip of the rewound coinview.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.ICoinView.GetRewindData(System.Int32)">
+            <summary>
+            Gets the rewind data by block height.
+            </summary>
+            <param name="height">The height of the block.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.CoinviewHelper.GetIdsToFetch(Blockcore.Consensus.BlockInfo.Block,System.Boolean)">
+            <summary>
+            Gets transactions identifiers that need to be fetched from store for specified block.
+            </summary>
+            <param name="block">The block with the transactions.</param>
+            <param name="enforceBIP30">Whether to enforce look up of the transaction id itself and not only the reference to previous transaction id.</param>
+            <returns>A list of transaction ids to fetch from store</returns>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.CoinViews.FetchCoinsResponse">
+            <summary>
+            Return value of <see cref="!:CoinView.FetchCoinsAsync(OutPoint[])"/>,
+            contains the coinview tip's hash and information about unspent coins in the requested transactions.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.CoinViews.FetchCoinsResponse.UnspentOutputs">
+            <summary>Unspent outputs of the requested transactions.</summary>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.CoinViews.InMemoryCoinView">
+            <summary>
+            Coinview that holds all information in the memory, which is used in tests.
+            </summary>
+            <remarks>Rewinding is not supported in this implementation.</remarks>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.InMemoryCoinView.lockobj">
+            <summary>Lock object to protect access to <see cref="F:Blockcore.Features.Consensus.CoinViews.InMemoryCoinView.unspents"/> and <see cref="F:Blockcore.Features.Consensus.CoinViews.InMemoryCoinView.tipHash"/>.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.InMemoryCoinView.unspents">
+            <summary>Information about unspent outputs mapped by transaction IDs the outputs belong to.</summary>
+            <remarks>All access to this object has to be protected by <see cref="F:Blockcore.Features.Consensus.CoinViews.InMemoryCoinView.lockobj"/>.</remarks>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.CoinViews.InMemoryCoinView.tipHash">
+            <summary>Hash of the block header which is the tip of the coinview.</summary>
+            <remarks>All access to this object has to be protected by <see cref="F:Blockcore.Features.Consensus.CoinViews.InMemoryCoinView.lockobj"/>.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.InMemoryCoinView.#ctor(Blockcore.Utilities.HashHeightPair)">
+            <summary>
+            Initializes an instance of the object.
+            </summary>
+            <param name="tipHash">Hash of the block headers of the tip of the coinview.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.InMemoryCoinView.GetTipHash">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.InMemoryCoinView.FetchCoins(Blockcore.Consensus.TransactionInfo.OutPoint[])">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.CoinViews.InMemoryCoinView.SaveChanges(System.Collections.Generic.IList{Blockcore.Utilities.UnspentOutput},Blockcore.Utilities.HashHeightPair,Blockcore.Utilities.HashHeightPair,System.Collections.Generic.List{Blockcore.Utilities.RewindData})">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.Consensus.ConsensusController">
+            <summary>
+            A <see cref="T:Blockcore.Controllers.FeatureController"/> that provides API and RPC methods from the consensus loop.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.ConsensusController.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ConsensusController.DeploymentFlags">
+            <summary>
+            Get the threshold states of softforks currently being deployed.
+            Allowable states are: Defined, Started, LockedIn, Failed, Active.
+            </summary>
+            <returns>A <see cref="T:Microsoft.AspNetCore.Mvc.JsonResult"/> object derived from a list of
+            <see cref="T:Blockcore.Base.Deployments.Models.ThresholdStateModel"/> objects - one per deployment.
+            Returns an <see cref="T:Blockcore.Utilities.JsonErrors.ErrorResult"/> if the method fails.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ConsensusController.GetBestBlockHash">
+            <summary>
+            Gets the hash of the block at the consensus tip.
+            </summary>
+            <returns>Json formatted <see cref="T:Blockcore.NBitcoin.uint256"/> hash of the block at the consensus tip. Returns <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> formatted error if fails.</returns>
+            <remarks>This is an API implementation of an RPC call.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ConsensusController.GetBlockHash(System.Int32)">
+            <summary>
+            Gets the hash of the block at a given height.
+            </summary>
+            <param name="height">The height of the block to get the hash for.</param>
+            <returns>Json formatted <see cref="T:Blockcore.NBitcoin.uint256"/> hash of the block at the given height. <c>Null</c> if block not found. Returns <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> formatted error if fails.</returns>
+            <remarks>This is an API implementation of an RPC call.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ConsensusFeature.InitializeAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ConsensusFeature.PrintHelp(Blockcore.Networks.Network)">
+            <summary>
+            Prints command-line help.
+            </summary>
+            <param name="network">The network to extract values from.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ConsensusFeature.BuildDefaultConfigurationFile(System.Text.StringBuilder,Blockcore.Networks.Network)">
+            <summary>
+            Get the default configuration.
+            </summary>
+            <param name="builder">The string builder to add the settings to.</param>
+            <param name="network">The network to base the defaults off.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ConsensusFeature.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.Consensus.ConsensusQuery">
+            <summary>
+            A class that provides the ability to query consensus elements.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ConsensusQuery.GetUnspentTransactionAsync(Blockcore.Consensus.TransactionInfo.OutPoint)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ConsensusQuery.GetNetworkDifficulty">
+            <inheritdoc/>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.ConsensusRPCController">
+            <summary>
+            A <see cref="T:Blockcore.Controllers.FeatureController"/> that provides API and RPC methods from the consensus loop.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.ConsensusRPCController.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ConsensusRPCController.GetBestBlockHash">
+            <summary>
+            Implements the getbestblockhash RPC call.
+            </summary>
+            <returns>A <see cref="T:Blockcore.NBitcoin.uint256"/> hash of the block at the consensus tip.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ConsensusRPCController.GetBlockHash(System.Int32)">
+            <summary>
+            Implements the getblockhash RPC call.
+            </summary>
+            <param name="height">The requested block height.</param>
+            <returns>A <see cref="T:Blockcore.NBitcoin.uint256"/> hash of the block at the given height. <c>Null</c> if block not found.</returns>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.FullNodeBuilderConsensusExtension">
+            <summary>
+            A class providing extension methods for <see cref="T:Blockcore.Builder.IFullNodeBuilder"/>.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Interfaces.IStakeValidator">
+            <summary>
+            Provides functionality for checking validity of PoS blocks.
+            See <see cref="!:Blockcore.Features.Miner.PosMinting"/> for more information about PoS solutions.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Interfaces.IStakeValidator.CheckKernel(Blockcore.Features.Consensus.PosRuleContext,Blockcore.Consensus.Chain.ChainedHeader,System.UInt32,System.Int64,Blockcore.Consensus.TransactionInfo.OutPoint)">
+            <summary>
+            Checks that UTXO is valid for staking and then checks kernel hash.
+            </summary>
+            <param name="context">Staking context.</param>
+            <param name="prevChainedHeader">Previous chained block.</param>
+            <param name="headerBits">Chained block's header bits, which define the difficulty target.</param>
+            <param name="transactionTime">Transaction time.</param>
+            <param name="prevout">Information about transaction id and index.</param>
+            <returns><c>true</c> if the coin stake satisfies the weighted target, otherwise <c>false</c>.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Interfaces.IStakeValidator.CheckStakeKernelHash(Blockcore.Features.Consensus.PosRuleContext,System.UInt32,Blockcore.NBitcoin.uint256,Blockcore.Utilities.UnspentOutput,Blockcore.Consensus.TransactionInfo.OutPoint,System.UInt32)">
+            <summary>
+            Checks that the stake kernel hash satisfies the target difficulty.
+            </summary>
+            <param name="context">Staking context.</param>
+            <param name="headerBits">Chained block's header bits, which define the difficulty target.</param>
+            <param name="prevStakeModifier">Previous staked block modifier.</param>
+            <param name="stakingCoins">Coins that participate in staking.</param>
+            <param name="prevout">Information about transaction id and index.</param>
+            <param name="transactionTime">Transaction time.</param>
+            <remarks>
+            Coinstake must meet hash target according to the protocol:
+            kernel (input 0) must meet the formula
+            <c>hash(stakeModifierV2 + stakingCoins.Time + prevout.Hash + prevout.N + transactionTime) &lt; target * weight</c>.
+            This ensures that the chance of getting a coinstake is proportional to the amount of coins one owns.
+            <para>
+            The reason this hash is chosen is the following:
+            <list type="number">
+            <item><paramref name="prevStakeModifier"/>: Scrambles computation to make it very difficult to precompute future proof-of-stake.</item>
+            <item><paramref name="stakingCoins.Time.Time"/>: Time of the coinstake UTXO. Slightly scrambles computation.</item>
+            <item><paramref name="prevout.Hash.Hash"/> Hash of stakingCoins UTXO, to reduce the chance of nodes generating coinstake at the same time.</item>
+            <item><paramref name="prevout.N.N"/>: Output number of stakingCoins UTXO, to reduce the chance of nodes generating coinstake at the same time.</item>
+            <item><paramref name="transactionTime"/>: Timestamp of the coinstake transaction.</item>
+            </list>
+            Block or transaction tx hash should not be used here as they can be generated in vast
+            quantities so as to generate blocks faster, degrading the system back into a proof-of-work situation.
+            </para>
+            </remarks>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.StakeTimeViolation">Thrown in case transaction time is lower than it's own UTXO timestamp.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.StakeHashInvalidTarget">Thrown in case PoS hash doesn't meet target protocol.</exception>
+            <returns><c>true</c> if the coin stake satisfies the weighted target, otherwise <c>false</c>.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Interfaces.IStakeValidator.CheckProofOfStake(Blockcore.Features.Consensus.PosRuleContext,Blockcore.Consensus.Chain.ChainedHeader,Blockcore.Consensus.BlockInfo.BlockStake,Blockcore.Consensus.TransactionInfo.Transaction,System.UInt32)">
+            <summary>
+            Checks if provided transaction is a valid coinstake transaction.
+            </summary>
+            <param name="context">Staking context.</param>
+            <param name="prevChainedHeader">Previous chained block.</param>
+            <param name="prevBlockStake">Information about previous staked block.</param>
+            <param name="transaction">The transaction.</param>
+            <param name="headerBits">Chained block's header bits, which define the difficulty target.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Interfaces.IStakeValidator.ComputeStakeModifierV2(Blockcore.Consensus.Chain.ChainedHeader,Blockcore.NBitcoin.uint256,Blockcore.NBitcoin.uint256)">
+            <summary>
+            Computes stake modifier.
+            </summary>
+            <param name="prevChainedHeader">Previous chained block.</param>
+            <param name="prevStakeModifier">Previous PoS block StakeModifier.</param>
+            <param name="kernel">The PoS kernel.</param>
+            <returns>Stake modifier.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Interfaces.IStakeValidator.GetLastPowPosChainedBlock(Blockcore.Features.Consensus.IStakeChain,Blockcore.Consensus.Chain.ChainedHeader,System.Boolean)">
+            <summary>
+            Gets the last block in the chain that was generated using
+            PoS if <paramref name="proofOfStake"/> is <c>true</c> or PoW if <paramref name="proofOfStake"/> is <c>false</c>.
+            </summary>
+            <param name="stakeChain">Database of stake related data for the current blockchain.</param>
+            <param name="startChainedHeader">Block that we start from. Only blocks before that one will be checked.</param>
+            <param name="proofOfStake">Specifies what kind of block we are looking for: <c>true</c> for PoS or <c>false</c> for PoW.</param>
+            <returns>Last block in the chain that satisfies provided requirements.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="startChainedHeader"/> is <c>null</c>.</exception>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Interfaces.IStakeValidator.GetNextTargetRequired(Blockcore.Features.Consensus.IStakeChain,Blockcore.Consensus.Chain.ChainedHeader,Blockcore.Consensus.IConsensus,System.Boolean)">
+            <summary>
+            Calculates the difficulty target for the next block.
+            </summary>
+            <param name="stakeChain">Database of stake related data for the current blockchain.</param>
+            <param name="chainedHeader">Block header for which to calculate the target difficulty.</param>
+            <param name="consensus">Consensus rules for the current network.</param>
+            <param name="proofOfStake"><c>true</c> for calculation of PoS difficulty target, <c>false</c> for calculation of PoW difficulty target.</param>
+            <returns>The difficulty target for the next block after <paramref name="chainedHeader"/>.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Interfaces.IStakeValidator.CalculateRetarget(System.UInt32,Blockcore.NBitcoin.Target,System.UInt32,Blockcore.NBitcoin.BouncyCastle.math.BigInteger)">
+            <summary>
+            Calculates the difficulty between two block time spans.
+            </summary>
+            <param name="firstBlockTime">The time of the first block.</param>
+            <param name="firstBlockTarget">The target of the first block.</param>
+            <param name="secondBlockTime">The block time of the second block.</param>
+            <param name="targetLimit">The upper limit of what the target can be.</param>
+            <returns>The new difficulty target as the outcome of the previous two blocks.</returns>
+            <remarks>
+            The calculation of the next target is based on the last target value and the block time (aka spacing) of <paramref name="firstBlockTime"/>
+            (i.e. difference in time stamp of this block and its immediate predecessor). The target changes every block and it is adjusted
+            down (i.e. towards harder to reach, or more difficult) if the time to mine last block was lower than the target block time.
+            And it is adjusted up if it took longer than the target block time. The adjustments are done in a way the target is moving towards
+            the target-spacing (expected block time) exponentially, so even a big change in the mining power on the network will be fixed by retargeting relatively quickly.
+            <para>
+            Over <see cref="!:RetargetIntervalMinutes"/> minutes there are certain number (say <c>N</c>) of blocks expected to be mined if the target block time
+            of <see cref="!:TargetSpacingSeconds"/> was reached every time. Then the next target is calculated as follows:</para>
+            <code>
+            NewTarget = PrevTarget * ((N - 1) * TargetSpacingSeconds + 2 * LastBlockTime) / ((N + 1) * TargetSpacingSeconds)
+            </code>
+            <para>
+            Which basically says that the block time of the last block is counted twice instead of two optimal block times.
+            And the <c>N</c> determines how strongly will the deviation of the last block time affect the difficulty.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Interfaces.IStakeValidator.VerifySignature(Blockcore.Utilities.UnspentOutput,Blockcore.Consensus.TransactionInfo.Transaction,System.Int32,Blockcore.Consensus.ScriptInfo.ScriptVerify)">
+            <summary>
+            Verifies transaction's signature.
+            </summary>
+            <param name="coin">UTXO that is spent in the transaction.</param>
+            <param name="txTo">Transaction.</param>
+            <param name="txToInN">Index of the transaction's input.</param>
+            <param name="flagScriptVerify">Script verification flags.</param>
+            <returns><c>true</c> if signature is valid.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Interfaces.IStakeValidator.IsConfirmedInNPrevBlocks(Blockcore.Utilities.UnspentOutput,Blockcore.Consensus.Chain.ChainedHeader,System.Int64)">
+            <summary>
+            Returns <c>true</c> if provided coins were confirmed in less than <paramref name="targetDepth"/> number of blocks.
+            </summary>
+            <param name="coins">Coins to check confirmation depth for.</param>
+            <param name="referenceChainedHeader">Chained block from which we are counting the depth.</param>
+            <param name="targetDepth">The target depth.</param>
+            <returns><c>true</c> if the coins were spent within N blocks from <see cref="!:referenceChainedHeader"/>, <c>false</c> otherwise.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Interfaces.IStakeValidator.GetTargetDepthRequired(Blockcore.Consensus.Chain.ChainedHeader)">
+            <summary>
+            Gets the required target depth according to the previous chained header and the consensus options.
+            </summary>
+            <param name="prevChainedHeader">Previous chained block.</param>
+            <returns>A value indicating the required target depth in number of blocks.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Interfaces.IStakeValidator.CheckStakeSignature(Blockcore.Consensus.BlockInfo.BlockSignature,Blockcore.NBitcoin.uint256,Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Validates the POS Block Signature.
+            </summary>
+            <param name="signature">The signature to validate.</param>
+            <param name="blockHash">The block hash.</param>
+            <param name="coinStake">The coinstake transaction.</param>
+            <returns><c>True</c> if passes validation, and <c>false</c> otherwise.</returns>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.IStakeChain">
+            <summary>
+            An interface to read and write PoS information from store.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.IStakeChain.Get(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Get the stake coresponding to the block.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.IStakeChain.Set(Blockcore.Consensus.Chain.ChainedHeader,Blockcore.Consensus.BlockInfo.BlockStake)">
+            <summary>
+            Set the stake for the given block header.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.IStakeChain.Load">
+            <summary>
+            Initialize the stake store.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.PosConsensusFeature.PrintHelp(Blockcore.Networks.Network)">
+            <summary>
+            Prints command-line help. Invoked via reflection.
+            </summary>
+            <param name="network">The network to extract values from.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.PosConsensusFeature.BuildDefaultConfigurationFile(System.Text.StringBuilder,Blockcore.Networks.Network)">
+            <summary>
+            Get the default configuration. Invoked via reflection.
+            </summary>
+            <param name="builder">The string builder to add the settings to.</param>
+            <param name="network">The network to base the defaults off.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.PosConsensusFeature.InitializeAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.PosConsensusFeature.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.PowConsensusFeature.PrintHelp(Blockcore.Networks.Network)">
+            <summary>
+            Prints command-line help. Invoked via reflection.
+            </summary>
+            <param name="network">The network to extract values from.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.PowConsensusFeature.BuildDefaultConfigurationFile(System.Text.StringBuilder,Blockcore.Networks.Network)">
+            <summary>
+            Get the default configuration. Invoked via reflection.
+            </summary>
+            <param name="builder">The string builder to add the settings to.</param>
+            <param name="network">The network to base the defaults off.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.PowConsensusFeature.InitializeAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.PowConsensusFeature.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.Consensus.ProvenBlockHeaders.IRewindDataIndexCache">
+            <summary>
+            Rewind data index data store, where index structure consists of a key-value storage where key is a TxId + N (N is an index of output in a transaction)
+            and value is a rewind data index. This data structure will always contain as many entries as there are rewind data instances in the database (currently
+            we do not delete old rewind data that is no longer needed but after the issue #5 (https://github.com/stratisproject/StratisBitcoinFullNode/issues/5)
+            is fixed we should also make sure that old fork point data is deleted as well).
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ProvenBlockHeaders.IRewindDataIndexCache.Initialize(System.Int32,Blockcore.Features.Consensus.CoinViews.ICoinView)">
+            <summary>
+            Initializes the rewind data index store by loading rewind data from the cache or dbreeze for the last 500 blocks.
+            </summary>
+            <param name="tipHeight">The chain tip height.</param>
+            <param name="coinView">The coin view to be used for getting rewind data.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ProvenBlockHeaders.IRewindDataIndexCache.Remove(System.Int32,Blockcore.Features.Consensus.CoinViews.ICoinView)">
+            <summary>
+            Removes the last rewind data index and add one instead.
+            </summary>
+            <param name="tipHeight">The chain tip height.</param>
+            <param name="coinView">The coin view to be used for getting rewind data.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ProvenBlockHeaders.IRewindDataIndexCache.SaveAndEvict(System.Int32,System.Collections.Generic.Dictionary{Blockcore.Consensus.TransactionInfo.OutPoint,System.Int32})">
+            <summary>
+            Saves rewind index data to cache.
+            </summary>
+            <param name="tipHeight">The current block height.</param>
+            <param name="indexData">The rewind index data, where key is TxId + N and value is a height of the rewind data.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ProvenBlockHeaders.IRewindDataIndexCache.Get(Blockcore.NBitcoin.uint256,System.Int32)">
+            <summary>
+            Gets rewind data index from the cache (or if not found from the disk) by tx id and output index.
+            </summary>
+            <param name="transactionId">The transaction id.</param>
+            <param name="transactionOutputIndex">Index of the transaction output.</param>
+            <returns>If found, rewind data index, else null.</returns>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore">
+            <summary>
+            Manages the persistence of <see cref="T:Blockcore.Consensus.BlockInfo.ProvenBlockHeader"/> items.
+            </summary>
+            <remarks>
+            <para>
+            The pending batch is saved to the database and cleared every minute.
+            </para>
+            <para>
+            Items in the pending batch are also saved to the least recently used <see cref="!:MemorySizeCache&lt;int, ProvenBlockHeader&gt;"/>.
+            Where the memory size is limited by <see cref="F:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.MemoryCacheSizeLimitInBytes"/>.
+            </para>
+            <para>
+            When new <see cref="T:Blockcore.Consensus.BlockInfo.ProvenBlockHeader"/> items are saved to the database - in case <see cref="T:Blockcore.Interfaces.IProvenBlockHeaderRepository"/> contains headers that
+            are no longer a part of the best chain - they are overwritten or ignored.
+            </para>
+            <para>
+            When <see cref="T:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore"/> is being initialized it will overwrite blocks that are not on the best chain.
+            </para>
+            </remarks>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.provenBlockHeaderRepository">
+            <summary>Database repository storing <see cref="T:Blockcore.Consensus.BlockInfo.ProvenBlockHeader"/> items.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.performanceCounter">
+            <summary>Performance counter to measure performance of the save and get operations.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.latestPerformanceSnapShot">
+            <summary>Latest snapshot performance counter to measure performance of the save and get operations.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.TipHashHeight">
+            <summary>
+            Current <see cref="T:Blockcore.Interfaces.IProvenBlockHeaderStore"/> tip hash and height that the <see cref= "T:Blockcore.Consensus.BlockInfo.ProvenBlockHeader"/> belongs to.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.pendingTipHashHeight">
+            <summary>
+            Pending - not yet saved to disk - <see cref="T:Blockcore.Interfaces.IProvenBlockHeaderStore"/> tip hash and height that the <see cref= "T:Blockcore.Consensus.BlockInfo.ProvenBlockHeader"/> belongs to.
+            <para>All access to these items have to be protected by <see cref="F:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.lockObject" /></para>
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.lockObject">
+            <summary>A lock object that protects access to the <see cref="F:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.pendingBatch"/> and <see cref="F:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.pendingTipHashHeight"/>.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.MemoryCacheSizeLimitInBytes">
+            <summary>Cache limit.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.pendingBatch">
+            <summary>
+            Cache of pending <see cref= "T:Blockcore.Consensus.BlockInfo.ProvenBlockHeader"/> items.
+            </summary>
+            <remarks>
+            Pending <see cref= "T:Blockcore.Consensus.BlockInfo.ProvenBlockHeader"/> items will be saved to disk every minute.
+            <para>
+            All access to these items have to be protected by <see cref="F:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.lockObject"/>.
+            </para>
+            </remarks>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.saveAsyncLoopException">
+            <summary>
+            This is a work around to fail the node if the save operation fails.
+            TODO: Use a global node exception that will stop consensus in critical errors.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.Cache">
+            <summary>
+            Store Cache of <see cref= "T:Blockcore.Consensus.BlockInfo.ProvenBlockHeader"/> items.
+            </summary>
+            <remarks>
+            Items are added to this cache when the caller asks for a <see cref= "T:Blockcore.Consensus.BlockInfo.ProvenBlockHeader"/>.
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.InitializeAsync(Blockcore.Consensus.Chain.ChainedHeader)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.GetAsync(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.AddToPendingBatch(Blockcore.Consensus.BlockInfo.ProvenBlockHeader,Blockcore.Utilities.HashHeightPair)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.SaveAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.CheckItemsAreInConsecutiveSequence(System.Collections.Generic.List{System.Int32})">
+            <summary>Checks whether block height keys are in consecutive sequence.</summary>
+            <param name="keys">List of block height keys to check.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ProvenBlockHeaders.ProvenBlockHeaderStore.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.Consensus.ProvenBlockHeaders.RewindDataIndexCache">
+            <inheritdoc />
+        </member>
+        <member name="F:Blockcore.Features.Consensus.ProvenBlockHeaders.RewindDataIndexCache.items">
+            <summary>
+            Internal cache for rewind data index. Key is a TxId + N (N is an index of output in a transaction)
+            and value is a rewind data index.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.ProvenBlockHeaders.RewindDataIndexCache.numberOfBlocksToKeep">
+            <summary>
+            Number of blocks to keep in cache after the flush.
+            The number of items stored in cache is the sum of inputs used in every transaction in each of those blocks.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.ProvenBlockHeaders.RewindDataIndexCache.performanceCounter">
+            <summary>
+            Performance counter to measure performance of the save and get operations.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ProvenBlockHeaders.RewindDataIndexCache.Initialize(System.Int32,Blockcore.Features.Consensus.CoinViews.ICoinView)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ProvenBlockHeaders.RewindDataIndexCache.AddRewindData(System.Int32,Blockcore.Utilities.RewindData)">
+            <summary>
+            Adding rewind information for a block in to the cache, we only add the unspent outputs.
+            The cache key is [trxid-outputIndex] and the value is the height of the block on with the rewind data information is kept.
+            </summary>
+            <param name="rewindHeight">Height of the rewind data.</param>
+            <param name="rewindData">The data itself</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ProvenBlockHeaders.RewindDataIndexCache.Remove(System.Int32,Blockcore.Features.Consensus.CoinViews.ICoinView)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ProvenBlockHeaders.RewindDataIndexCache.SaveAndEvict(System.Int32,System.Collections.Generic.Dictionary{Blockcore.Consensus.TransactionInfo.OutPoint,System.Int32})">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.ProvenBlockHeaders.RewindDataIndexCache.Get(Blockcore.NBitcoin.uint256,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Features.Consensus.UtxoRuleContext.UnspentOutputSet">
+            <summary>
+            The UTXO that are representing the current validated block.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.PosRuleContext">
+            <summary>
+            A context that is used by the <see cref="T:Blockcore.Consensus.IConsensusRuleEngine"/> for the PoS network type.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.PowRuleContext">
+            <summary>
+            A context that is used by the <see cref="T:Blockcore.Consensus.IConsensusRuleEngine"/> for the PoW network type.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.BlockMerkleRootRule">
+            <summary>
+            This rule will validate that the calculated merkle tree matches the merkle root in the header.
+            </summary>
+            <remarks>
+            Transactions in a block are hashed together using SHA256 in to a merkle tree,
+            the root of that tree is included in the block header.
+            </remarks>
+            <remarks>
+            Check for merkle tree malleability (CVE-2012-2459): repeating sequences
+            of transactions in a block without affecting the merkle root of a block,
+            while still invalidating it.
+            Validation cannot be skipped for this rule, someone might have been able to create a mutated
+            block (block with a duplicate transaction) with a valid hash, but we don't want to accept these
+            kind of blocks.
+            <seealso cref="!:https://bitcointalk.org/index.php?topic=102395.0"/>
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.BlockMerkleRootRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadMerkleRoot">The block merkle root is different from the computed merkle root.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadTransactionDuplicate">One of the leaf nodes of the merkle tree has a duplicate hash within the subtree.</exception>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.BlockMerkleRootRule.BlockMerkleRoot(Blockcore.Consensus.BlockInfo.Block,System.Boolean@)">
+            <summary>
+            Calculates merkle root for block's transactions.
+            </summary>
+            <param name="block">Block which transactions are used for calculation.</param>
+            <param name="mutated"><c>true</c> if block contains repeating sequences of transactions without affecting the merkle root of a block. Otherwise: <c>false</c>.</param>
+            <returns>Merkle root.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.BlockMerkleRootRule.ComputeMerkleRoot(System.Collections.Generic.List{Blockcore.NBitcoin.uint256},System.Boolean@)">
+            <summary>
+            Computes merkle root.
+            </summary>
+            <remarks>This implements a constant-space merkle root/path calculator, limited to 2^32 leaves.</remarks>
+            <param name="leaves">Merkle tree leaves.</param>
+            <param name="mutated"><c>true</c> if at least one leaf of the merkle tree has the same hash as any subtree. Otherwise: <c>false</c>.</param>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.BlockSizeRule">
+            <summary>
+            This rule will validate the block size and weight.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.BlockSizeRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadBlockWeight">The block weight is higher than the max block weight.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadBlockLength">The block length is larger than the allowed max block base size.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadBlockLength">The amount of transactions inside the block is higher than the allowed max block base size.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadBlockLength">The block does not contain any transactions.</exception>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.CheckDifficultyHybridRule">
+            <summary>Calculate the difficulty of a POS network for both Pow/POS blocks.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.Rules.CommonRules.CheckDifficultyHybridRule.PosParent">
+            <summary>Allow access to the POS parent.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.CheckDifficultyHybridRule.Initialize">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.CheckDifficultyHybridRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.HighHash">Thrown if block doesn't have a valid PoW header.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadDiffBits">Thrown if proof of stake is incorrect.</exception>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.CheckDifficultyPosRule">
+            <summary>
+            Calculate the difficulty for a POS block and check that it is correct.
+            This rule is only activated after the POW epoch is finished according to the value in <see cref="!:Consensus.LastPOWBlock"/>.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.Rules.CommonRules.CheckDifficultyPosRule.PosParent">
+            <summary>Allow access to the POS parent.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.CheckDifficultyPosRule.Initialize">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.CheckDifficultyPosRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadDiffBits">Thrown if proof of stake is incorrect.</exception>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.CheckDifficultyPowRule">
+            <summary>Calculate the difficulty for a POW network and check that it is correct.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.CheckDifficultyPowRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.HighHash"> Thrown if block doesn't have a valid PoS header.</exception>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.CheckPosTransactionRule">
+            <summary>Validate a PoS transaction.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.CheckPosTransactionRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="!:ConsensusErros.BadTransactionEmptyOutput">The transaction output is empty.</exception>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.CheckPowTransactionRule">
+            <summary>Validate a PoW transaction.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.CheckPowTransactionRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadTransactionNoInput">Thrown if transaction has no inputs.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadTransactionNoOutput">Thrown if transaction has no outputs.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadTransactionOversize">Thrown if transaction size is greater than maximum allowed size of a block.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadTransactionNegativeOutput">Thrown if at least one transaction output has negative value.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadTransactionTooLargeOutput">Thrown if at least one transaction output value is greater than maximum allowed one.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadTransactionTooLargeTotalOutput">Thrown if sum of all transaction outputs is greater than maximum allowed one.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadTransactionDuplicateInputs">Thrown if any of transaction inputs are duplicate.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadCoinbaseSize">Thrown if coinbase transaction is too small or too big.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadTransactionNullPrevout">Thrown if transaction contains a null prevout.</exception>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.CheckSigOpsRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadBlockSigOps">The block contains more signature check operations than allowed.</exception>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.CoinbaseHeightRule">
+            <summary>
+            According to BIP34 a coinbase transaction must have the block height serialized in the script language,
+            </summary>
+            <remarks>
+            More info here https://github.com/bitcoin/bips/blob/master/bip-0034.mediawiki
+            <para>
+            This is partial validation rule.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.CoinbaseHeightRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadCoinbaseHeight">Thrown if coinbase doesn't start with serialized block height.</exception>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.CoinbaseHeightRule.StartWith(System.Byte[],System.Byte[])">
+            <summary>
+            Checks if first <paramref name="subset.Lenght.Lenght"/> entries are equal between two arrays.
+            </summary>
+            <param name="bytes">Main array.</param>
+            <param name="subset">Subset array.</param>
+            <returns><c>true</c> if <paramref name="subset.Lenght.Lenght"/> entries are equal between two arrays. Otherwise <c>false</c>.</returns>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.CoinbaseHeightActivationRule">
+            <summary>
+            With Bitcoin the BIP34 was activated at block 227,835 using the deployment flags,
+            this rule allows a chain to have BIP34 activated as a deployment rule.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.CoinbaseHeightActivationRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.EnsureCoinbaseRule">
+            <summary>Ensures a block follows the coinbase rules.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.EnsureCoinbaseRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadCoinbaseMissing">The coinbase transaction is missing in the block.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadMultipleCoinbase">The block contains multiple coinbase transactions.</exception>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.HeaderTimeChecksPosRule">
+            <summary>Checks if <see cref="T:Blockcore.Consensus.BlockInfo.PosBlock"/> timestamp is greater than previous block timestamp.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.HeaderTimeChecksPosRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BlockTimestampTooEarly">Thrown if block time is equal or behind the previous block.</exception>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.HeaderTimeChecksRule">
+            <summary>Checks if <see cref="T:Blockcore.Consensus.BlockInfo.Block"/> time stamp is ahead of current consensus and not more then two hours in the future.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.HeaderTimeChecksRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.TimeTooOld">Thrown if block's timestamp is too early.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.TimeTooNew">Thrown if block's timestamp too far in the future.</exception>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.HeaderVersionRule">
+            <summary>A base skeleton class that is implemented by networks to define and verify the version of blocks.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.HeaderVersionRule.ComputeBlockVersion(Blockcore.Consensus.Chain.ChainedHeader)">
+            <summary>
+            Computes what the block version of a newly created block should be, given a previous header and the
+            current set of BIP9 deployments defined in the consensus.
+            </summary>
+            <param name="prevChainedHeader">The header of the previous block in the chain.</param>
+            <remarks>This method is currently used during block creation only. Different nodes may not implement
+            BIP9, or may disagree about what the current valid set of deployments are. It is therefore not strictly
+            possible to validate a block version number in anything more than general terms.</remarks>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.PosBlockSignatureRepresentationRule">
+            <summary>
+            Check that the block signature for a POS block is in the canonical format.
+            </summary>
+            <remarks>This rule can only be an integrity validation rule. If it is
+            used as a partial or full validation rule, the block itself will get banned
+            instead of the peer, which can result in a chain split as the C++ node
+            only bans the peer.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.PosBlockSignatureRepresentationRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadBlockSignature">The block signature is not in the canonical format.</exception>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.PosBlockSignatureRule">
+            <summary>
+            A rule that will validate the signature of a PoS block.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.PosBlockSignatureRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadBlockSignature">The block signature is invalid.</exception>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.PosBlockSignatureRule.CheckBlockSignature(Blockcore.Consensus.BlockInfo.PosBlock)">
+            <summary>
+            Checks if block signature is valid.
+            </summary>
+            <param name="block">The block.</param>
+            <returns><c>true</c> if the signature is valid, <c>false</c> otherwise.</returns>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.PosCoinstakeRule">
+            <summary>Context checks on a POS block.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.Rules.CommonRules.PosCoinstakeRule.PosParent">
+            <summary>Allow access to the POS parent.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.PosCoinstakeRule.Initialize">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.PosCoinstakeRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadStakeBlock">The coinbase output (first transaction) is not empty.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadStakeBlock">The second transaction is not a coinstake transaction.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadMultipleCoinstake">There are multiple coinstake tranasctions in the block.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BlockTimeBeforeTrx">The block contains a transaction with a timestamp after the block timestamp.</exception>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.PosColdStakingRule">
+            <summary>
+            This rule performs further coldstaking transaction validation when cold staking balances are spent with a
+            cold staking "hotPubKey" inside of a cold staking transaction. The cold staking "hotPubKey" is the pubKey
+            that allows spending only to the same address.
+            </summary>
+            <remarks><para>
+            This code will perform further validation for transactions that spend the new scriptPubKey containing the
+            new <see cref="F:Blockcore.Consensus.ScriptInfo.OpcodeType.OP_CHECKCOLDSTAKEVERIFY"/> opcode using a hotPubKeyHash inside of a coinstake
+            transaction. Those are the conditions under which the <see cref="!:PosTransaction.IsColdCoinStake"/> flag will
+            be set and it is therefore the flag we use to determine if these rules should be applied. Due to a check
+            being done inside of the implementation of the <see cref="F:Blockcore.Consensus.ScriptInfo.OpcodeType.OP_CHECKCOLDSTAKEVERIFY"/> opcode this
+            flag can only be set for coinstake transactions after the opcode implementation has been activated (at a
+            specified block height). The opcode activation flag is <see cref="F:Blockcore.Consensus.ScriptInfo.ScriptVerify.CheckColdStakeVerify"/> and
+            it is set in <see cref="!:DeploymentFlags.ScriptFlags"/> when the block height is greater than or equal to <see
+            cref="!:PosConsensusOptions.ColdStakingActivationHeight"/>.
+            </para><para>
+            The following conditions are enforced for cold staking transactions. This rule implements all but the first one:
+            <list type="number">
+            <item>Check if the transaction spending an output, which contains this instruction, is a coinstake transaction.
+            If it is not, the script fails. This has already been checked within the opcode implementation before setting
+            <see cref="!:PosTransaction.IsColdCoinStake"/> so it will not be checked here.</item>
+            <item>Check that ScriptPubKeys of all inputs of this transaction are the same. If they are not, the script
+            fails.</item>
+            <item>Check that ScriptPubKeys of all outputs of this transaction, except for the marker output (a special
+            first output of each coinstake transaction) and the pubkey output (an optional special second output that
+            contains public key in coinstake transaction), are the same as ScriptPubKeys of the inputs. If they are not,
+            the script fails.</item>
+            <item>Check that the sum of values of all inputs is smaller or equal to the sum of values of all outputs. If
+            this does not hold, the script fails.</item>
+            </list></para></remarks>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.PosColdStakingRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadColdstakeInputs">Thrown if the input scriptPubKeys mismatch.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadColdstakeOutputs">Thrown if the output scriptPubKeys mismatch.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadColdstakeAmount">Thrown if the total input is smaller or equal than the sum of outputs.</exception>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.PosFutureDriftRule">
+            <summary>
+            A rule that will verify the block time drift is according to the PoS consensus rules.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.Rules.CommonRules.PosFutureDriftRule.FutureDriftSeconds">
+            <summary>The future drift in seconds.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.Rules.CommonRules.PosFutureDriftRule.PosParent">
+            <summary>Allow access to the POS parent.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.PosFutureDriftRule.Initialize">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.PosFutureDriftRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BlockTimestampTooFar">The block timestamp is too far into the future.</exception>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.PosFutureDriftRule.GetFutureDrift(System.Int64)">
+            <summary>
+            Gets future drift for the provided timestamp.
+            </summary>
+            <remarks>
+            Future drift is maximal allowed block's timestamp difference over adjusted time.
+            If this difference is greater block won't be accepted.
+            </remarks>
+            <param name="time">UNIX timestamp.</param>
+            <returns>Value of the future drift.</returns>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.PosTimeMaskRule">
+            <summary>
+            Checks if <see cref="T:Blockcore.Consensus.BlockInfo.Block"/> has a valid PoS header.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.PosTimeMaskRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.TimeTooNew">Thrown if block' timestamp too far in the future.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadVersion">Thrown if block's version is outdated.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BlockTimestampTooEarly"> Thrown if the block timestamp is before the previous block timestamp.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.StakeTimeViolation">Thrown if the coinstake timestamp is invalid.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.ProofOfWorkTooHigh">The block's height is higher than the last allowed PoW block.</exception>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.PosTimeMaskRule.CheckCoinStakeTimestamp(System.Int64)">
+            <summary>
+            Checks whether the coinstake timestamp meets protocol.
+            </summary>
+            <param name="blockTime">The block time.</param>
+            <returns><c>true</c> if block timestamp is equal to transaction timestamp, <c>false</c> otherwise.</returns>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.SetActivationDeploymentsPartialValidationRule">
+            <summary>Set the <see cref="P:Blockcore.Consensus.Rules.RuleContext.Flags"/> property that defines what deployments have been activated.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.SetActivationDeploymentsPartialValidationRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="!:ConsensusErrors.InvalidPrevTip">The tip is invalid because a reorg has been detected.</exception>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.SetActivationDeploymentsFullValidationRule">
+            <summary>Set the <see cref="P:Blockcore.Consensus.Rules.RuleContext.Flags"/> property that defines what deployments have been activated.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.SetActivationDeploymentsFullValidationRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="!:ConsensusErrors.InvalidPrevTip">The tip is invalid because a reorg has been detected.</exception>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.TransactionDuplicationActivationRule">
+            <summary>
+            Prevent duplicate transactions in the coinbase.
+            </summary>
+            <remarks>
+            More info here https://github.com/bitcoin/bips/blob/master/bip-0030.mediawiki
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.TransactionDuplicationActivationRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadTransactionBIP30"> Thrown if BIP30 is not passed.</exception>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.TransactionLocktimeActivationRule">
+            <summary>
+            Transaction lock-time calculations are checked using the median of the last 11 blocks instead of the block's time stamp.
+            </summary>
+            <remarks>
+            More info here https://github.com/bitcoin/bips/blob/master/bip-0113.mediawiki
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.TransactionLocktimeActivationRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadTransactionNonFinal">Thrown if one or more transactions are not finalized.</exception>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.CommonRules.WitnessCommitmentsRule">
+            <summary>A rule that validates witness commitments.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.WitnessCommitmentsRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadWitnessNonceSize">The witness nonce size is invalid.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadWitnessMerkleMatch">The witness merkle commitment does not match the computed commitment.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.UnexpectedWitness">The block does not expect witness transactions but contains a witness transaction.</exception>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.WitnessCommitmentsRule.ValidateWitnessCommitment(Blockcore.Consensus.Rules.RuleContext,Blockcore.Networks.Network)">
+            <summary>
+            Validation of the witness commitment if its found.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.WitnessCommitmentsRule.EqualsArray(System.Byte[],System.Byte[],System.Int32)">
+            <summary>
+            Checks if first <paramref name="length"/> entries are equal between two arrays.
+            </summary>
+            <param name="a">First array.</param>
+            <param name="b">Second array.</param>
+            <param name="length">Number of entries to be checked.</param>
+            <returns><c>true</c> if <paramref name="length"/> entries are equal between two arrays. Otherwise <c>false</c>.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.WitnessCommitmentsRule.GetWitnessCommitment(Blockcore.Networks.Network,Blockcore.Consensus.BlockInfo.Block)">
+            <summary>
+            Gets commitment in the last coinbase transaction output with SegWit flag.
+            </summary>
+            <param name="block">Block which coinbase transaction's outputs will be checked for SegWit flags.</param>
+            <returns>
+            <c>null</c> if no SegWit flags were found.
+            If SegWit flag is found the commitment of the last transaction's output that has SegWit flag is returned.
+            </returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.WitnessCommitmentsRule.ClearWitnessCommitment(Blockcore.Networks.Network,Blockcore.Consensus.BlockInfo.Block)">
+            <summary>
+            Clear all witness commitments from the block.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.WitnessCommitmentsRule.CreateWitnessCommitment(Blockcore.Networks.Network,Blockcore.Consensus.BlockInfo.Block)">
+            <summary>
+            Create a witness commitment based from the given block.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.CommonRules.WitnessCommitmentsRule.BlockWitnessMerkleRoot(Blockcore.Consensus.BlockInfo.Block,System.Boolean@)">
+            <summary>
+            Calculates merkle root for witness data.
+            </summary>
+            <param name="block">Block which transactions witness data is used for calculation.</param>
+            <param name="mutated"><c>true</c> if at least one leaf of the merkle tree has the same hash as any subtree. Otherwise: <c>false</c>.</param>
+            <returns>Merkle root.</returns>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.PosConsensusRuleEngine">
+            <summary>
+            Extension of consensus rules that provide access to a PoS store.
+            </summary>
+            <remarks>
+            A Proof-Of-Stake blockchain as implemented in this code base represents a hybrid POS/POW consensus model.
+            </remarks>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.Rules.PosConsensusRuleEngine.StakeChain">
+            <summary>Database of stake related data for the current blockchain.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.Rules.PosConsensusRuleEngine.StakeValidator">
+            <summary>Provides functionality for checking validity of PoS blocks.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.PosConsensusRuleEngine.CreateRuleContext(Blockcore.Consensus.ValidationContext)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.PosConsensusRuleEngine.Initialize(Blockcore.Consensus.Chain.ChainedHeader)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.PowConsensusRuleEngine">
+            <summary>
+            Extension of consensus rules that provide access to a store based on UTXO (Unspent transaction outputs).
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.Rules.PowConsensusRuleEngine.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.Rules.PowConsensusRuleEngine.UtxoSet">
+            <summary>The consensus db, containing all unspent UTXO in the chain.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.PowConsensusRuleEngine.CreateRuleContext(Blockcore.Consensus.ValidationContext)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.PowConsensusRuleEngine.GetBlockHash">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.PowConsensusRuleEngine.RewindAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.PowConsensusRuleEngine.Initialize(Blockcore.Consensus.Chain.ChainedHeader)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderCoinstakeRule">
+            <summary>
+            Rule to check if the coinstake inside proven header is valid:
+            <list type="number">
+                <item><description>Check that coinstake tx has IsCoinStake property equal to true.</description></item>
+                <item><description>Header time is equal to the timestamp of the coinstake tx.</description></item>
+                <item><description>Check if coinstake tx timestamp is divisible by 16 (using timestamp mask).</description></item>
+                <item><description>Verify the coinstake age requirement (*).</description></item>
+                <item>
+                <description>
+                    Verify all coinstake transaction inputs (*).
+                    <list type="number">
+                        <item><description>Input comes from a UTXO.</description></item>
+                        <item><description>Verify the ScriptSig</description></item>
+                    </list>
+                </description>
+                </item>
+                <item><description>Check if the coinstake kernel hash satisfies the difficulty requirement (*).</description></item>
+                <item><description>Check that coinstake tx is in the merkle tree using the merkle proof.</description></item>
+                <item><description>Verify header signature with the key from coinstake kernel (*).</description></item>
+            </list>
+            </summary>
+            <remarks>(*) - denotes rules that are expensive to execute.</remarks>
+            <seealso cref="T:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderRuleBase" />
+        </member>
+        <member name="F:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderCoinstakeRule.stakeValidator">
+            <summary>The stake validator.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderCoinstakeRule.Initialize">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderCoinstakeRule.ProcessRule(Blockcore.Features.Consensus.PosRuleContext,Blockcore.Consensus.Chain.ChainedHeader,Blockcore.Consensus.BlockInfo.ProvenBlockHeader)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderCoinstakeRule.CheckCoinstakeIsNotNull(Blockcore.Consensus.BlockInfo.ProvenBlockHeader)">
+            <summary>
+            Checks the coinstake to make sure it is not null.
+            </summary>
+            <param name="header">The proven blockheader.</param>
+            <exception cref="T:Blockcore.Consensus.ConsensusException">
+            Throws exception with error <see cref="P:Blockcore.Consensus.ConsensusErrors.EmptyCoinstake" /> if check fails.
+            </exception>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderCoinstakeRule.GetAndValidatePreviousUtxo(Blockcore.Consensus.BlockInfo.ProvenBlockHeader,Blockcore.Features.Consensus.PosRuleContext)">
+            <summary>
+            Gets and validates unspent outputs based of coins fetched from coin view.
+            </summary>
+            <param name="header">The header.</param>
+            <param name="context">Rule context.</param>
+            <returns>The validated previous <see cref="T:Blockcore.Utilities.UnspentOutput"/></returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderCoinstakeRule.CheckIfCoinstakeIsTrue(Blockcore.Consensus.BlockInfo.ProvenBlockHeader)">
+            <summary>
+            Checks if coinstake transaction is valid.
+            </summary>
+            <param name="header">The proven block header.</param>
+            <exception cref="T:Blockcore.Consensus.ConsensusException">
+            Throws exception with error <see cref="P:Blockcore.Consensus.ConsensusErrors.NonCoinstake" /> if check fails.
+            </exception>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderCoinstakeRule.CheckHeaderAndCoinstakeTimes(Blockcore.Consensus.BlockInfo.ProvenBlockHeader)">
+            <summary>
+            Checks whether header time is equal to the timestamp of the coinstake tx and if coinstake tx
+            timestamp is divisible by 16 (using timestamp mask).
+            </summary>
+            <param name="header">The proven block header.</param>
+            <exception cref="T:Blockcore.Consensus.ConsensusException">
+            Throws exception with error <see cref="P:Blockcore.Consensus.ConsensusErrors.StakeTimeViolation" /> if check fails.
+            </exception>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderCoinstakeRule.CheckCoinstakeAgeRequirement(Blockcore.Consensus.Chain.ChainedHeader,Blockcore.Utilities.UnspentOutput)">
+            <summary>
+            Checks the coinstake age requirement.
+            </summary>
+            <param name="chainedHeader">The chained header.</param>
+            <param name="unspentOutputs">The unspent outputs.</param>
+            <exception cref="T:Blockcore.Consensus.ConsensusException">
+            Throws exception with error <see cref="P:Blockcore.Consensus.ConsensusErrors.InvalidStakeDepth" /> if check fails.
+            </exception>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderCoinstakeRule.CheckSignature(Blockcore.Consensus.BlockInfo.ProvenBlockHeader,Blockcore.Utilities.UnspentOutput)">
+            <see cref="M:Blockcore.Features.Consensus.Interfaces.IStakeValidator.VerifySignature(Blockcore.Utilities.UnspentOutput,Blockcore.Consensus.TransactionInfo.Transaction,System.Int32,Blockcore.Consensus.ScriptInfo.ScriptVerify)"/>
+            <exception cref="T:Blockcore.Consensus.ConsensusException">
+            Throws exception with error <see cref="P:Blockcore.Consensus.ConsensusErrors.CoinstakeVerifySignatureFailed" /> if check fails.
+            </exception>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderCoinstakeRule.CheckStakeKernelHash(Blockcore.Features.Consensus.PosRuleContext,Blockcore.Utilities.UnspentOutput,Blockcore.Consensus.BlockInfo.ProvenBlockHeader,Blockcore.Consensus.Chain.ChainedHeader)">
+            <see cref="M:Blockcore.Features.Consensus.Interfaces.IStakeValidator.CheckStakeKernelHash(Blockcore.Features.Consensus.PosRuleContext,System.UInt32,Blockcore.NBitcoin.uint256,Blockcore.Utilities.UnspentOutput,Blockcore.Consensus.TransactionInfo.OutPoint,System.UInt32)"/>
+            <exception cref="T:Blockcore.Consensus.ConsensusException">
+            Throws exception with error <see cref="P:Blockcore.Consensus.ConsensusErrors.PrevStakeNull" /> if check fails.
+            </exception>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderCoinstakeRule.CheckCoinstakeMerkleProof(Blockcore.Consensus.BlockInfo.ProvenBlockHeader)">
+            <summary>
+            Check that coinstake tx is in the merkle tree using the merkle proof.
+            </summary>
+            <param name="header">The header.</param>
+            <exception cref="T:Blockcore.Consensus.ConsensusException">
+            Throws exception with error <see cref="P:Blockcore.Consensus.ConsensusErrors.BadMerkleRoot" /> if check fails.
+            </exception>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderCoinstakeRule.CheckHeaderSignatureWithCoinstakeKernel(Blockcore.Consensus.BlockInfo.ProvenBlockHeader)">
+            <summary>
+            Verifies header signature with the key from coinstake kernel.
+            </summary>
+            <param name="header">The header.</param>
+            <exception cref="T:Blockcore.Consensus.ConsensusException">
+            Throws exception with error <see cref="P:Blockcore.Consensus.ConsensusErrors.BadBlockSignature" /> if check fails.
+            </exception>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderCoinstakeRule.CheckIfCoinstakeIsSpentOnAnotherChain(Blockcore.Consensus.BlockInfo.ProvenBlockHeader,Blockcore.Features.Consensus.PosRuleContext)" -->
+        <member name="T:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderRuleBase">
+            <summary>
+            Base rule to be used by all proven header validation rules.
+            </summary>
+            <remarks>
+            We assume that in case normal headers are provided instead of proven headers we should ignore validation.
+            This should be allowed by the behaviors only for whitelisted nodes.</remarks>
+            <seealso cref="T:Blockcore.Consensus.Rules.HeaderValidationConsensusRule" />
+        </member>
+        <member name="F:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderRuleBase.PosParent">
+            <summary>Allow access to the POS parent.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderRuleBase.Initialize">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderRuleBase.IsProvenHeaderActivated(System.Int32)">
+            <summary>
+            Determines whether proven headers are activated based on the proven header activation height and applicable network.
+            </summary>
+            <param name="height">The height of the header.</param>
+            <returns>
+            <c>true</c> if proven header height is past the activation height for the corresponding network;
+            otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderRuleBase.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderRuleBase.ProcessRule(Blockcore.Features.Consensus.PosRuleContext,Blockcore.Consensus.Chain.ChainedHeader,Blockcore.Consensus.BlockInfo.ProvenBlockHeader)">
+            <summary>
+            Processes the rule.
+            </summary>
+            <param name="context">The context.</param>
+            <param name="chainedHeader">The chained header to be validated.</param>
+            <param name="header">The Proven Header to be validated.</param>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderSizeRule">
+            <summary>
+            Rule to check if the serialized sizes of the proven header components, such as merkle proof (max 512 bytes),
+            signature (max 80 bytes) and coinstake (max 1,000,000 bytes), do not exceed maximum possible size allocation.
+            </summary>
+            <seealso cref="T:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderRuleBase" />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.ProvenHeaderRules.ProvenHeaderSizeRule.ProcessRule(Blockcore.Features.Consensus.PosRuleContext,Blockcore.Consensus.Chain.ChainedHeader,Blockcore.Consensus.BlockInfo.ProvenBlockHeader)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPosUtxosetRule">
+            <summary>
+            Proof of stake override for the coinview rules - BIP68, MaxSigOps and BlockReward checks.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPosUtxosetRule.stakeValidator">
+            <summary>Provides functionality for checking validity of PoS blocks.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPosUtxosetRule.stakeChain">
+            <summary>Database of stake related data for the current blockchain.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPosUtxosetRule.consensus">
+            <summary>The consensus of the parent Network.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPosUtxosetRule.Initialize">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPosUtxosetRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <summary>Compute and store the stake proofs.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPosUtxosetRule.CheckBlockReward(Blockcore.Consensus.Rules.RuleContext,Blockcore.NBitcoin.Money,System.Int32,Blockcore.Consensus.BlockInfo.Block)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPosUtxosetRule.UpdateCoinView(Blockcore.Consensus.Rules.RuleContext,Blockcore.Consensus.TransactionInfo.Transaction)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPosUtxosetRule.CheckMaturity(Blockcore.Utilities.UnspentOutput,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPosUtxosetRule.CheckInputValidity(Blockcore.Consensus.TransactionInfo.Transaction,Blockcore.Utilities.UnspentOutput)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPosUtxosetRule.CheckAndComputeStake(Blockcore.Consensus.Rules.RuleContext)">
+            <summary>
+            Checks and computes stake.
+            </summary>
+            <param name="context">Context that contains variety of information regarding blocks validation and execution.</param>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.PrevStakeNull">Thrown if previous stake is not found.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.SetStakeEntropyBitFailed">Thrown if failed to set stake entropy bit.</exception>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPosUtxosetRule.GetProofOfWorkReward(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPosUtxosetRule.GetProofOfStakeReward(System.Int32)">
+            <summary>
+            Gets miner's coin stake reward.
+            </summary>
+            <param name="height">Target block height.</param>
+            <returns>Miner's coin stake reward.</returns>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPowUtxosetPowRule">
+            <inheritdoc />
+        </member>
+        <member name="F:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPowUtxosetPowRule.consensus">
+            <summary>Consensus parameters.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPowUtxosetPowRule.Initialize">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPowUtxosetPowRule.CheckBlockReward(Blockcore.Consensus.Rules.RuleContext,Blockcore.NBitcoin.Money,System.Int32,Blockcore.Consensus.BlockInfo.Block)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPowUtxosetPowRule.GetProofOfWorkReward(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPowUtxosetPowRule.IsTxFinal(Blockcore.Consensus.TransactionInfo.Transaction,Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPowUtxosetPowRule.CheckMaturity(Blockcore.Utilities.UnspentOutput,System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPowUtxosetPowRule.UpdateCoinView(Blockcore.Consensus.Rules.RuleContext,Blockcore.Consensus.TransactionInfo.Transaction)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckPowUtxosetPowRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+        </member>
+        <!-- Badly formed XML comment ignored for member "T:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule" -->
+        <member name="P:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.ConsensusOptions">
+            <summary>Consensus options.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.Consensus">
+            <summary>The consensus.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.Initialize">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.IsTxFinal(Blockcore.Consensus.TransactionInfo.Transaction,Blockcore.Consensus.Rules.RuleContext)">
+            <summary>Checks if transaction if final.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.CheckInput(Blockcore.Consensus.TransactionInfo.Transaction,System.Int32,Blockcore.Consensus.TransactionInfo.TxOut,Blockcore.Consensus.TransactionInfo.PrecomputedTransactionData,Blockcore.Consensus.TransactionInfo.TxIn,Blockcore.Base.Deployments.DeploymentFlags)">
+            <summary>
+            Verify that an input may be validly spent as part of the given transaction in the given block.
+            </summary>
+            <param name="tx">Transaction to check.</param>
+            <param name="inputIndexCopy">Index of the input to check.</param>
+            <param name="txout">Output the input is spending.</param>
+            <param name="txData">Transaction data for the transaction being checked.</param>
+            <param name="input">Input to check.</param>
+            <param name="flags">Deployment flags</param>
+            <returns>Whether the input is valid.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.UpdateUTXOSet(Blockcore.Consensus.Rules.RuleContext,Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Update the context's UTXO set.
+            </summary>
+            <param name="context">Context that contains variety of information regarding blocks validation and execution.</param>
+            <param name="transaction">Transaction which outputs will be added to the context's <see cref="T:Blockcore.Features.Consensus.UnspentOutputSet"/> and which inputs will be removed from it.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.UpdateCoinView(Blockcore.Consensus.Rules.RuleContext,Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Network specific updates to the context's UTXO set.
+            <para>
+            Refer to <see cref="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.UpdateUTXOSet(Blockcore.Consensus.Rules.RuleContext,Blockcore.Consensus.TransactionInfo.Transaction)"/>.
+            </para>
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.CheckBlockReward(Blockcore.Consensus.Rules.RuleContext,Blockcore.NBitcoin.Money,System.Int32,Blockcore.Consensus.BlockInfo.Block)">
+            <summary>
+            Verifies that block has correct coinbase transaction with appropriate reward and fees summ.
+            </summary>
+            <param name="context">Context that contains variety of information regarding blocks validation and execution.</param>
+            <param name="fees">Total amount of fees from transactions that are included in that block.</param>
+            <param name="height">Block's height.</param>
+            <param name="block">Block for which reward amount is checked.</param>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadCoinbaseAmount">Thrown if coinbase transaction output value is larger than expected.</exception>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.CheckCoinbaseMaturity(Blockcore.Utilities.UnspentOutput,System.Int32)">
+            <summary>
+            Checks the maturity of UTXOs.
+            </summary>
+            <param name="coins">UTXOs to check the maturity of.</param>
+            <param name="spendHeight">Height at which coins are attempted to be spent.</param>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadTransactionPrematureCoinbaseSpending">Thrown if transaction tries to spend coins that are not mature.</exception>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.CheckMaturity(Blockcore.Utilities.UnspentOutput,System.Int32)">
+            <summary>
+            Network specific logic that checks the maturity of UTXO sets.
+            <para>
+            Refer to <see cref="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.CheckMaturity(Blockcore.Utilities.UnspentOutput,System.Int32)"/>.
+            </para>
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.CheckInputValidity(Blockcore.Consensus.TransactionInfo.Transaction,Blockcore.Utilities.UnspentOutput)">
+            <summary>
+            Contains checks that need to be performed on each input once UTXO data is available.
+            </summary>
+            <param name="transaction">The transaction that is having its input examined.</param>
+            <param name="coins">The unspent output consumed by the input being examined.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.CheckInputs(Blockcore.Consensus.TransactionInfo.Transaction,Blockcore.Features.Consensus.UnspentOutputSet,System.Int32)">
+            <summary>
+            Checks that transaction's inputs are valid.
+            </summary>
+            <param name="transaction">Transaction to check.</param>
+            <param name="inputs">Map of previous transactions that have outputs we're spending.</param>
+            <param name="spendHeight">Height at which we are spending coins.</param>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadTransactionMissingInput">Thrown if transaction's inputs are missing.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadTransactionInputValueOutOfRange">Thrown if input value is out of range.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadTransactionInBelowOut">Thrown if transaction inputs are less then outputs.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadTransactionNegativeFee">Thrown if fees sum is negative.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadTransactionFeeOutOfRange">Thrown if fees value is out of range.</exception>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.GetProofOfWorkReward(System.Int32)">
+            <summary>
+            Gets the block reward at the provided height.
+            </summary>
+            <param name="height">Height of the block that we're calculating the reward for.</param>
+            <returns>Reward amount.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.GetTransactionSignatureOperationCost(Blockcore.Consensus.TransactionInfo.Transaction,Blockcore.Features.Consensus.UnspentOutputSet,Blockcore.Base.Deployments.DeploymentFlags)">
+            <summary>
+            Calculates total signature operation cost of a transaction.
+            </summary>
+            <param name="transaction">Transaction for which we are computing the cost.</param>
+            <param name="inputs">Map of previous transactions that have outputs we're spending.</param>
+            <param name="flags">Script verification flags.</param>
+            <returns>Signature operation cost for all transaction's inputs.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.CountWitnessSignatureOperation(Blockcore.Consensus.ScriptInfo.Script,Blockcore.Consensus.TransactionInfo.WitScript,Blockcore.Base.Deployments.DeploymentFlags)">
+            <summary>
+            Calculates signature operation cost for single transaction input.
+            </summary>
+            <param name="scriptPubKey">Script public key.</param>
+            <param name="witness">Witness script.</param>
+            <param name="flags">Script verification flags.</param>
+            <returns>Signature operation cost for single transaction input.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.GetP2SHSignatureOperationsCount(Blockcore.Consensus.TransactionInfo.Transaction,Blockcore.Features.Consensus.UnspentOutputSet)">
+            <summary>
+            Calculates pay-to-script-hash (BIP16) transaction signature operation cost.
+            </summary>
+            <param name="transaction">Transaction for which we are computing the cost.</param>
+            <param name="inputs">Map of previous transactions that have outputs we're spending.</param>
+            <returns>Signature operation cost for transaction.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.GetLegacySignatureOperationsCount(Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Calculates legacy transaction signature operation cost.
+            </summary>
+            <param name="transaction">Transaction for which we are computing the cost.</param>
+            <returns>Legacy signature operation cost for transaction.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.MoneyRange(System.Int64)">
+            <summary>
+            Checks if value is in range from 0 to <see cref="!:consensusOptions.MaxMoney"/>.
+            </summary>
+            <param name="value">The value to be checked.</param>
+            <returns><c>true</c> if the value is in range. Otherwise <c>false</c>.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule.IsPremine(System.Int32)">
+            <summary>
+            Determines whether the block with specified height is premined.
+            </summary>
+            <param name="height">Block's height.</param>
+            <returns><c>true</c> if the block with provided height is premined, <c>false</c> otherwise.</returns>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.UtxosetRules.PushUtxosetRule">
+            <summary>
+            Push the modified <see cref="T:Blockcore.Features.Consensus.UnspentOutputSet"/> back to the underline cache.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.PushUtxosetRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.UtxosetRules.FlushUtxosetRule">
+            <summary>
+            Track flush operations in a separate rule to better minitor its performance.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.FlushUtxosetRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.FlushUtxosetRule.WaitForBlockstore(Blockcore.Features.Consensus.CoinViews.CachedCoinView)">
+            <summary>
+            Before we continue to persist coindb we need to make sure the
+            store is not behind our tip, if it is we will wait to let store
+            catchup even if it means we need to block consensus form advancing
+            </summary>
+            <param name="cachedCoinView"></param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.FlushUtxosetRule.FlushChainRepo">
+            <summary>
+            Flush the chain repository before flushing the consensus coindb.
+            This is in order to avoid consensus being ahead of the chain of
+            headers in case of a node crash.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.UtxosetRules.FetchUtxosetRule">
+            <summary>
+            Load a blocks utxos to <see cref="T:Blockcore.Features.Consensus.UnspentOutputSet"/> a workable data set.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.FetchUtxosetRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.UtxosetRules.SaveCoinviewRule">
+            <summary>
+            Legacy class for coins that did not upgrade.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.SaveCoinviewRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.UtxosetRules.LoadCoinviewRule">
+            <summary>
+            Legacy class for coins that did not upgrade.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.Rules.UtxosetRules.UtxoStoreConsensusRule">
+            <summary>
+            Rules that provide easy access to the <see cref="!:CoinView"/> which is the store for a PoW system.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.Rules.UtxosetRules.UtxoStoreConsensusRule.PowParent">
+            <summary>Allow access to the POS parent.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.Rules.UtxosetRules.UtxoStoreConsensusRule.Initialize">
+            <inheritdoc />
+        </member>
+        <member name="F:Blockcore.Features.Consensus.StakeChainStore.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="T:Blockcore.Features.Consensus.StakeValidator">
+            <summary>
+            Provides functionality for verifying validity of PoS block.
+            </summary>
+            See <see cref="!:Blockcore.Features.Miner.PosMinting"/> for more information about PoS solutions.
+            <remarks>
+            These are the criteria for a new block to be accepted as a valid POS block at version 3 of the protocol,
+            which has been active since 6 August 2016 07:03:21 (Unix epoch time > 1470467000). All timestamps
+            are Unix epoch timestamps with seconds precision.
+            <list type="bullet">
+            <item>New block's timestamp ('BlockTime') MUST be strictly greater than previous block's timestamp.</item>
+            <item>Coinbase transaction's (first transaction in the block with no inputs) timestamp MUST be inside interval ['BlockTime' - 15; 'BlockTime'].</item>
+            <item>Coinstake transaction's (second transaction in the block with at least one input and at least 2 outputs and first output being empty) timestamp
+            MUST be equal to 'BlockTime' and it MUST have lower 4 bits set to 0 (i.e. be divisible by 16) - see <see cref="!:StakeTimestampMask"/>.</item>
+            <item>Block's header 'nBits' field MUST be set to the correct POS target value.</item>
+            <item>All transactions in the block must be final, which means their 'nLockTime' is either zero, or it is lower than current block's height
+            or node's 'AdjustedTime'. 'AdjustedTime' is the synchronized time among the node and its peers.</item>
+            <item>Coinstake transaction MUST be signed correctly.</item>
+            <item>Coinstake transaction's kernel (first) input MUST not be created within last <see cref="!:PosConsensusOptions.StakeMinConfirmations"/> blocks,
+            i.e. it MUST have that many confirmation at least.</item>
+            <item>Coinstake transaction's kernel must meet the staking target using this formula:
+            <code>hash(stakeModifierV2 + stakingCoins.Time + prevout.Hash + prevout.N + transactionTime) &lt; target * weight</code>
+            <para>
+            where 'stakingCoins' is the coinstake's kernel UTXO, 'prevout' is the kernel's output in that transaction,
+            'prevout.Hash' is the hash of that transaction; 'transactionTime' is coinstake's transaction time; 'target' is the target as
+            in 'Bits' block header; 'weight' is the value of the kernel's input.
+            </para>
+            </item>
+            <item>Block's height MUST NOT be more than 500 blocks back - i.e. reorganizations longer than 500 are not allowed.</item>
+            <item>Coinbase 'scriptSig' starts with serialized block height value. This means that coinbase transaction commits to the height of the block it appears in.</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.StakeValidator.MaxPushDataSize">
+            <summary>When checking the POS block signature this determines the maximum push data (public key) size following the OP_RETURN in the nonspendable output.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.StakeValidator.RetargetIntervalMinutes">
+            <summary>Time interval in minutes that is used in the retarget calculation.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.StakeValidator.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.StakeValidator.stakeChain">
+            <summary>Database of stake related data for the current blockchain.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.StakeValidator.chainIndexer">
+            <summary>Thread safe access to the best chain of block headers (that the node is aware of) from genesis.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.StakeValidator.coinView">
+            <summary>Consensus' view of UTXO set.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Consensus.StakeValidator.network">
+            <inheritdoc cref="T:Blockcore.Networks.Network"/>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.StakeValidator.#ctor(Blockcore.Networks.Network,Blockcore.Features.Consensus.IStakeChain,Blockcore.Consensus.Chain.ChainIndexer,Blockcore.Features.Consensus.CoinViews.ICoinView,Microsoft.Extensions.Logging.ILoggerFactory)">
+            <inheritdoc />
+            <param name="network">Specification of the network the node runs on - regtest/testnet/mainnet.</param>
+            <param name="stakeChain">Database of stake related data for the current blockchain.</param>
+            <param name="chainIndexer">Chain of headers.</param>
+            <param name="coinView">Used for getting UTXOs.</param>
+            <param name="loggerFactory">Factory for creating loggers.</param>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.StakeValidator.GetLastPowPosChainedBlock(Blockcore.Features.Consensus.IStakeChain,Blockcore.Consensus.Chain.ChainedHeader,System.Boolean)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.StakeValidator.CalculateRetarget(System.UInt32,Blockcore.NBitcoin.Target,System.UInt32,Blockcore.NBitcoin.BouncyCastle.math.BigInteger)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.StakeValidator.GetNextTargetRequired(Blockcore.Features.Consensus.IStakeChain,Blockcore.Consensus.Chain.ChainedHeader,Blockcore.Consensus.IConsensus,System.Boolean)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.StakeValidator.CheckProofOfStake(Blockcore.Features.Consensus.PosRuleContext,Blockcore.Consensus.Chain.ChainedHeader,Blockcore.Consensus.BlockInfo.BlockStake,Blockcore.Consensus.TransactionInfo.Transaction,System.UInt32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.StakeValidator.ComputeStakeModifierV2(Blockcore.Consensus.Chain.ChainedHeader,Blockcore.NBitcoin.uint256,Blockcore.NBitcoin.uint256)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.StakeValidator.CheckKernel(Blockcore.Features.Consensus.PosRuleContext,Blockcore.Consensus.Chain.ChainedHeader,System.UInt32,System.Int64,Blockcore.Consensus.TransactionInfo.OutPoint)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.StakeValidator.CheckStakeKernelHash(Blockcore.Features.Consensus.PosRuleContext,System.UInt32,Blockcore.NBitcoin.uint256,Blockcore.Utilities.UnspentOutput,Blockcore.Consensus.TransactionInfo.OutPoint,System.UInt32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.StakeValidator.VerifySignature(Blockcore.Utilities.UnspentOutput,Blockcore.Consensus.TransactionInfo.Transaction,System.Int32,Blockcore.Consensus.ScriptInfo.ScriptVerify)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.StakeValidator.IsConfirmedInNPrevBlocks(Blockcore.Utilities.UnspentOutput,Blockcore.Consensus.Chain.ChainedHeader,System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.StakeValidator.GetTargetDepthRequired(Blockcore.Consensus.Chain.ChainedHeader)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Consensus.StakeValidator.ToUInt256(Blockcore.NBitcoin.BouncyCastle.math.BigInteger)">
+            <summary>
+            Converts <see cref="T:Blockcore.NBitcoin.BouncyCastle.math.BigInteger" /> to <see cref="T:Blockcore.NBitcoin.uint256" />.
+            </summary>
+            <param name="input"><see cref="T:Blockcore.NBitcoin.BouncyCastle.math.BigInteger"/> input value.</param>
+            <returns><see cref="T:Blockcore.NBitcoin.uint256"/> version of <paramref name="input"/>.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Consensus.StakeValidator.CheckStakeSignature(Blockcore.Consensus.BlockInfo.BlockSignature,Blockcore.NBitcoin.uint256,Blockcore.Consensus.TransactionInfo.Transaction)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>

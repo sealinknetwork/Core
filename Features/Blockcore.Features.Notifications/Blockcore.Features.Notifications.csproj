@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+  <PropertyGroup>
+    <Description>Blockcore Features Notifications</Description>
+    <AssemblyTitle>Blockcore.Features.Notifications</AssemblyTitle>
+    <AssemblyName>Blockcore.Features.Notifications</AssemblyName>
+    <PackageId>Blockcore.Features.Notifications</PackageId>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Blockcore\Blockcore.csproj" />
+	  <ProjectReference Include="..\Blockcore.Features.NodeHost\Blockcore.Features.NodeHost.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.1.1" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;1705;IDE0008;</NoWarn>
+    <DocumentationFile></DocumentationFile>
+  </PropertyGroup>
+</Project>

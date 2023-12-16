@@ -1,0 +1,23 @@
+﻿@inherits LayoutComponentBase
+
+    <Modal />
+
+    <div class="sidebar bg-dark" style="background-color:#000 !important">
+        <NavMenu />
+    </div>
+
+    <div class="main" style="background:#000">
+
+        @* <div class="top-row p-4 border-bottom">
+            <span class="float-right">
+            <a href="/docs/index.html" target="_blank">Open API</a>
+            <a href="/ws-ui/index.html" target="_blank">Web Socket</a>
+            <a href="https://www.sealink.network" target="_blank">Blockcore</a>
+            </span>
+        </div> *@
+
+        <div class="container pt-3">
+            @Body
+        </div>
+
+    </div>

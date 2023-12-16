@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Blockcore.Networks.Rutanio</name>
+    </assembly>
+    <members>
+        <member name="T:Rutanio.Networks.Consensus.RutanioPosConsensusOptions">
+            <inheritdoc />
+        </member>
+        <member name="M:Rutanio.Networks.Consensus.RutanioPosConsensusOptions.GetStakeMinConfirmations(System.Int32,Blockcore.Networks.Network)">
+            <inheritdoc />
+        </member>
+        <member name="T:Rutanio.Networks.Deployments.RutanioBIP9Deployments">
+            <summary>
+            BIP9 deployments for the Blockcore sample coin network.
+            </summary>
+        </member>
+        <member name="M:Rutanio.Networks.Deployments.RutanioBIP9Deployments.#ctor">
+            <summary>
+            Constructs the BIP9 deployments array.
+            </summary>
+        </member>
+        <member name="M:Rutanio.Networks.Deployments.RutanioBIP9Deployments.GetFlags(System.Int32)">
+            <summary>
+            Gets the deployment flags to set when the deployment activates.
+            </summary>
+            <param name="deployment">The deployment number.</param>
+            <returns>The deployment flags.</returns>
+        </member>
+        <member name="T:Rutanio.Networks.Policies.RutanioStandardScriptsRegistry">
+            <summary>
+            Blockcore sample coin-specific standard transaction definitions.
+            </summary>
+        </member>
+        <member name="T:Rutanio.Networks.Rules.RutanioBugFixPosFutureDriftRule">
+            <summary>
+            A rule that will verify the block time drift is according to the PoS consensus rules for the <see cref="T:Rutanio.Networks.RutanioMain"/> network (and its test networks).
+            New networks must use the <see cref="T:Blockcore.Features.Consensus.Rules.CommonRules.PosFutureDriftRule"/>.
+            </summary>
+        </member>
+        <member name="F:Rutanio.Networks.Rules.RutanioBugFixPosFutureDriftRule.DriftingBugFixTimestamp">
+            <summary>Drifting Bug Fix, hardfork on Mon Sep 02, 2019 22:00:00 GMT.</summary>
+        </member>
+        <member name="F:Rutanio.Networks.Rules.RutanioBugFixPosFutureDriftRule.BugFutureDriftSeconds">
+            <summary>Old future drift in seconds before the hardfork.</summary>
+        </member>
+        <member name="M:Rutanio.Networks.Rules.RutanioBugFixPosFutureDriftRule.GetFutureDrift(System.Int64)">
+            <summary>
+            Gets future drift for the provided timestamp.
+            </summary>
+            <remarks>
+            Future drift is maximal allowed block's timestamp difference over adjusted time.
+            If this difference is greater block won't be accepted.
+            </remarks>
+            <param name="time">UNIX timestamp.</param>
+            <returns>Value of the future drift.</returns>
+        </member>
+        <member name="M:Rutanio.Networks.Rules.RutanioBugFixPosFutureDriftRule.IsDriftReduced(System.Int64)">
+            <summary>
+            Checks whether the future drift should be reduced after provided timestamp.
+            </summary>
+            <param name="time">UNIX timestamp.</param>
+            <returns><c>true</c> if for this timestamp future drift should be reduced, <c>false</c> otherwise.</returns>
+        </member>
+        <member name="T:Rutanio.Networks.Rules.RutanioHeaderVersionRule">
+            <summary>
+            Checks if <see cref="T:Rutanio.Networks.RutanioMain"/> network block's header has a valid block version.
+            </summary>
+        </member>
+        <member name="M:Rutanio.Networks.Rules.RutanioHeaderVersionRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadVersion">Thrown if block's version is outdated or otherwise invalid.</exception>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,2987 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Blockcore.Features.MemoryPool</name>
+    </assembly>
+    <members>
+        <member name="T:Blockcore.Features.MemoryPool.BlocksDisconnectedSignaled">
+            <summary>
+            Mempool observer on disconnected block notifications.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.BlocksDisconnectedSignaled.AddBackToMempoolAsync(Blockcore.Consensus.BlockInfo.Block)">
+            <summary>
+            Adds Transactions in disconnected blocks back to the mempool.
+            </summary>
+            <remarks>This could potentially be optimized. with an async queue.</remarks>
+            <param name="block">The disconnected block containing the transactions.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.BlocksDisconnectedSignaled.RemoveInvalidTransactionsAsync(Blockcore.Consensus.BlockInfo.Block)">
+            <summary>
+            If there are any transactions in the mempool that depend on transactions no longer in the chain, remove them.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.Broadcasting.MempoolBroadcastCheck">
+            <summary>
+            Adds the transaction to the mempool and if it failed validation retun the error code.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.FeeFilter.FeeFilterBehavior">
+            <summary>
+            Implementing FeeFilter as described in BIP0133
+            https://github.com/bitcoin/bips/blob/master/bip-0133.mediawiki
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator">
+             <summary>
+             The BlockPolicyEstimator is used for estimating the feerate needed
+             for a transaction to be included in a block within a certain number of
+             blocks.
+             </summary>
+             <remarks>
+             At a high level the algorithm works by grouping transactions into buckets
+             based on having similar feerates and then tracking how long it
+             takes transactions in the various buckets to be mined.  It operates under
+             the assumption that in general transactions of higher feerate will be
+             included in blocks before transactions of lower feerate.   So for
+             example if you wanted to know what feerate you should put on a transaction to
+             be included in a block within the next 5 blocks, you would start by looking
+             at the bucket with the highest feerate transactions and verifying that a
+             sufficiently high percentage of them were confirmed within 5 blocks and
+             then you would look at the next highest feerate bucket, and so on, stopping at
+             the last bucket to pass the test.   The average feerate of transactions in this
+             bucket will give you an indication of the lowest feerate you can put on a
+             transaction and still have a sufficiently high chance of being confirmed
+             within your desired 5 blocks.
+            
+             Here is a brief description of the implementation:
+             When a transaction enters the mempool, we
+             track the height of the block chain at entry.  Whenever a block comes in,
+             we count the number of transactions in each bucket and the total amount of feerate
+             paid in each bucket. Then we calculate how many blocks Y it took each
+             transaction to be mined and we track an array of counters in each bucket
+             for how long it to took transactions to get confirmed from 1 to a max of 25
+             and we increment all the counters from Y up to 25. This is because for any
+             number Z>=Y the transaction was successfully mined within Z blocks.  We
+             want to save a history of this information, so at any time we have a
+             counter of the total number of transactions that happened in a given feerate
+             bucket and the total number that were confirmed in each number 1-25 blocks
+             or less for any bucket.   We save this history by keeping an exponentially
+             decaying moving average of each one of these stats.  Furthermore we also
+             keep track of the number unmined (in mempool) transactions in each bucket
+             and for how many blocks they have been outstanding and use that to increase
+             the number of transactions we've seen in that feerate bucket when calculating
+             an estimate for any number of confirmations below the number of blocks
+             they've been outstanding.
+            
+             We will instantiate an instance of this class to track transactions that were
+             included in a block. We will lump transactions into a bucket according to their
+             approximate feerate and then track how long it took for those txs to be included in a block
+            
+             The tracking of unconfirmed (mempool) transactions is completely independent of the
+             historical tracking of transactions that have been confirmed in a block.
+            
+              We want to be able to estimate feerates that are needed on tx's to be included in
+             a certain number of blocks.Every time a block is added to the best chain, this class records
+             stats on the transactions included in that block
+             </remarks>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.SufficientFeeTxs">
+            <summary>Require an avg of 1 tx in the combined feerate bucket per block to have stat significance.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.MinSuccessPct">
+            <summary>Require greater than 95% of X feerate transactions to be confirmed within Y blocks for X to be big enough.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.MinFeeRate">
+            <summary>Minimum value for tracking feerates.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.MaxFeeRate">
+            <summary>Maximum value for tracking feerates.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.FeeSpacing">
+            <summary>
+            Spacing of FeeRate buckets.
+            </summary>
+            <remarks>
+            We have to lump transactions into buckets based on feerate, but we want to be able
+            to give accurate estimates over a large range of potential feerates.
+            Therefore it makes sense to exponentially space the buckets.
+            </remarks>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.MaxBlockConfirms">
+            <summary>Track confirm delays up to 25 blocks, can't estimate beyond that.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.DefaultDecay">
+            <summary>Decay of .998 is a half-life of 346 blocks or about 2.4 days.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.InfPriority">
+            <summary>Value for infinite priority.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.MaxMoney">
+            <summary>Maximum money value.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.InfFeeRate">
+            <summary>Value for infinite fee rate.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.feeStats">
+            <summary>Classes to track historical data on transaction confirmations.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.mapMemPoolTxs">
+            <summary>Map of txids to information about that transaction.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.minTrackedFee">
+            <summary>Minimum tracked Fee. Passed to constructor to avoid dependency on main./// </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.nBestSeenHeight">
+            <summary>Best seen block height.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.mempoolSettings">
+            <summary>Setting for the node.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.logger">
+            <summary>Logger for logging on this object.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.trackedTxs">
+            <summary>Count of tracked transactions.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.untrackedTxs">
+            <summary>Count of untracked transactions.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.#ctor(Blockcore.Features.MemoryPool.MempoolSettings,Microsoft.Extensions.Logging.ILoggerFactory,Blockcore.Configuration.NodeSettings)">
+            <summary>
+            Constructs an instance of the block policy estimator object.
+            </summary>
+            <param name="mempoolSettings">Mempool settings.</param>
+            <param name="loggerFactory">Factory for creating loggers.</param>
+            <param name="nodeSettings">Full node settings.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.ProcessBlock(System.Int32,System.Collections.Generic.List{Blockcore.Features.MemoryPool.TxMempoolEntry})">
+            <summary>
+            Process all the transactions that have been included in a block.
+            </summary>
+            <param name="nBlockHeight">The block height for the block.</param>
+            <param name="entries">Collection of memory pool entries.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.ProcessBlockTx(System.Int32,Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <summary>
+            Process a transaction confirmed in a block.
+            </summary>
+            <param name="nBlockHeight">Height of the block.</param>
+            <param name="entry">The memory pool entry.</param>
+            <returns>Whether it was able to successfully process the transaction.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.ProcessTransaction(Blockcore.Features.MemoryPool.TxMempoolEntry,System.Boolean)">
+            <summary>
+             Process a transaction accepted to the mempool.
+            </summary>
+            <param name="entry">Memory pool entry.</param>
+            <param name="validFeeEstimate">Whether to update fee estimate.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.RemoveTx(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Remove a transaction from the mempool tracking stats.
+            </summary>
+            <param name="hash">Transaction hash.</param>
+            <returns>Whether the transaction was successfully removed.</returns>
+            <remarks>
+            This function is called from TxMemPool.RemoveUnchecked to ensure
+            txs removed from the mempool for any reason are no longer
+            tracked. Txs that were part of a block have already been removed in
+            ProcessBlockTx to ensure they are never double tracked, but it is
+            of no harm to try to remove them again.
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.EstimateFee(System.Int32)">
+            <summary>
+            Return a feerate estimate
+            </summary>
+            <param name="confTarget">The desired number of confirmations to be included in a block.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.EstimateSmartFee(System.Int32,Blockcore.Features.MemoryPool.Interfaces.ITxMempool,System.Int32@)">
+            <summary>
+            Estimate feerate needed to be included in a block within
+            confTarget blocks. If no answer can be given at confTarget, return an
+            estimate at the lowest target where one can be given.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.Write(System.IO.Stream)">
+            <summary>
+            Write estimation data to a file.
+            </summary>
+            <param name="fileout">Stream to write to.</param>
+            <remarks>TODO: Implement write estimation</remarks>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.Read(System.IO.Stream,System.Int32)">
+            <summary>
+            Read estimation data from a file.
+            </summary>
+            <param name="filein">Stream to read data from.</param>
+            <param name="nFileVersion">Version number of the file.</param>
+            <remarks>TODO: Implement read estimation</remarks>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.EstimatePriority(System.Int32)">
+            <summary>
+            Return an estimate of the priority.
+            </summary>
+            <param name="confTarget">The desired number of confirmations to be included in a block.</param>
+            <returns>Estimate of the priority.</returns>
+            <remarks>TODO: Implement priority estimation</remarks>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.EstimateSmartPriority(System.Int32,Blockcore.Features.MemoryPool.Interfaces.ITxMempool,System.Int32@)">
+            <summary>
+            Return an estimated smart priority.
+            </summary>
+            <param name="confTarget">The desired number of confirmations to be included in a block.</param>
+            <param name="pool">Memory pool transactions.</param>
+            <param name="answerFoundAtTarget">Block height where answer was found.</param>
+            <returns>The smart priority.</returns>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.TxStatsInfo">
+            <summary>
+            Transaction statistics information.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.TxStatsInfo.blockHeight">
+            <summary>The block height.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.TxStatsInfo.bucketIndex">
+            <summary>The index into the confirmed transactions bucket map.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator.TxStatsInfo.#ctor">
+            <summary>
+            Constructs a instance of a transaction stats info object.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.Fee.TxConfirmStats">
+            <summary>
+            Transation confirmation statistics.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.logger">
+            <summary>Instance logger for logging messages.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.avg">
+            <summary>
+            Moving average of total fee rate of all transactions in each bucket.
+            </summary>
+            <remarks>
+            Track the historical moving average of this total over blocks.
+            </remarks>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.bucketMap">
+            <summary>Map of bucket upper-bound to index into all vectors by bucket.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.buckets">
+            <summary>The upper-bound of the range for the bucket (inclusive).</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.confAvg">
+            <summary>Confirmation average. confAvg[Y][X].</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.curBlockConf">
+            <summary>Current block confirmations. curBlockConf[Y][X].</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.curBlockTxCt">
+            <summary>Current block transaction count.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.curBlockVal">
+            <summary>Current block fee rate.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.decay">
+            <summary>Decay value to use.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.oldUnconfTxs">
+            <summary>Transactions still unconfirmed after MAX_CONFIRMS for each bucket</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.txCtAvg">
+            <summary>
+            Historical moving average of transaction counts.
+            </summary>
+            <remarks>
+            For each bucket X:
+            Count the total # of txs in each bucket.
+            Track the historical moving average of this total over blocks
+            </remarks>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.unconfTxs">
+            <summary>
+            Mempool counts of outstanding transactions.
+            </summary>
+            <remarks>
+            For each bucket X, track the number of transactions in the mempool
+            that are unconfirmed for each possible confirmation value Y
+            unconfTxs[Y][X]
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.#ctor(Microsoft.Extensions.Logging.ILogger)">
+            <summary>
+            Constructs an instance of the transaction confirmation stats object.
+            </summary>
+            <param name="logger">Instance logger to use for message logging.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.Initialize(System.Collections.Generic.List{System.Double},System.Int32,System.Double)">
+            <summary>
+            Initialize the data structures.  This is called by BlockPolicyEstimator's
+            constructor with default values.
+            </summary>
+            <param name="defaultBuckets">Contains the upper limits for the bucket boundaries.</param>
+            <param name="maxConfirms">Max number of confirms to track.</param>
+            <param name="decay">How much to decay the historical moving average per block.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.ClearCurrent(System.Int32)">
+            <summary>
+            Clear the state of the curBlock variables to start counting for the new block.
+            </summary>
+            <param name="nBlockHeight">Block height.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.Record(System.Int32,System.Double)">
+            <summary>
+            Record a new transaction data point in the current block stats.
+            </summary>
+            <param name="blocksToConfirm">The number of blocks it took this transaction to confirm. blocksToConfirm is 1-based and has to be >= 1.</param>
+            <param name="val">The feerate of the transaction.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.NewTx(System.Int32,System.Double)">
+            <summary>
+            Record a new transaction entering the mempool.
+            </summary>
+            <param name="nBlockHeight">The block height.</param>
+            <param name="val"></param>
+            <returns>The feerate of the transaction.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.RemoveTx(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Remove a transaction from mempool tracking stats.
+            </summary>
+            <param name="entryHeight">The height of the mempool entry.</param>
+            <param name="nBestSeenHeight">The best sceen height.</param>
+            <param name="bucketIndex">The bucket index.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.UpdateMovingAverages">
+            <summary>
+            Update our estimates by decaying our historical moving average and updating
+            with the data gathered from the current block.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.EstimateMedianVal(System.Int32,System.Double,System.Double,System.Boolean,System.Int32)">
+            <summary>
+            Calculate a feerate estimate.  Find the lowest value bucket (or range of buckets
+            to make sure we have enough data points) whose transactions still have sufficient likelihood
+            of being confirmed within the target number of confirmations.
+            </summary>
+            <param name="confTarget">Target number of confirmations.</param>
+            <param name="sufficientTxVal">Required average number of transactions per block in a bucket range.</param>
+            <param name="successBreakPoint">The success probability we require.</param>
+            <param name="requireGreater">Return the lowest feerate such that all higher values pass minSuccess OR return the highest feerate such that all lower values fail minSuccess.</param>
+            <param name="nBlockHeight">The current block height.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.GetMaxConfirms">
+            <summary>
+            Return the max number of confirms we're tracking.
+            </summary>
+            <returns>The max number of confirms.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.Write(Blockcore.NBitcoin.BitcoinStream)">
+            <summary>
+            Write state of estimation data to a file.
+            </summary>
+            <param name="stream">Stream to write to.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Fee.TxConfirmStats.Read(System.IO.Stream)">
+            <summary>
+            Read saved state of estimation data from a file and replace all internal data structures and
+            variables with this state.
+            </summary>
+            <param name="filein">Stream to read from.</param>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.Interfaces.IMempoolRule">
+            <summary>
+            Rule to be checked before a transaction is added to the mempool.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.IMempoolRule.CheckTransaction(Blockcore.Features.MemoryPool.MempoolValidationContext)">
+            <summary>
+            Check that the transaction meets certain criteria before being added to mempool.
+            If it doesn't, a <see cref="!:ConsensusErrorException" /> will be thrown.
+            </summary>
+            <param name="context">Current validation context.</param>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.Interfaces.IMempoolValidator">
+            <summary>
+            Public interface for the memory pool validator.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.Interfaces.IMempoolValidator.ConsensusOptions">
+            <summary>Gets the proof of work consensus option.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.Interfaces.IMempoolValidator.PerformanceCounter">
+            <summary>Gets the memory pool performance counter.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.IMempoolValidator.AcceptToMemoryPool(Blockcore.Features.MemoryPool.MempoolValidationState,Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Accept transaction to memory pool.
+            Sets the validation state accept time to now.
+            </summary>
+            <param name="state">Validation state.</param>
+            <param name="tx">Transaction to accept.</param>
+            <returns>Whether the transaction is accepted or not.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.IMempoolValidator.AcceptToMemoryPoolWithTime(Blockcore.Features.MemoryPool.MempoolValidationState,Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Accept transaction to memory pool.
+            Honors the validation state accept time.
+            </summary>
+            <param name="state">Validation state.</param>
+            <param name="tx">Transaction to accept.</param>
+            <returns>Whether the transaction was accepted to the memory pool.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.IMempoolValidator.SanityCheck">
+            <summary>
+            Executes the memory pool sanity check here <see cref="!:TxMempool.Check(CoinView)"/>.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.Interfaces.ITxMempool">
+            <summary>
+            Memory pool of pending transactions.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.MinerPolicyEstimator">
+            <summary>Gets the miner policy estimator.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.Size">
+            <summary>Get the number of transactions in the memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.MapTx">
+            <summary>The indexed transaction set in the memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.MapNextTx">
+            <summary>Collection of transaction inputs.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.AddTransactionsUpdated(System.Int32)">
+            <summary>
+            Increments number of transaction that have been updated counter.
+            </summary>
+            <param name="n">Number of transactions to increment by.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.AddUnchecked(Blockcore.NBitcoin.uint256,Blockcore.Features.MemoryPool.TxMempoolEntry,System.Boolean)">
+            <summary>
+            Add to memory pool without checking anything after calculating transaction ancestors.
+            Must update state for all ancestors of a given transaction, to track size/count of descendant transactions.
+            </summary>
+            <param name="hash">Transaction hash.</param>
+            <param name="entry">Memory pool entry.</param>
+            <param name="validFeeEstimate">Whether to update fee estimate.</param>
+            <returns>Whether transaction was added successfully.</returns>
+            <remarks>
+            First version of AddUnchecked can be used to have it call CalculateMemPoolAncestors(), and
+            then invoke the second version.
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.AddUnchecked(Blockcore.NBitcoin.uint256,Blockcore.Features.MemoryPool.TxMempoolEntry,Blockcore.Features.MemoryPool.TxMempool.SetEntries,System.Boolean)">
+            <summary>
+            Add to memory pool without checking anything.
+            </summary>
+            <param name="hash">Transaction hash.</param>
+            <param name="entry">Memory pool entry.</param>
+            <param name="setAncestors">Transaction ancestors.</param>
+            <param name="validFeeEstimate">Whether to update fee estimate.</param>
+            <returns>Whether transaction was added successfully.</returns>
+            <remarks>
+            Used by AcceptToMemoryPool(), which DOES do all the appropriate checks.
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.ApplyDeltas(Blockcore.NBitcoin.uint256,System.Double@,Blockcore.NBitcoin.Money@)">
+            <summary>
+            Apply transaction priority and fee deltas.
+            </summary>
+            <param name="hash">Hash of the transaction.</param>
+            <param name="dPriorityDelta">Priority delta to update.</param>
+            <param name="nFeeDelta">Fee delta to update.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.CalculateDescendants(Blockcore.Features.MemoryPool.TxMempoolEntry,Blockcore.Features.MemoryPool.TxMempool.SetEntries)">
+            <summary>
+            Calculates descendants of entry that are not already in setDescendants, and adds to setDecendants.
+            </summary>
+            <param name="entry">Memory pool entry.</param>
+            <param name="setDescendants">Set of entry decendants to add to.</param>
+            <remarks>
+            Assumes entryit is already a tx in the mempool and setMemPoolChildren
+            is correct for tx and all descendants.
+            Also assumes that if an entry is in setDescendants already, then all
+            in-mempool descendants of it are already in setDescendants as well, so that we
+            can save time by not iterating over those entries.
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.CalculateMemPoolAncestors(Blockcore.Features.MemoryPool.TxMempoolEntry,Blockcore.Features.MemoryPool.TxMempool.SetEntries,System.Int64,System.Int64,System.Int64,System.Int64,System.String@,System.Boolean)">
+            <summary>
+            Try to calculate all in-mempool ancestors of entry.
+            (these are all calculated including the tx itself)
+            </summary>
+            <param name="entry">Memory pool entry.</param>
+            <param name="setAncestors">Set of ancestors that the ancestors are added to.</param>
+            <param name="limitAncestorCount">Sax number of ancestorsUpdateTransactionsFromBlock.</param>
+            <param name="limitAncestorSize">Max size of ancestors.</param>
+            <param name="limitDescendantCount">Max number of descendants any ancestor can have.</param>
+            <param name="limitDescendantSize">Max size of descendants any ancestor can have.</param>
+            <param name="errString">Populated with error reason if any limits are hit.</param>
+            <param name="fSearchForParents">Whether to search a tx's vin for in-mempool parents, or look up parents from mapLinks. Must be true for entries not in the mempool.</param>
+            <returns>Whether operation was successful.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.Check(Blockcore.Features.Consensus.CoinViews.ICoinView)">
+            <summary>
+             If sanity-checking is turned on, check makes sure the pool is consistent.
+            (does not contain two transactions that spend the same inputs,
+            all inputs are in the mapNextTx array). If sanity-checking is turned off,
+            check does nothing.
+            </summary>
+            <param name="pcoins">Coin view of the transaction.</param>
+            <exception cref="!:NotImplementedException"/>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.Clear">
+            <summary>
+            Clears the collections that contain the memory pool transactions,
+            and increments the running total of transactions updated.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.DynamicMemoryUsage">
+            <summary>
+            Gets the dynamic memory usage in bytes.
+            </summary>
+            <returns>The dynamic memory usage value.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.EstimateFee(System.Int32)">
+            <summary>
+            Gets the estimated fee using <see cref="P:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.MinerPolicyEstimator"/>.
+            </summary>
+            <param name="nBlocks">The confirmation target blocks.</param>
+            <returns>The fee rate estimate.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.EstimatePriority(System.Int32)">
+            <summary>
+            Estimates the priority using <see cref="P:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.MinerPolicyEstimator"/>.
+            </summary>
+            <param name="nBlocks">The confirmation target blocks.</param>
+            <returns>The estimated priority.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.EstimateSmartFee(System.Int32,System.Int32@)">
+            <summary>
+            Estimates the smart fee using <see cref="P:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.MinerPolicyEstimator"/>.
+            </summary>
+            <param name="nBlocks">The confirmation target blocks.</param>
+            <param name="answerFoundAtBlocks">The block where the fee was found.</param>
+            <returns>The fee rate estimate.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.EstimateSmartPriority(System.Int32,System.Int32@)">
+            <summary>
+            Estimates the smart priority using <see cref="P:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.MinerPolicyEstimator"/>.
+            </summary>
+            <param name="nBlocks">The confirmation target blocks.</param>
+            <param name="answerFoundAtBlocks">The block where the priority was found.</param>
+            <returns>The estimated priority.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.Exists(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Whether the transaction hash exists in the memory pool.
+            </summary>
+            <param name="hash">Transaction hash.</param>
+            <returns>Whether the transaction exists.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.Expire(System.Int64)">
+            <summary>
+            Expire all transaction (and their dependencies) in the mempool older than time.
+            </summary>
+            <param name="time">Expiry time.</param>
+            <returns>Return the number of removed transactions.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.Get(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Gets the transaction from the memory pool based upon the transaction hash.
+            </summary>
+            <param name="hash">Transaction hash.</param>
+            <returns>The transaction.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.GetMinFee(System.Int64)">
+            <summary>
+            The minimum fee to get into the mempool, which may itself not be enough for larger-sized transactions.
+            </summary>
+            <param name="sizelimit">Size limit of the memory pool in bytes.</param>
+            <returns>The minimum fee.</returns>
+            <remarks>
+            The minReasonableRelayFee constructor arg is used to bound the time it
+            takes the fee rate to go back down all the way to 0. When the feerate
+            would otherwise be half of this, it is set to 0 instead.
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.GetTransactionsUpdated">
+            <summary>
+            Get number of transactions that have been updated.
+            </summary>
+            <returns>Number of transactions.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.HasNoInputsOf(Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Check that none of this transactions inputs are in the mempool, and thus
+            the tx is not dependent on other mempool transactions to be included in a block.
+            </summary>
+            <param name="tx">The transaction to check.</param>
+            <returns>Whether the transaction is not dependent on other transaction.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.ReadFeeEstimates(Blockcore.NBitcoin.BitcoinStream)">
+            <summary>
+            Read fee estimates from a stream.
+            </summary>
+            <param name="stream">Stream to read from.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.RemoveForBlock(System.Collections.Generic.IEnumerable{Blockcore.Consensus.TransactionInfo.Transaction},System.Int32)">
+            <summary>
+            Called when a block is connected. Removes transactions from mempool and updates the miner fee estimator.
+            </summary>
+            <param name="vtx">Collection of transactions.</param>
+            <param name="blockHeight">Height to connect the block.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.RemoveRecursive(Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Removes the transaction from the memory pool recursively.
+            </summary>
+            <param name="origTx">The original transaction to remove.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.RemoveStaged(Blockcore.Features.MemoryPool.TxMempool.SetEntries,System.Boolean)">
+            <summary>
+            Remove a set of transactions from the mempool.
+            </summary>
+            <param name="stage">Staged transactions.</param>
+            <param name="updateDescendants">Whether to update decendants.</param>
+            <remarks>
+            If a transaction is in this set, then all in-mempool descendants must
+            also be in the set, unless this transaction is being removed for being
+            in a block.
+            Set updateDescendants to true when removing a tx that was in a block, so
+            that any in-mempool descendants have their ancestor state updated.
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.SetSanityCheck(System.Double)">
+            <summary>
+            Set how frequent the sanity check is executed.
+            </summary>
+            <param name="dFrequency">The frequency of the sanity check.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.TrimToSize(System.Int64,System.Collections.Generic.List{Blockcore.NBitcoin.uint256})">
+            <summary>
+            Trims the memory pool to a size limite.
+            </summary>
+            <param name="sizelimit">Size limit to trim memory pool to.</param>
+            <param name="pvNoSpendsRemaining">Collection of no spends transactions remaining.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Interfaces.ITxMempool.WriteFeeEstimates(Blockcore.NBitcoin.BitcoinStream)">
+            <summary>
+            Write fee estimates to a stream.
+            </summary>
+            <param name="stream">Stream to write to.</param>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.MempoolBehavior">
+            <summary>
+            Peer behavior for memory pool.
+            Provides message handling of notifications from attached peer.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolBehavior.InventoryBroadcastInterval">
+            <summary>
+            Average delay between trickled inventory transmissions in seconds.
+            Blocks and white-listed receivers bypass this, outbound peers get half this delay.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolBehavior.InventoryBroadcastMax">
+            <summary>
+            Maximum number of inventory items to send per transmission.
+            Limits the impact of low-fee transaction floods.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolBehavior.validator">
+            <summary>Memory pool validator for validating transactions.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolBehavior.mempoolManager">
+            <summary>Memory pool manager for managing the memory pool.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolBehavior.orphans">
+            <summary>Memory pool orphans for managing orphan transactions.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolBehavior.connectionManager">
+            <summary>Connection manager for managing peer connections.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolBehavior.initialBlockDownloadState">
+            <summary>Provider of IBD state.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolBehavior.signals">
+            <summary>Peer notifications available to subscribe to.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolBehavior.logger">
+            <summary>Instance logger for the memory pool behavior component.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolBehavior.loggerFactory">
+            <summary>Factory used to create the logger for this component.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolBehavior.network">
+            <summary>The network that this component is running on.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolBehavior.inventoryTxToSend">
+            <summary>
+            Inventory transaction to send.
+            State that is local to the behavior.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolBehavior.filterInventoryKnown">
+            <summary>
+            Filter for inventory known.
+            State that is local to the behavior.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolBehavior.lockObject">
+            <summary>
+            Locking object for memory pool behaviour.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolBehavior.isPeerWhitelistedForRelay">
+            <summary>
+            If the attached peer is whitelisted for relaying.
+            This is turned on if the peer is whitelisted and whitelistrelay mempool option is also on.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolBehavior.isBlocksOnlyMode">
+            <summary>
+            Whether the attached peer should only be relayed blocks (no transactions).
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolBehavior.MinFeeFilter">
+            <summary>
+            The min fee the peer asks to relay transactions.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolBehavior.LastMempoolReq">
+            <summary>Time of last memory pool request in unix time.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolBehavior.AttachCore">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolBehavior.DetachCore">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolBehavior.Clone">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolBehavior.OnMessageReceivedAsync(Blockcore.P2P.Peer.INetworkPeer,Blockcore.P2P.Protocol.IncomingMessage)">
+            <summary>
+            Handler for processing incoming message from the peer.
+            </summary>
+            <param name="peer">Peer sending the message.</param>
+            <param name="message">Incoming message.</param>
+            <remarks>
+            TODO: Fix the exception handling of the async event.
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolBehavior.ProcessMessageAsync(Blockcore.P2P.Peer.INetworkPeer,Blockcore.P2P.Protocol.IncomingMessage)">
+            <summary>
+            Handler for processing peer messages.
+            Handles the following message payloads: TxPayload, MempoolPayload, GetDataPayload, InvPayload.
+            </summary>
+            <param name="peer">Peer sending the message.</param>
+            <param name="message">Incoming message.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolBehavior.SendMempoolPayloadAsync(Blockcore.P2P.Peer.INetworkPeer,Blockcore.P2P.Protocol.Payloads.MempoolPayload)">
+            <summary>
+            Send the memory pool payload to the attached peer.
+            Gets the transaction info from the memory pool and sends to the attached peer.
+            </summary>
+            <param name="peer">Peer sending the message.</param>
+            <param name="message">The message payload.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolBehavior.ProcessInvAsync(Blockcore.P2P.Peer.INetworkPeer,Blockcore.P2P.Protocol.Payloads.InvPayload)">
+            <summary>
+            Processing of inventory payload message from the peer.
+            Adds inventory to known inventory then sends GetDataPayload to the attached peer.
+            </summary>
+            <param name="peer">The peer sending the message.</param>
+            <param name="invPayload">The inventory payload in the message.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolBehavior.ProcessGetDataAsync(Blockcore.P2P.Peer.INetworkPeer,Blockcore.P2P.Protocol.Payloads.GetDataPayload)">
+            <summary>
+            Processing of the get data payload message from the peer.
+            Sends the memory pool transaction info via TxPayload to the attached peer.
+            </summary>
+            <param name="peer">Peer sending the message.</param>
+            <param name="getDataPayload">The payload for the message.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolBehavior.ProcessTxPayloadAsync(Blockcore.P2P.Peer.INetworkPeer,Blockcore.P2P.Protocol.Payloads.TxPayload)">
+            <summary>
+            Processing of the transaction payload message from peer.
+            Adds transaction from the transaction payload to the memory pool.
+            </summary>
+            <param name="peer">Peer sending the message.</param>
+            <param name="transactionPayload">The payload for the message.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolBehavior.SendAsTxInventoryAsync(Blockcore.P2P.Peer.INetworkPeer,System.Collections.Generic.List{Blockcore.NBitcoin.uint256})">
+            <summary>
+            Sends transactions as inventory to attached peer.
+            </summary>
+            <param name="peer">Peer to send transactions to.</param>
+            <param name="trxList">List of transactions.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolBehavior.AddTransactionToSend(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Adds the transaction to the send inventory for this behavior if it doesn't already exist.
+            </summary>
+            <param name="hash">Hash of transaction to add.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolBehavior.RelayTransaction(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Relays a transaction to the connected peers.
+            </summary>
+            <param name="hash">Hash of the transaction.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolBehavior.SendTrickleAsync">
+            <summary>
+            Sends transaction inventory to attached peer.
+            This is executed on a 5 second loop when MempoolSignaled is constructed.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.MempoolCoinView">
+            <summary>
+            Memory pool coin view.
+            Provides coin view representation of memory pool transactions via a backed coin view.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolCoinView.memPool">
+            <summary>Transaction memory pool for managing transactions in the memory pool.</summary>
+            <remarks>All access to this object has to be protected by <see cref="F:Blockcore.Features.MemoryPool.MempoolCoinView.mempoolLock"/>.</remarks>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolCoinView.mempoolLock">
+            <summary>A lock for protecting access to <see cref="F:Blockcore.Features.MemoryPool.MempoolCoinView.memPool"/>.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolCoinView.mempoolValidator">
+            <summary>Memory pool validator for validating transactions.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolCoinView.#ctor(Blockcore.Networks.Network,Blockcore.Features.Consensus.CoinViews.ICoinView,Blockcore.Features.MemoryPool.Interfaces.ITxMempool,Blockcore.Utilities.SchedulerLock,Blockcore.Features.MemoryPool.Interfaces.IMempoolValidator)">
+            <summary>
+            Constructs a memory pool coin view.
+            </summary>
+            <param name="inner">The backing coin view.</param>
+            <param name="memPool">Transaction memory pool for managing transactions in the memory pool.</param>
+            <param name="mempoolLock">A lock for managing asynchronous access to memory pool.</param>
+            <param name="mempoolValidator">Memory pool validator for validating transactions.</param>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolCoinView.Set">
+            <summary>
+            Gets the unspent transaction output set.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolCoinView.Inner">
+            <summary>
+            Backing coin view instance.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolCoinView.LoadViewLocked(Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Load the coin view for a memory pool transaction. This should only be called
+            inside the memory pool lock.
+            </summary>
+            <param name="trx">Memory pool transaction.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolCoinView.HaveTransaction(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Check whether a transaction id exists in the <see cref="T:Blockcore.Features.MemoryPool.TxMempool"/> or in the <see cref="T:Blockcore.Features.MemoryPool.MempoolCoinView"/>.
+            </summary>
+            <param name="txid">Transaction identifier.</param>
+            <returns>Whether coins exist.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolCoinView.GetPriority(Blockcore.Consensus.TransactionInfo.Transaction,System.Int32)">
+            <summary>
+            Gets the priority of this memory pool transaction based upon chain height.
+            </summary>
+            <param name="tx">Memory pool transaction.</param>
+            <param name="nHeight">Chain height.</param>
+            <returns>Tuple of priority value and sum of all txin values that are already in blockchain.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolCoinView.ComputePriority(Blockcore.Consensus.TransactionInfo.Transaction,System.Double,System.Int32)">
+            <summary>
+            Calculates the priority of a transaction based upon transaction size and priority inputs.
+            </summary>
+            <param name="trx">Memory pool transaction.</param>
+            <param name="dPriorityInputs">Priority weighting of inputs.</param>
+            <param name="nTxSize">Transaction size, 0 will compute.</param>
+            <returns>Priority value.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolCoinView.SpendsCoinBase(Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Whether memory pool transaction spends coin base.
+            </summary>
+            <param name="tx">Memory pool transaction.</param>
+            <returns>Whether the transactions spends coin base.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolCoinView.HaveCoins(Blockcore.Consensus.TransactionInfo.OutPoint)">
+            <summary>
+            Check if an output exists.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolCoinView.GetValueIn(Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Gets the value of the inputs for a memory pool transaction.
+            </summary>
+            <param name="tx">Memory pool transaction.</param>
+            <returns>Value of the transaction's inputs.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolCoinView.GetOutputFor(Blockcore.Consensus.TransactionInfo.TxIn)">
+            <summary>
+            Gets the transaction output for a transaction input.
+            </summary>
+            <param name="input">Transaction input.</param>
+            <returns>Transaction output.</returns>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.MempoolController">
+            <summary>
+            Controller providing operations on the Mempool.
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Blockcore.Features.MemoryPool.MempoolController.GetRawMempoolAsync" -->
+        <member name="T:Blockcore.Features.MemoryPool.MempoolErrorException">
+            <summary>
+            Exception thrown when memory pool exception occurs.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolErrorException.#ctor(Blockcore.Features.MemoryPool.MempoolValidationState)">
+            <summary>
+            Constructs a memory pool exception object.
+            Exception message is set from <see cref="P:Blockcore.Features.MemoryPool.MempoolValidationState.ErrorMessage"/>.
+            </summary>
+            <param name="state">Validation state of the memory pool.</param>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolErrorException.ValidationState">
+            <summary>Gets the validation state of the memory pool.</summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.MempoolError">
+            <summary>
+            Memory pool error state.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolError.#ctor">
+            <summary>
+            Default constructor for a memory pool error.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolError.#ctor(System.Int32,System.String)">
+            <summary>
+            Constructor for memory pool error.
+            </summary>
+            <param name="rejectCode">Numeric reject code.</param>
+            <param name="code">String representation of error code.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolError.#ctor(Blockcore.Consensus.ConsensusError)">
+            <summary>
+            Constructor for memory pool error.
+            </summary>
+            <param name="consensusError">Error from consensus feature.</param>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolError.Code">
+            <summary>Gets or sets the string representation of the error code.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolError.RejectCode">
+            <summary>Gets or sets the numeric representation of the error code.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolError.ConsensusError">
+            <summary>Gets or sets the error from consensus feature.</summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.MempoolErrors">
+            <summary>
+            Predefined memory pool errors.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectMalformed">
+            <summary>Public reject code for malformed transaction.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectInvalid">
+            <summary>Public reject code for Invalid transaction</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectObsolete">
+            <summary>Public reject code for Obsolete Transaction.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectDuplicate">
+            <summary>Public reject code for Duplicate Transaction.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectNonstandard">
+            <summary>Public reject code for Non standard transaction.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectDust">
+            <summary>Public reject code for Dust transaction.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectInsufficientfee">
+            <summary>Public reject code for Insufficient fee for transaction.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectCheckpoint">
+            <summary>Public reject code for Transaction failed checkpoint.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectInternal">
+            <summary>Internal rejection code for general rejection of transaction.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectHighfee">
+            <summary>
+            Internal rejection code for too high fee.
+            Can not be triggered by P2P transactions.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectAlreadyKnown">
+            <summary>
+            Internal rejection code for Transaction is already known.
+            Either in mempool or blockchain.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectConflict">
+            <summary>Internal rejection code for transaction conflicts with a transaction already known.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.Coinbase">
+            <summary>'coinbase' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectInvalid"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.Coinstake">
+            <summary>'coinstake' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectInvalid"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.NonFinal">
+            <summary>'non-final' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectNonstandard"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.InPool">
+            <summary>'txn-already-in-mempool' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectAlreadyKnown"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.Conflict">
+            <summary>'txn-mempool-conflict' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectConflict"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.NonstandardInputs">
+            <summary>'bad-txns-nonstandard-inputs' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectNonstandard"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.NonstandardWitness">
+            <summary>'bad-witness-nonstandard' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectNonstandard"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.TooManySigops">
+            <summary>'bad-txns-too-many-sigops' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectNonstandard"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.Full">
+            <summary>'mempool-full' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectInsufficientfee"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.InsufficientFee">
+            <summary>'insufficient-fee' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectInsufficientfee"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.AlreadyKnown">
+            <summary>'txn-already-known' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectAlreadyKnown"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.MissingOrSpentInputs">
+            <summary>'bad-txns-inputs-missing' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectInvalid"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.NonBIP68Final">
+            <summary>'non-BIP68-final' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectNonstandard"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.MinFeeNotMet">
+            <summary>'mempool-min-fee-not-met' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectInsufficientfee"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.InsufficientPriority">
+            <summary>'insufficient-priority' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectInsufficientfee"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.AbsurdlyHighFee">
+            <summary>'absurdly-high-fee' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectHighfee"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.TooLongMempoolChain">
+            <summary>'too-long-mempool-chain' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectNonstandard"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.BadTxnsSpendsConflictingTx">
+            <summary>'bad-txns-spends-conflicting-tx' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectInvalid"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.TooManyPotentialReplacements">
+            <summary>'too-many-potential-replacements' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectNonstandard"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.ReplacementAddsUnconfirmed">
+            <summary>'replacement-adds-unconfirmed' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectNonstandard"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.Insufficientfee">
+            <summary>'insufficient-fee' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectInsufficientfee"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.MandatoryScriptVerifyFlagFailed">
+            <summary>'mandatory-script-verify-flag-failed' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectInvalid"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.NonMandatoryScriptVerifyFlagFailed">
+            <summary>'non-mandatory-script-verify-flag' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectNonstandard"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.Version">
+            <summary>'version' error returns a <see cref="!:RejectNonStandard"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.TxSize">
+            <summary>'tx-size' error returns a <see cref="!:RejectNonStandard"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.ScriptsigSize">
+            <summary>'scriptsig-size' error returns a <see cref="!:RejectNonStandard"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.ScriptsigNotPushonly">
+            <summary>'scriptsig-not-pushonly' error returns a <see cref="!:RejectNonStandard"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.Scriptpubkey">
+            <summary>'scriptpubkey' error returns a <see cref="!:RejectNonStandard"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.Dust">
+            <summary>'dust' error returns a <see cref="!:RejectNonStandard"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.MultiOpReturn">
+            <summary>'multi-op-return' error returns a <see cref="!:RejectNonStandard"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.TimeTooNew">
+            <summary>'time-too-new' error returns a <see cref="!:RejectNonStandard"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.NoWitnessYet">
+            <summary>'no-witness-yet' error returns a <see cref="!:RejectNonStandard"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.TransactionContainsDustTxOuts">
+            <summary>'mempool-tx-contains-dust-outputs' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectInvalid"/> reject code.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolErrors.WitnessMutated">
+            <summary>'witness-mutated' error returns a <see cref="F:Blockcore.Features.MemoryPool.MempoolErrors.RejectInvalid"/> reject code.</summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.MempoolFeature">
+            <summary>
+            Transaction memory pool feature for the Full Node.
+            </summary>
+            <seealso cref="!:https://github.com/bitcoin/bitcoin/blob/6dbcc74a0e0a7d45d20b03bb4eb41a027397a21d/src/txmempool.cpp"/>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolFeature.InitializeAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolFeature.PrintHelp(Blockcore.Networks.Network)">
+            <summary>
+            Prints command-line help.
+            </summary>
+            <param name="network">The network to extract values from.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolFeature.BuildDefaultConfigurationFile(System.Text.StringBuilder,Blockcore.Networks.Network)">
+            <summary>
+            Get the default configuration.
+            </summary>
+            <param name="builder">The string builder to add the settings to.</param>
+            <param name="network">The network to base the defaults off.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolFeature.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.FullNodeBuilderMempoolExtension">
+            <summary>
+            A class providing extension methods for <see cref="T:Blockcore.Builder.IFullNodeBuilder"/>.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.FullNodeBuilderMempoolExtension.UseMempool(Blockcore.Builder.IFullNodeBuilder)">
+            <summary>
+            Include the memory pool feature and related services in the full node.
+            </summary>
+            <param name="fullNodeBuilder">Full node builder.</param>
+            <returns>Full node builder.</returns>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.MempoolSchedulerLock">
+            <summary>
+            A lock for managing asynchronous access to memory pool.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.MempoolManager">
+            <summary>
+            The memory pool manager contains high level methods that can be used from outside of the mempool.
+            Includes querying information about the transactions in the memory pool.
+            Also includes methods for persisting memory pool.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolManager.mempoolPersistence">
+            <summary>Memory pool persistence methods for loading and saving from storage.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolManager.logger">
+            <summary>Instance logger for memory pool manager.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolManager.memPool">
+            <summary>Transaction memory pool for managing transactions in the memory pool.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolManager.coinView">
+            <summary>Coin view of the memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolManager.MempoolLock">
+            <summary>Lock for memory pool access.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolManager.Validator">
+            <summary>Memory pool validator for validating transactions.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolManager.DateTimeProvider">
+            <summary>Date and time information provider.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolManager.mempoolSettings">
+            <summary>Settings for memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolManager.PerformanceCounter">
+            <summary>Access to memory pool validator performance counter.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolManager.GetTransaction(Blockcore.NBitcoin.uint256)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolManager.GetMempoolAsync">
+            <summary>
+            Gets the memory pool transactions.
+            </summary>
+            <returns>List of transactions</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolManager.InfoAll">
+            <summary>
+            Gets a list of transaction information from the memory pool.
+            </summary>
+            <returns>List of transaction information.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolManager.ExistsAsync(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Check whether a transaction exists in the mempool.
+            </summary>
+            <param name="trxid">The hash of the transaction to check.</param>
+            <returns><c>true</c>if the transaction exists in the mempool.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolManager.LoadPoolAsync(System.String)">
+            <summary>
+            Loads the memory pool asynchronously from a file.
+            </summary>
+            <param name="fileName">Filename to load from.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolManager.SavePool">
+            <summary>
+            Saves the memory pool to persistent storage.
+            </summary>
+            <returns>Memory pool save result.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolManager.Info(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Gets transaction information for a specific transaction.
+            </summary>
+            <param name="hash">Hash of the transaction to query.</param>
+            <returns>Transaction information.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolManager.InfoAllAsync">
+            <summary>
+            Gets transaction information for all transactions in memory pool.
+            </summary>
+            <returns>List of transaction information.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolManager.InfoAsync(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Gets transaction info for a specific transaction in memory pool.
+            </summary>
+            <param name="hash">Hash of the transaction to query.</param>
+            <returns>Transaction information.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolManager.MempoolSize">
+            <summary>
+            Gets the memory pool size.
+            </summary>
+            <returns>Memory pool size.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolManager.Clear">
+            <summary>
+            Clears the memory pool.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolManager.MempoolDynamicMemoryUsage">
+            <summary>
+            Gets the memory pool dynamic memory usage.
+            </summary>
+            <returns>Dynamic memory usage.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolManager.GetUnspentTransactionAsync(Blockcore.Consensus.TransactionInfo.OutPoint)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolManager.AddMempoolEntriesToMempoolAsync(System.Collections.Generic.IEnumerable{Blockcore.Features.MemoryPool.MempoolPersistenceEntry})">
+            <summary>
+            Add persisted mempool entries to the memory pool.
+            </summary>
+            <param name="entries">Entries read from mempool cache.</param>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.MempoolOrphans">
+            <summary>
+            Manages memory pool orphan transactions.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolOrphans.OrphanTxExpireTime">
+            <summary>Expiration time for orphan transactions in seconds.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolOrphans.DefaultMaxOrphanTransactions">
+            <summary>Default for -maxorphantx, maximum number of orphan transactions kept in memory.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolOrphans.OrphanTxExpireInterval">
+            <summary>Minimum time between orphan transactions expire time checks in seconds.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolOrphans.chainIndexer">
+            <summary>Thread safe access to the best chain of block headers (that the node is aware of) from genesis.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolOrphans.signals">
+            <summary>Node notifications available to subscribe to.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolOrphans.coinView">
+            <summary>Coin view of the memory pool.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolOrphans.dateTimeProvider">
+            <summary>Date and time information provider.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolOrphans.mempoolSettings">
+            <summary>Settings from the memory pool.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolOrphans.mempoolManager">
+            <summary>Manages the memory pool transactions.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolOrphans.logger">
+            <summary>Instance logger for the memory pool.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolOrphans.mapOrphanTransactions">
+            <summary>Dictionary of orphan transactions keyed by transaction hash.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolOrphans.mapOrphanTransactionsByPrev">
+            <summary>Dictionary of orphan transactions keyed by transaction output.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolOrphans.recentRejects">
+            <summary>Dictionary of recent transaction rejects keyed by transaction hash</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolOrphans.nNextSweep">
+            <summary>Time of next sweep to purge expired orphan transactions.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolOrphans.random">
+            <summary> Object for generating random numbers used for randomly purging orphans.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolOrphans.hashRecentRejectsChainTip">
+            <summary>Location on chain when rejects are validated.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolOrphans.lockObject">
+            <summary>Lock object for locking access to local collections.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolOrphans.Validator">
+            <summary>Memory pool validator for validating transactions.</summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.MempoolOrphans.OrphanTx">
+            <summary>
+            Object representing an orphan transaction information.
+            When modifying, adapt the copy of this definition in tests/DoS_tests.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolOrphans.OrphanTx.Tx">
+            <summary>The orphan transaction.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolOrphans.OrphanTx.NodeId">
+            <summary>The id of the node that sent this transaction.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolOrphans.OrphanTx.TimeExpire">
+            <summary>The time when this orphan transaction will expire.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolOrphans.OrphansList">
+            <summary>
+            Gets a list of all the orphan transactions.
+            </summary>
+            <returns>A list of orphan transactions.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolOrphans.OrphansCount">
+            <summary>
+            Orphan list count.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolOrphans.RemoveForBlock(System.Collections.Generic.List{Blockcore.Consensus.TransactionInfo.Transaction})">
+            <summary>
+            Remove transactions form the orphan list.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolOrphans.AlreadyHaveAsync(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Whether the transaction id is already present in the list of orphans.
+            </summary>
+            <param name="trxid">transaction id to search for.</param>
+            <returns>Whether the transaction id is present.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolOrphans.ProcessesOrphansAsync(Blockcore.Features.MemoryPool.MempoolBehavior,Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Processes orphan transactions.
+            Executed when receive a new transaction through MempoolBehavior.
+            </summary>
+            <param name="behavior">Memory pool behavior that received new transaction.</param>
+            <param name="tx">The new transaction received.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolOrphans.AddToRecentRejects(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Adds transaction hash to recent rejects.
+            </summary>
+            <param name="orphanHash">Hash to add.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolOrphans.ProcessesOrphansMissingInputs(Blockcore.P2P.Peer.INetworkPeer,Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Adds transaction to orphan list after checking parents and inputs.
+            Executed if new transaction has been validated to having missing inputs.
+            If parents for this transaction have all been rejected than reject this transaction.
+            </summary>
+            <param name="from">Source node for transaction.</param>
+            <param name="tx">Transaction to add.</param>
+            <returns>Whether the transaction was added to orphans.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolOrphans.LimitOrphanTxSize(System.Int32)">
+            <summary>
+            Limit the orphan transaction list by a max size.
+            First prune expired orphan pool entries within the sweep period.
+            If further pruning is required to get to limit, then evict randomly.
+            </summary>
+            <param name="maxOrphanTx">Size to limit the orphan transactions to.</param>
+            <returns>The number of transactions evicted.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolOrphans.AddOrphanTx(System.UInt64,Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Add an orphan transaction to the orphan pool.
+            </summary>
+            <param name="nodeId">Node id of the source node.</param>
+            <param name="tx">The transaction to add.</param>
+            <returns>Whether the orphan transaction was added.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolOrphans.EraseOrphanTxLock(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Erase an specific transaction from orphan pool.
+            </summary>
+            <param name="hash">hash of the transaction.</param>
+            <returns>Whether erased.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolOrphans.EraseOrphansFor(System.UInt64)">
+            <summary>
+            Erase all orphans for a specific peer node.
+            </summary>
+            <param name="peerId">Peer node id</param>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.MempoolPerformanceCounter">
+            <summary>
+            Memory performance counter for tracking memory pool performance.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolPerformanceCounter.mempoolSize">
+            <summary>Number of transactions in the memory pool.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolPerformanceCounter.mempoolDynamicSize">
+            <summary>Memory pool dynamic size in bytes.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolPerformanceCounter.mempoolOrphanSize">
+            <summary>Memory pool orphan transaction count.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolPerformanceCounter.hitCount">
+            <summary>Counter of number of memory pool hits.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolPerformanceCounter.dateTimeProvider">
+            <summary>Provider of date time functionality.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolPerformanceCounter.#ctor(Blockcore.Utilities.IDateTimeProvider)">
+            <summary>
+            Constructs a memory pool performance counter.
+            </summary>
+            <param name="dateTimeProvider">Provider of date time functionality.</param>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolPerformanceCounter.Start">
+            <summary>Gets the start time of the performance counter.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolPerformanceCounter.MempoolSize">
+            <summary>Gets the number of transactions in the memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolPerformanceCounter.MempoolDynamicSize">
+            <summary> Gets the memory pool dynamic size in bytes.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolPerformanceCounter.MempoolOrphanSize">
+            <summary>
+            Gets and sets the memory pool orphan transaction count.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolPerformanceCounter.HitCount">
+            <summary>Gets the count of memory pool hits.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolPerformanceCounter.SetMempoolSize(System.Int64)">
+            <summary>
+            Sets the number of transactions in the memory pool.
+            </summary>
+            <param name="size">Count of number of transactions in the memory pool.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolPerformanceCounter.SetMempoolDynamicSize(System.Int64)">
+            <summary>
+            Sets the memory pool dynamic size in bytes.
+            </summary>
+            <param name="size">Dynamic size of the memory pool.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolPerformanceCounter.SetMempoolOrphanSize(System.Int64)">
+            <summary>
+            Sets the number of memory pool orphan transactions.
+            </summary>
+            <param name="size">Memory pool orphan transaction count.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolPerformanceCounter.AddHitCount(System.Int64)">
+            <summary>
+            Increments the memory pool hit count.
+            </summary>
+            <param name="count">Amount to increment hit count.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolPerformanceCounter.ToString">
+            <summary>
+            Gets string representation of memory pool counter.
+            </summary>
+            <returns>String representation.</returns>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.IMempoolPersistence">
+            <summary>
+            Public interface for persisting the memory pool.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.IMempoolPersistence.Save(Blockcore.Networks.Network,Blockcore.Features.MemoryPool.Interfaces.ITxMempool,System.String)">
+            <summary>
+            Persists the memory pool to a file.
+            </summary>
+            <param name="memPool">The transaction memory pool.</param>
+            <param name="fileName">The filename to persist to. Default filename is used if null.</param>
+            <returns>Result of saving the memory pool.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.IMempoolPersistence.Load(Blockcore.Networks.Network,System.String)">
+            <summary>
+            Loads the memory pool from a persisted file.
+            </summary>
+            <param name="fileName">Filename to load from. Default filename is used if null.</param>
+            <returns>List of persistence entries.</returns>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.MemPoolSaveResult">
+            <summary>
+            The result of a memory pool save.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MemPoolSaveResult.NonSuccess">
+            <summary>Gets a non successful save result.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MemPoolSaveResult.Success(System.UInt32)">
+            <summary>
+            Defines a successful save result.
+            </summary>
+            <param name="trxSaved">The transaction that was saved.</param>
+            <returns>A successful save result.</returns>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MemPoolSaveResult.Succeeded">
+            <summary>Whether the file save was successful.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MemPoolSaveResult.TrxSaved">
+            <summary>The transaction id that was saved.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MemPoolSaveResult.ToString">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.MempoolPersistenceEntry">
+            <summary>
+            A memory pool entry to be persisted.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolPersistenceEntry.tx">
+            <summary>Memory pool transaction to persist.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolPersistenceEntry.time">
+            <summary>The transaction time.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolPersistenceEntry.feeDelta">
+            <summary>The transaction fee difference.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolPersistenceEntry.Tx">
+            <summary>Gets or set the transaction for persistence.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolPersistenceEntry.Time">
+            <summary>Gets or sets the memory pools time for the transaction for persistence.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolPersistenceEntry.FeeDelta">
+            <summary>Gets or sets the transaction fee difference for persistence.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolPersistenceEntry.FromTxMempoolEntry(Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <summary>
+            Creates a persistence entry from a memory pool transaction entry.
+            </summary>
+            <param name="tx">Memory pool transaction entry.</param>
+            <returns>Persistence entry.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolPersistenceEntry.ReadWrite(Blockcore.NBitcoin.BitcoinStream)">
+            <summary>
+            Does a readwrite to the stream of this persistence entry.
+            </summary>
+            <param name="stream">Stream to do readwrite to.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolPersistenceEntry.Equals(System.Object)">
+            <summary>
+            Compares whether two persistence entries are equal.
+            </summary>
+            <param name="obj">Object to compare this persistence entry to.</param>
+            <returns>Whether the objects are equal.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolPersistenceEntry.GetHashCode">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.MempoolPersistence">
+            <summary>
+            Object used for persisting memory pool transactions.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolPersistence.MempoolDumpVersion">
+            <summary>Current memory pool version number for persistence.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolPersistence.DefaultFilename">
+            <summary>The default filename used for memory pool persistence.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolPersistence.dataDir">
+            <summary>Data directory to save persisted memory pool to.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolPersistence.mempoolLogger">
+            <summary>Instance logger for the memory pool persistence object.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolPersistence.#ctor(Blockcore.Configuration.NodeSettings,Microsoft.Extensions.Logging.ILoggerFactory)">
+            <summary>
+            Constructs an instance of an object for persisting memory pool transactions.
+            </summary>
+            <param name="settings">Node settings used for getting the data directory.</param>
+            <param name="loggerFactory">Logger factory for creating instance logger.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolPersistence.Save(Blockcore.Networks.Network,Blockcore.Features.MemoryPool.Interfaces.ITxMempool,System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolPersistence.Save(Blockcore.Networks.Network,System.Collections.Generic.IEnumerable{Blockcore.Features.MemoryPool.MempoolPersistenceEntry},System.String)">
+            <summary>
+            Saves a list of memory pool transaction entries to a persistence file.
+            </summary>
+            <param name="network">The blockchain network.</param>
+            <param name="toSave">List of persistence transactions to save.</param>
+            <param name="fileName">The filename to persist transactions to.</param>
+            <returns>The save result.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolPersistence.DumpToStream(Blockcore.Networks.Network,System.Collections.Generic.IEnumerable{Blockcore.Features.MemoryPool.MempoolPersistenceEntry},System.IO.Stream)">
+            <summary>
+            Writes a collection of memory pool transactions to a stream.
+            </summary>
+            <param name="network">The blockchain network.</param>
+            <param name="toSave">Collection of memory pool transactions to save.</param>
+            <param name="stream">Stream to write transactions to.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolPersistence.Load(Blockcore.Networks.Network,System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolPersistence.LoadFromStream(Blockcore.Networks.Network,System.IO.Stream)">
+            <summary>
+            Loads a collection of memory pool transactions from a persistence stream.
+            </summary>
+            <param name="stream">Stream to load transactions from.</param>
+            <returns>Collection of memory pool transactions.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolRule.CheckTransaction(Blockcore.Features.MemoryPool.MempoolValidationContext)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.MempoolSettings">
+            <summary>
+            Configuration of mempool features and limits.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolSettings.DefaultWhiteListRelay">
+            <seealso cref="P:Blockcore.Features.MemoryPool.MempoolSettings.WhiteListRelay"/>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolSettings.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolSettings.MaxMempool">
+            <summary>Maximal size of the transaction memory pool in megabytes.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolSettings.MempoolExpiry">
+            <summary>Maximum number of hours to keep transactions in the mempool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolSettings.RelayPriority">
+            <summary><c>true</c> to require high priority for relaying free or low-fee transactions.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolSettings.LimitAncestors">
+            <summary>Maximum number of ancestors of a transaction in mempool (including itself).</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolSettings.LimitAncestorSize">
+            <summary>Maximal size in kB of ancestors of a transaction in mempool (including itself).</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolSettings.LimitDescendants">
+            <summary>Maximum number of descendants any ancestor can have in mempool (including itself).</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolSettings.LimitDescendantSize">
+            <summary>Maximum size in kB of descendants any ancestor can have in mempool (including itself).</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolSettings.EnableReplacement">
+            <summary><c>true</c> to enable transaction replacement in the memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolSettings.MaxOrphanTx">
+            <summary>Maximum number of orphan transactions kept in memory.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolSettings.WhiteListRelay">
+            <summary><c>true</c> to accept relayed transactions received from whitelisted peers even when not relaying transactions.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolSettings.RequireStandard">
+            <summary>Option to skip (most) non-standard transaction checks, for testnet/regtest only.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolSettings.PermitBareMultisig">
+            <summary>Regard bare (non-P2SH) multisig transactions as standard.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolSettings.FeeFilter">
+            <summary>Enable the fee filter relay.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolSettings.#ctor(Blockcore.Configuration.NodeSettings)">
+            <summary>
+            Initializes an instance of the object from the node configuration.
+            </summary>
+            <param name="nodeSettings">The node configuration.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolSettings.PrintHelp(Blockcore.Networks.Network)">
+            <summary>Prints the help information on how to configure the mempool settings to the logger.</summary>
+            <param name="network">The network to use.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolSettings.BuildDefaultConfigurationFile(System.Text.StringBuilder,Blockcore.Networks.Network)">
+            <summary>
+            Get the default configuration.
+            </summary>
+            <param name="builder">The string builder to add the settings to.</param>
+            <param name="network">The network to base the defaults off.</param>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.MempoolSignaled">
+            <summary>Mempool observer on chained header block notifications.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolSignaled.asyncLoop">
+            <summary>The async loop we need to wait upon before we can shut down this manager.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolSignaled.asyncProvider">
+            <summary>Factory for creating background async loop tasks.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolSignaled.manager">
+            <summary>
+            Memory pool manager injected dependency.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolSignaled.chainIndexer">
+            <summary>
+            Concurrent chain injected dependency.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolSignaled.connection">
+            <summary>
+            Connection manager injected dependency.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolSignaled.nodeLifetime">
+            <summary>Global application life cycle control - triggers when application shuts down.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolSignaled.#ctor(Blockcore.Features.MemoryPool.MempoolManager,Blockcore.Consensus.Chain.ChainIndexer,Blockcore.Connection.IConnectionManager,Blockcore.Utilities.INodeLifetime,Blockcore.AsyncWork.IAsyncProvider,Blockcore.Features.MemoryPool.MempoolSchedulerLock,Blockcore.Features.MemoryPool.Interfaces.ITxMempool,Blockcore.Features.MemoryPool.Interfaces.IMempoolValidator,Blockcore.Features.MemoryPool.MempoolOrphans,Blockcore.Signals.ISignals)">
+            <summary>
+            Constructs an instance of a MempoolSignaled object.
+            Starts the block notification loop to memory pool behaviors for connected nodes.
+            </summary>
+            <param name="manager">Memory pool manager injected dependency.</param>
+            <param name="chainIndexer">Concurrent chain injected dependency.</param>
+            <param name="connection">Connection manager injected dependency.</param>
+            <param name="nodeLifetime">Node lifetime injected dependency.</param>
+            <param name="asyncProvider">Asynchronous loop factory injected dependency.</param>
+            <param name="mempoolLock">The mempool lock.</param>
+            <param name="memPool">the mempool.</param>
+            <param name="validator">The mempool validator.</param>
+            <param name="mempoolOrphans">The mempool orphan list.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolSignaled.RemoveForBlock(Blockcore.Consensus.BlockInfo.Block,System.Int32)">
+            <summary>
+            Removes transaction from a block in memory pool.
+            </summary>
+            <param name="block">Block of transactions.</param>
+            <param name="blockHeight">Location of the block.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolSignaled.Start">
+            <summary>
+            Announces blocks on all connected nodes memory pool behaviors every five seconds.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.MempoolValidationState">
+            <summary>
+            A state used when validating a new transaction.
+            A transaction must be validated before being added to the memory pool.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolValidationState.#ctor(System.Boolean)">
+            <summary>
+            Constructs an instance of the memory pool validation state object.
+            </summary>
+            <param name="limitFree">Whether free transactions were limited.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolValidationState.#ctor(System.Boolean,System.Boolean,Blockcore.NBitcoin.Money)">
+            <summary>
+            Constructs and instance of the memory pool validation state object.
+            </summary>
+            <param name="limitFree">Whether free transactions were limited.</param>
+            <param name="overrideMempoolLimit">Whether the memory pool limit was overridden.</param>
+            <param name="absurdFee">The amount that was used for calculating an absurdly high fee.</param>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationState.Error">
+            <summary>Get or sets the current error status for memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationState.ErrorMessage">
+            <summary>Gets or sets the current error message for memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationState.AbsurdFee">
+            <summary>Gets or sets the value for an absurdly high transaction fee.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationState.MissingInputs">
+            <summary>Gets or sets whether there are missing inputs on the transaction.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationState.CorruptionPossible">
+            <summary>Gets or sets whether transaction pool could be in a corrupted state.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationState.IsInvalid">
+            <summary>Gets or sets whether the validation state is in an invalid state.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationState.OverrideMempoolLimit">
+            <summary>Gets or sets whether the memory pool limit has been overridden.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationState.AcceptTime">
+            <summary>Gets or sets the acceptance time of the transaction to the memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationState.LimitFree">
+            <summary>Gets or sets whether free transactions are being limited.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationState.MempoolSize">
+            <summary>Gets or sets the current number of transactions in the memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationState.MempoolDynamicSize">
+            <summary>Gets or sets the memory pools dynamic size in bytes.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolValidationState.Invalid(Blockcore.Features.MemoryPool.MempoolError)">
+            <summary>
+            Sets the memory pool validation state to invalid.
+            </summary>
+            <param name="error">The current error.</param>
+            <returns>The current validation state of the memory pool.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolValidationState.Invalid(Blockcore.Features.MemoryPool.MempoolError,System.String)">
+            <summary>
+            Sets the memory pool validation state to invalid, with an error message.
+            </summary>
+            <param name="error">The current error.</param>
+            <param name="errorMessage">The current error message.</param>
+            <returns>The current validation state of the memory pool.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolValidationState.Fail(Blockcore.Features.MemoryPool.MempoolError)">
+            <summary>
+            Sets the memory pool validation state to fail.
+            </summary>
+            <param name="error">The current error.</param>
+            <returns>The current validation state of the memory pool.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolValidationState.Fail(Blockcore.Features.MemoryPool.MempoolError,System.String)">
+            <summary>
+            Sets the memory pool validation state to fail, with an error message.
+            </summary>
+            <param name="error">The current error.</param>
+            <param name="errorMessage">The current error message.</param>
+            <returns>The current validation state of the memory pool.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolValidationState.Throw">
+            <summary>
+            Throws a <see cref="T:Blockcore.Features.MemoryPool.MempoolErrorException"/> for the current error state.
+            </summary>
+            <exception cref="T:Blockcore.Features.MemoryPool.MempoolErrorException">Current error state.</exception>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolValidationState.ToString">
+            <summary>
+            Gets a string formatted error message with code.
+            </summary>
+            <returns>The error message as a string.</returns>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.MempoolValidationContext">
+            <summary>
+            A context to hold validation data when adding
+            a transaction to the memory pool.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationContext.State">
+            <summary>Gets the validation state of the memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationContext.SetConflicts">
+            <summary>Gets or sets the collection of transaction set conflicts.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationContext.Transaction">
+            <summary>Gets the current transaction being validated.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationContext.TransactionHash">
+            <summary>Gets the hash of the current transaction being validated.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationContext.Entry">
+            <summary>Gets or sets the current entry in the memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationContext.View">
+            <summary>Gets or sets the current coin view of the transaction.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationContext.EntrySize">
+            <summary>Gets or sets the size of the current entry in the memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationContext.AllConflicting">
+            <summary>Gets or sets the set of all memory pool entries that are conflicting.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationContext.SetAncestors">
+            <summary>Gets or sets the transaction set's ancestors.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationContext.LockPoints">
+            <summary>Gets or sets the lock points for the memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationContext.ConflictingFees">
+            <summary>Gets or sets the conflicting fees for the memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationContext.ConflictingSize">
+            <summary>Gets or sets the memory pool entry size of the conflicting transaction.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationContext.ConflictingCount">
+            <summary>Gets or sets the number of other entries that are conflicting transactions.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationContext.ValueOut">
+            <summary>Value of the output of the transaction.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationContext.Fees">
+            <summary>Amount of the fees for the transaction.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationContext.ModifiedFees">
+            <summary>The Amount of the fees for the transaction after they have been modified.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationContext.SigOpsCost">
+            <summary>The total cost of the signature operations for the transaction.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidationContext.MinRelayTxFee">
+            <summary>This is not transaction-specific, it is needed for rule evaluation.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolValidationContext.#ctor(Blockcore.Consensus.TransactionInfo.Transaction,Blockcore.Features.MemoryPool.MempoolValidationState)">
+            <summary>
+            Constructs a memory pool validation context object.
+            </summary>
+            <param name="transaction">The current transaction being validated.</param>
+            <param name="state">The current memory pool validation state.</param>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.MempoolValidator">
+            <summary>
+            Validates memory pool transactions.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolValidator.DefaultRelaypriority">
+            <summary>
+            Default for relay priority.
+            </summary>
+            <seealso cref = "T:Blockcore.Features.MemoryPool.MempoolSettings" />
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolValidator.DefaultMaxMempoolSize">
+            <summary>
+            Default for -maxmempool, maximum megabytes of mempool memory usage.
+            </summary>
+            <seealso cref = "T:Blockcore.Features.MemoryPool.MempoolSettings" />
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolValidator.DefaultAncestorLimit">
+            <summary>
+            Default for -limitancestorcount, max number of in-mempool ancestors.
+            </summary>
+            <seealso cref = "T:Blockcore.Features.MemoryPool.MempoolSettings" />
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolValidator.DefaultAncestorSizeLimit">
+            <summary>
+            Default for -limitancestorsize, maximum kilobytes of tx + all in-mempool ancestors.
+            </summary>
+            <seealso cref = "T:Blockcore.Features.MemoryPool.MempoolSettings" />
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolValidator.DefaultDescendantLimit">
+            <summary>
+            Default for -limitdescendantcount, max number of in-mempool descendants.
+            </summary>
+            <seealso cref = "T:Blockcore.Features.MemoryPool.MempoolSettings" />
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolValidator.DefaultDescendantSizeLimit">
+            <summary>
+            Default for -limitdescendantsize, maximum kilobytes of in-mempool descendants.
+            </summary>
+            <seealso cref = "T:Blockcore.Features.MemoryPool.MempoolSettings" />
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolValidator.DefaultMempoolExpiry">
+            <summary>
+            Default for -mempoolexpiry, expiration time for mempool transactions in hours.
+            </summary>
+            <seealso cref = "T:Blockcore.Features.MemoryPool.MempoolSettings" />
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolValidator.DefaultEnableReplacement">
+            <summary>
+            Default for -mempoolreplacement, whether to replace memory pool.
+            </summary>
+            <seealso cref = "T:Blockcore.Features.MemoryPool.MempoolSettings" />
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolValidator.DefaultPermitBareMultisig">
+            <summary>
+            Default for -permitbaremultisig, whether or not to regard bare (non-P2SH) multisig transactions as standard.
+            </summary>
+            <seealso cref = "T:Blockcore.Features.MemoryPool.MempoolSettings" />
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolValidator.DefaultFeeFilter">
+            <summary>
+            Default for using fee filter (-feefilter).
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolValidator.MaxFeeEstimationTipAge">
+            <summary>Maximum age of our tip in seconds for us to be considered current for fee estimation.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolValidator.mempoolLock">
+            <summary>A lock for managing asynchronous access to memory pool.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolValidator.dateTimeProvider">
+            <summary>Date and time information provider.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolValidator.mempoolSettings">
+            <summary>Settings from the memory pool.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolValidator.chainIndexer">
+            <summary>Thread safe access to the best chain of block headers (that the node is aware of) from genesis.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolValidator.coinView">
+            <summary>Coin view of the memory pool.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolValidator.memPool">
+            <summary>Transaction memory pool for managing transactions in the memory pool.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolValidator.logger">
+            <summary>Instance logger for memory pool validator.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolValidator.minRelayTxFee">
+            <summary>Minimum fee rate for a relay transaction.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.MempoolValidator.StandardLocktimeVerifyFlags">
+            <summary>Flags that determine how transaction should be validated in non-consensus code.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidator.PerformanceCounter">
+            <summary>Gets a counter for tracking memory pool performance.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.MempoolValidator.ConsensusOptions">
+            <summary>Gets the consensus options from the <see cref="T:Blockcore.Features.Consensus.Rules.UtxosetRules.CheckUtxosetRule"/></summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolValidator.AcceptToMemoryPoolWithTime(Blockcore.Features.MemoryPool.MempoolValidationState,Blockcore.Consensus.TransactionInfo.Transaction)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolValidator.AcceptToMemoryPool(Blockcore.Features.MemoryPool.MempoolValidationState,Blockcore.Consensus.TransactionInfo.Transaction)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolValidator.SanityCheck">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolValidator.CheckFinalTransaction(Blockcore.Consensus.Chain.ChainIndexer,Blockcore.Utilities.IDateTimeProvider,Blockcore.Consensus.TransactionInfo.Transaction,Blockcore.Consensus.TransactionInfo.Transaction.LockTimeFlags)">
+            <summary>
+            Validates that the transaction is the final transaction."/>
+            Validated by comparing the transaction vs chain tip.
+            If <see cref="!:CheckUtxosetRule.StandardLocktimeVerifyFlags"/> flag is set then
+            use the block time at the end of the block chain for validation.
+            Otherwise use the current time for the block time.
+            </summary>
+            <param name="chainIndexer">Block chain used for computing time-locking on the transaction.</param>
+            <param name="dateTimeProvider">Provides the current date and time.</param>
+            <param name="tx">The transaction to validate.</param>
+            <param name="flags">Flags for time-locking the transaction.</param>
+            <returns>Whether the final transaction was valid.</returns>
+            <seealso cref="M:Blockcore.Consensus.TransactionInfo.Transaction.IsFinal(System.DateTimeOffset,System.Int32)"/>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolValidator.GetTransactionWeight(Blockcore.Consensus.TransactionInfo.Transaction,Blockcore.Consensus.ConsensusFactory,Blockcore.Consensus.ConsensusOptions)">
+            <summary>
+            Computes the transaction size based on <see cref="P:Blockcore.Features.MemoryPool.MempoolValidator.ConsensusOptions"/>.
+            Takes into account witness options in the computation.
+            </summary>
+            <param name="tx">Transaction.</param>
+            <param name="consensusFactory">The consensus factory.</param>
+            <param name="consensusOptions">Proof of work consensus options.</param>
+            <returns>Transaction weight.</returns>
+            <seealso cref="!:Transaction.GetSerializedSize"/>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolValidator.CalculateModifiedSize(Blockcore.Consensus.ConsensusFactory,System.Int32,Blockcore.Consensus.TransactionInfo.Transaction,Blockcore.Consensus.ConsensusOptions)">
+            <summary>
+            Calculates the modified transaction size used for memory pool priority.
+            Calculated by stripping off the lengths of the inputs signatures.
+            </summary>
+            <param name="consensusFactory">The consensus factory.</param>
+            <param name="nTxSize">Current transaction size, set to 0 to compute it.</param>
+            <param name="trx">The transaction.</param>
+            <param name="consensusOptions">The consensus option, needed to compute the transaction size.</param>
+            <returns>The new transaction size.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolValidator.AcceptToMemoryPoolWorkerAsync(Blockcore.Features.MemoryPool.MempoolValidationState,Blockcore.Consensus.TransactionInfo.Transaction,System.Collections.Generic.List{Blockcore.NBitcoin.uint256})">
+            <summary>
+            Validates and then adds a transaction to memory pool.
+            </summary>
+            <param name="state">Validation state for creating the validation context.</param>
+            <param name="tx">The transaction to validate.</param>
+            <param name="vHashTxnToUncache">Not currently used</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolValidator.PreMempoolChecks(Blockcore.Features.MemoryPool.MempoolValidationContext)">
+            <summary>
+            Checks that are done before touching the memory pool.
+            These checks don't need to run under the memory pool lock.
+            </summary>
+            <param name="context">Current validation context.</param>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Blockcore.Features.MemoryPool.MempoolValidator.CheckStandardTransaction(Blockcore.Features.MemoryPool.MempoolValidationContext)" -->
+        <member name="M:Blockcore.Features.MemoryPool.MempoolValidator.LimitMempoolSize(System.Int64,System.Int64)">
+            <summary>
+            Trims memory pool to a new size.
+            First expires transactions older than age.
+            Then trims memory pool to limit if necessary.
+            </summary>
+            <param name="limit">New size.</param>
+            <param name="age">AAge to use for calculating expired transactions.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.MempoolValidator.IsCurrentForFeeEstimation">
+            <summary>
+            Whether chain is currently valid for fee estimation.
+            It should only count for fee estimation if the node is not behind.
+            </summary>
+            <returns>Whether current for fee estimation.</returns>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.Rules.CheckAllInputsMempoolRule">
+            <summary>
+            Validate inputs against previous transactions.
+            Checks against <see cref="F:Blockcore.Consensus.ScriptInfo.ScriptVerify.Standard"/> and <see cref="F:Blockcore.Consensus.ScriptInfo.ScriptVerify.P2SH"/>
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Rules.CheckAllInputsMempoolRule.CheckTransaction(Blockcore.Features.MemoryPool.MempoolValidationContext)">
+            <seealso>https://github.com/bitcoin/bitcoin/blob/febf3a856bcfb8fef2cb4ddcb8d1e0cab8a22580/src/validation.cpp#L770</seealso>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Blockcore.Features.MemoryPool.Rules.CheckAllInputsMempoolRule.CheckInputs(Blockcore.Features.MemoryPool.MempoolValidationContext,Blockcore.Consensus.ScriptInfo.ScriptVerify,Blockcore.Consensus.TransactionInfo.PrecomputedTransactionData)" -->
+        <member name="T:Blockcore.Features.MemoryPool.Rules.CheckAncestorsMempoolRule">
+            <summary>
+            Validates the ancestors of a memory pool entry.
+            Checks that the number of ancestors isn't too large.
+            Checks for a transaction that spends outputs that would be replaced by it.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.Rules.CheckCoinViewMempoolRule">
+            <summary>
+            Validates the transaction with the coin view.
+            Checks if already in coin view, and missing and unavailable inputs.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.Rules.CheckConflictsMempoolRule">
+            <summary>
+            Check for conflicts with in-memory transactions.
+            If a conflict is found it is added to the validation context.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.Rules.CheckFeeMempoolRule">
+            <summary>
+            Validates the transaction fee is valid.
+            Checks whether the fee meets minimum fee, free transactions have sufficient priority,
+            and absurdly high fees.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.Rules.CheckRateLimitMempoolRule">
+            <summary>
+            Validates the rate limit.
+            Currently not implemented.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.Rules.CheckReplacementMempoolRule">
+            <summary>
+            Check if transaction can replace others.
+            Only transactions that increase fees over previous transactions are accepted.
+            There is a restriction on the maximum number of transactions that would be replaced.
+            The new transaction must have all inputs confirmed.
+            The new transaction must have sufficient fees to pay for it's bandwidth.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.Rules.CheckSigOpsMempoolRule">
+            <summary>
+            Check that the transaction doesn't have an excessive number of sigops.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.Rules.CheckTxOutDustRule">
+            <summary>
+            This rule ensures that the transaction does not contain any outputs which are considered dust.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Rules.CheckTxOutDustRule.CheckTransaction(Blockcore.Features.MemoryPool.MempoolValidationContext)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.Rules.CreateMempoolEntryMempoolRule">
+            <summary>
+            Creates a memory pool entry in the validation context.
+            Validates the transactions can be mined, and the pay to script hashes are standard.
+            Calculates the fees related to the transaction.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Rules.CreateMempoolEntryMempoolRule.CheckSequenceLocks(Blockcore.Networks.Network,Blockcore.Consensus.Chain.ChainedHeader,Blockcore.Features.MemoryPool.MempoolValidationContext,Blockcore.Consensus.TransactionInfo.Transaction.LockTimeFlags,Blockcore.Features.MemoryPool.LockPoints,System.Boolean)">
+            <summary>
+            Check if transaction will be BIP 68 final in the next block to be created.
+            Simulates calling SequenceLocks() with data from the tip of the current active chain.
+            Optionally stores in LockPoints the resulting height and time calculated and the hash
+            of the block needed for calculation or skips the calculation and uses the LockPoints
+            passed in for evaluation.
+            The LockPoints should not be considered valid if CheckSequenceLocks returns false.
+            See consensus/consensus.h for flag definitions.
+            </summary>
+            <param name="network">The blockchain network.</param>
+            <param name="tip">Tip of the chain.</param>
+            <param name="context">Validation context for the memory pool.</param>
+            <param name="flags">Transaction lock time flags.</param>
+            <param name="lp">Optional- existing lock points to use, and update during evaluation.</param>
+            <param name="useExistingLockPoints">Whether to use the existing lock points during evaluation.</param>
+            <returns>Whether sequence lock validated.</returns>
+            <seealso cref="M:Blockcore.NBitcoin.SequenceLock.Evaluate(Blockcore.Consensus.Chain.ChainedHeader)"/>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Rules.CreateMempoolEntryMempoolRule.AreInputsStandard(Blockcore.Networks.Network,Blockcore.Consensus.TransactionInfo.Transaction,Blockcore.Features.MemoryPool.MempoolCoinView)">
+            <summary>
+            Whether transaction inputs are standard.
+            Check for standard transaction types.
+            </summary>
+            <seealso>https://github.com/bitcoin/bitcoin/blob/febf3a856bcfb8fef2cb4ddcb8d1e0cab8a22580/src/policy/policy.cpp#L156</seealso>
+            <param name="tx">Transaction to verify.</param>
+            <param name="mapInputs">Map of previous transactions that have outputs we're spending.</param>
+            <returns>Whether all inputs (scriptSigs) use only standard transaction forms.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.Rules.CreateMempoolEntryMempoolRule.IsWitnessStandard(Blockcore.Consensus.TransactionInfo.Transaction,Blockcore.Features.MemoryPool.MempoolCoinView)">
+            <summary>
+            Whether transaction is witness standard.
+            <seealso cref="!:https://github.com/bitcoin/bitcoin/blob/aa624b61c928295c27ffbb4d27be582f5aa31b56/src/policy/policy.cpp#L196"/>
+            </summary>
+            <param name="tx">Transaction to verify.</param>
+            <param name="mapInputs">Map of previous transactions that have outputs we're spending.</param>
+            <returns>Whether transaction is witness standard.</returns>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.TxMempoolInfo">
+            <summary>
+            Information about a memory pool transaction.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolInfo.Trx">
+            <summary>The transaction itself.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolInfo.Time">
+            <summary>Time the transaction entered the mempool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolInfo.FeeRate">
+            <summary>Fee rate of the transaction.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolInfo.FeeDelta">
+            <summary>The fee delta.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolInfo.Fee">
+            <summary>The fee.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolInfo.Size">
+            <summary>The trx size.</summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.TxMempool">
+             <summary>
+             Memory pool of pending transactions.
+             </summary>
+             <remarks>
+            
+             TxMempool stores valid-according-to-the-current-best-chain transactions
+             that may be included in the next block.
+            
+             Transactions are added when they are seen on the network(or created by the
+             local node), but not all transactions seen are added to the pool.For
+             example, the following new transactions will not be added to the mempool:
+             - a transaction which doesn't make the mimimum fee requirements.
+             - a new transaction that double-spends an input of a transaction already in
+             the pool where the new transaction does not meet the Replace-By-Fee
+             requirements as defined in BIP 125.
+             - a non-standard transaction.
+            
+             <see cref="P:Blockcore.Features.MemoryPool.TxMempool.MapTx"/>, and <see cref="T:Blockcore.Features.MemoryPool.TxMempoolEntry"/> bookkeeping:
+            
+             <see cref="P:Blockcore.Features.MemoryPool.TxMempool.MapTx"/> is a collection that sorts the mempool on 4 criteria:
+             - transaction hash
+             - feerate[we use max(feerate of tx, feerate of Transaction with all descendants)]
+             - time in mempool
+             - mining score (feerate modified by any fee deltas from PrioritiseTransaction)
+            
+             Note: the term "descendant" refers to in-mempool transactions that depend on
+             this one, while "ancestor" refers to in-mempool transactions that a given
+             transaction depends on.
+            
+             In order for the feerate sort to remain correct, we must update transactions
+             in the mempool when new descendants arrive. To facilitate this, we track
+             the set of in-mempool direct parents and direct children in <see cref="!:mapLinks.Within"/>
+             each TxMempoolEntry, we track the size and fees of all descendants.
+            
+             Usually when a new transaction is added to the mempool, it has no in-mempool
+             children(because any such children would be an orphan).  So in
+             <see cref="M:Blockcore.Features.MemoryPool.TxMempool.AddUnchecked(Blockcore.NBitcoin.uint256,Blockcore.Features.MemoryPool.TxMempoolEntry,System.Boolean)"/>, we:
+             - update a new entry's setMemPoolParents to include all in-mempool parents
+             - update the new entry's direct parents to include the new tx as a child
+             - update all ancestors of the transaction to include the new tx's size/fee
+            
+             When a transaction is removed from the mempool, we must:
+             - update all in-mempool parents to not track the tx in setMemPoolChildren
+             - update all ancestors to not include the tx's size/fees in descendant state
+             - update all in-mempool children to not include it as a parent
+            
+             These happen in <see cref="M:Blockcore.Features.MemoryPool.TxMempool.UpdateForRemoveFromMempool(Blockcore.Features.MemoryPool.TxMempool.SetEntries,System.Boolean)"/>.
+             (Note that when removing a
+             transaction along with its descendants, we must calculate that set of
+             transactions to be removed before doing the removal, or else the mempool can
+             be in an inconsistent state where it's impossible to walk the ancestors of
+             a transaction.)
+            
+             In the event of a reorg, the assumption that a newly added tx has no
+             in-mempool children is false.  In particular, the mempool is in an
+             inconsistent state while new transactions are being added, because there may
+             be descendant transactions of a tx coming from a disconnected block that are
+             unreachable from just looking at transactions in the mempool(the linking
+             transactions may also be in the disconnected block, waiting to be added).
+             Because of this, there's not much benefit in trying to search for in-mempool
+             children in <see cref="M:Blockcore.Features.MemoryPool.TxMempool.AddUnchecked(Blockcore.NBitcoin.uint256,Blockcore.Features.MemoryPool.TxMempoolEntry,Blockcore.Features.MemoryPool.TxMempool.SetEntries,System.Boolean)"/>.
+             Instead, in the special case of transactions
+             being added from a disconnected block, we require the caller to clean up the
+             state, to account for in-mempool, out-of-block descendants for all the
+             in-block transactions by calling <see cref="M:Blockcore.Features.MemoryPool.TxMempool.AddTransactionsUpdated(System.Int32)"/>.  Note that
+             until this is called, the mempool state is not consistent, and in particular
+             <see cref="F:Blockcore.Features.MemoryPool.TxMempool.mapLinks"/> may not be correct (and therefore functions like
+             <see cref="M:Blockcore.Features.MemoryPool.TxMempool.CalculateMemPoolAncestors(Blockcore.Features.MemoryPool.TxMempoolEntry,Blockcore.Features.MemoryPool.TxMempool.SetEntries,System.Int64,System.Int64,System.Int64,System.Int64,System.String@,System.Boolean)"/>
+             and <see cref="M:Blockcore.Features.MemoryPool.TxMempool.CalculateDescendants(Blockcore.Features.MemoryPool.TxMempoolEntry,Blockcore.Features.MemoryPool.TxMempool.SetEntries)"/> that rely
+             on them to walk the mempool are not generally safe to use).
+            
+             Computational limits:
+            
+             Updating all in-mempool ancestors of a newly added transaction can be slow,
+             if no bound exists on how many in-mempool ancestors there may be.
+             <see cref="M:Blockcore.Features.MemoryPool.TxMempool.CalculateMemPoolAncestors(Blockcore.Features.MemoryPool.TxMempoolEntry,Blockcore.Features.MemoryPool.TxMempool.SetEntries,System.Int64,System.Int64,System.Int64,System.Int64,System.String@,System.Boolean)"/>
+             takes configurable limits that are designed to
+             prevent these calculations from being too CPU intensive.
+            
+             Adding transactions from a disconnected block can be very time consuming,
+             because we don't have a way to limit the number of in-mempool descendants.
+             To bound CPU processing, we limit the amount of work we're willing to do
+             to properly update the descendant information for a tx being added from
+             a disconnected block.  If we would exceed the limit, then we instead mark
+             the entry as "dirty", and set the feerate for sorting purposes to be equal
+             the feerate of the transaction without any descendants.
+             </remarks>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempool.MempoolHeight">
+            <summary>Fake height value used in Coins to signify they are only in the memory pool (since 0.8).</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempool.RollingFeeHalflife">
+            <summary>The rolling fee's half life.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempool.MapTx">
+            <summary>The indexed transaction set in the memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempool.MapNextTx">
+            <summary>Collection of transaction inputs.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempool.checkFrequency">
+            <summary>Value n means that n times in 2^32 we check.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempool.nTransactionsUpdated">
+            <summary>Number of transactions updated.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempool.totalTxSize">
+            <summary>
+             Sum of all mempool tx's virtual sizes.
+             Differs from serialized Transaction size since witness data is discounted. Defined in BIP 141.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempool.cachedInnerUsage">
+            <summary>Sum of dynamic memory usage of all the map elements (NOT the maps themselves).</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempool.minReasonableRelayFee">
+            <summary>
+            minReasonableRelayFee should be a feerate which is, roughly, somewhere
+            around what it "costs" to relay a transaction around the network and
+            below which we would reasonably say a transaction has 0-effective-fee.
+             </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempool.lastRollingFeeUpdate">
+            <summary>Time when the last rolling fee was updated.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempool.blockSinceLastRollingFeeBump">
+            <summary>Whether are new blocks since last rolling fee update.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempool.rollingMinimumFeeRate">
+            <summary>minimum fee to get into the pool, decreases exponentially.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempool.mapLinks">
+            <summary>Collection of transaction links.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempool.mapDeltas">
+            <summary>Dictionary of <see cref="T:Blockcore.Features.MemoryPool.TxMempool.DeltaPair"/> indexed by transaction hash.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempool.vTxHashes">
+            <summary>All tx witness hashes/entries in mapTx, in random order.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempool.logger">
+            <summary>Instance logger for the memory pool.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.#ctor(Blockcore.Utilities.IDateTimeProvider,Blockcore.Features.MemoryPool.Fee.BlockPolicyEstimator,Microsoft.Extensions.Logging.ILoggerFactory,Blockcore.Configuration.NodeSettings)">
+            <summary>
+            Constructs a new TxMempool object.
+            </summary>
+            <param name="dateTimeProvider">The data and time provider for accessing current date and time.</param>
+            <param name="blockPolicyEstimator">The block policy estimator object.</param>
+            <param name="loggerFactory">Factory for creating instance logger.</param>
+            <param name="nodeSettings">Full node settings.</param>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempool.MinerPolicyEstimator">
+            <summary>Gets the miner policy estimator.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempool.Size">
+            <summary>Get the number of transactions in the memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempool.TimeProvider">
+            <summary>Gets the date and time provider.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.InnerClear">
+            <summary>
+            Clears the collections that contain the memory pool transactions,
+            and increments the running total of transactions updated.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.Clear">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.trackPackageRemoved(Blockcore.NBitcoin.FeeRate)">
+            <summary>
+            Set the new memory pools min fee to the fee rate of the removed set.
+            </summary>
+            <param name="rate">Fee rate of the removed set</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.Check(Blockcore.Features.Consensus.CoinViews.ICoinView)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.Get(Blockcore.NBitcoin.uint256)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.EstimateFee(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.EstimateSmartFee(System.Int32,System.Int32@)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.EstimatePriority(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.EstimateSmartPriority(System.Int32,System.Int32@)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.SetSanityCheck(System.Double)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.AddUnchecked(Blockcore.NBitcoin.uint256,Blockcore.Features.MemoryPool.TxMempoolEntry,System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.AddUnchecked(Blockcore.NBitcoin.uint256,Blockcore.Features.MemoryPool.TxMempoolEntry,Blockcore.Features.MemoryPool.TxMempool.SetEntries,System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.UpdateEntryForAncestors(Blockcore.Features.MemoryPool.TxMempoolEntry,Blockcore.Features.MemoryPool.TxMempool.SetEntries)">
+            <summary>
+            Set ancestor state for an entry.
+            </summary>
+            <param name="entry">Memory pool entry.</param>
+            <param name="setAncestors">Transaction ancestors.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.UpdateAncestorsOf(System.Boolean,Blockcore.Features.MemoryPool.TxMempoolEntry,Blockcore.Features.MemoryPool.TxMempool.SetEntries)">
+            <summary>
+            Update ancestors of hash to add/remove it as a descendant transaction.
+            </summary>
+            <param name="add">Whether to add or remove.</param>
+            <param name="entry">Memory pool entry.</param>
+            <param name="setAncestors">Transaction ancestors.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.GetMemPoolParents(Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <summary>
+            Gets the parents of a memory pool entry.
+            </summary>
+            <param name="entry">Memory pool entry.</param>
+            <returns>Set of parent entries.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.GetMemPoolChildren(Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <summary>
+            Gets the children of a memory pool entry.
+            </summary>
+            <param name="entry">Memory pool entry.</param>
+            <returns>Set of child entries.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.UpdateChild(Blockcore.Features.MemoryPool.TxMempoolEntry,Blockcore.Features.MemoryPool.TxMempoolEntry,System.Boolean)">
+            <summary>
+            Updates memory pool entry with a child.
+            </summary>
+            <param name="entry">Memory pool entry.</param>
+            <param name="child">Child entry to add/remove.</param>
+            <param name="add">Whether to add or remove entry.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.UpdateParent(Blockcore.Features.MemoryPool.TxMempoolEntry,Blockcore.Features.MemoryPool.TxMempoolEntry,System.Boolean)">
+            <summary>
+            Updates memory pool entry with a parent.
+            </summary>
+            <param name="entry">Memory pool entry.</param>
+            <param name="parent">Parent entry to add/remove.</param>
+            <param name="add">Whether to add or remove entry.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.CalculateMemPoolAncestors(Blockcore.Features.MemoryPool.TxMempoolEntry,Blockcore.Features.MemoryPool.TxMempool.SetEntries,System.Int64,System.Int64,System.Int64,System.Int64,System.String@,System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.HasNoInputsOf(Blockcore.Consensus.TransactionInfo.Transaction)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.Exists(Blockcore.NBitcoin.uint256)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.RemoveRecursive(Blockcore.Consensus.TransactionInfo.Transaction)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.RemoveStaged(Blockcore.Features.MemoryPool.TxMempool.SetEntries,System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.Expire(System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.RemoveUnchecked(Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <summary>
+            Removes entry from memory pool.
+            </summary>
+            <param name="entry">Entry to remove.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.CalculateDescendants(Blockcore.Features.MemoryPool.TxMempoolEntry,Blockcore.Features.MemoryPool.TxMempool.SetEntries)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.UpdateForRemoveFromMempool(Blockcore.Features.MemoryPool.TxMempool.SetEntries,System.Boolean)">
+            <summary>
+            For each transaction being removed, update ancestors and any direct children.
+            </summary>
+            <param name="entriesToRemove">Memory pool entries to remove.</param>
+            <param name="updateDescendants">If updateDescendants is true, then also update in-mempool descendants' ancestor state.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.UpdateChildrenForRemoval(Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <summary>
+            Sever link between specified transaction and direct children.
+            </summary>
+            <param name="entry">Memory pool entry.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.RemoveForBlock(System.Collections.Generic.IEnumerable{Blockcore.Consensus.TransactionInfo.Transaction},System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.RemoveConflicts(Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Removes conflicting transactions.
+            </summary>
+            <param name="tx">Transaction to remove conflicts from.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.ClearPrioritisation(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Clears the prioritisation for a transaction.
+            </summary>
+            <param name="hash">Transaction hash.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.DynamicMemoryUsage">
+            <summary>
+            Get the amount of dynamic memory being used by the memory pool.
+            </summary>
+            <returns>Number of bytes in use by memory pool.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.TrimToSize(System.Int64,System.Collections.Generic.List{Blockcore.NBitcoin.uint256})">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.GetMinFee(System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.ApplyDeltas(Blockcore.NBitcoin.uint256,System.Double@,Blockcore.NBitcoin.Money@)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.AllowFreeThreshold">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.AllowFree(System.Double)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.WriteFeeEstimates(Blockcore.NBitcoin.BitcoinStream)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.ReadFeeEstimates(Blockcore.NBitcoin.BitcoinStream)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.GetTransactionsUpdated">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.AddTransactionsUpdated(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet">
+            <summary>
+            Indexed transaction set used to store memory pool transactions.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet.#ctor">
+            <summary>
+            Constructs a indexed transaction set.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet.DescendantScore">
+            <summary>Gets a collection of memory pool entries ordered by descendant score.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet.EntryTime">
+            <summary>Gets a collection of memory pool entries ordered by entry time.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet.MiningScore">
+            <summary>Gets a collection of memory pool entries ordered by mining score.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet.AncestorScore">
+            <summary>Gets a collection of memory pool entries ordered by ancestor score.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet.SpendsCoinbase">
+            <summary>Gets the memory pool entries that spend a coinbase transaction.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet.Add(Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <summary>
+            Adds an entry to the transaction set.
+            </summary>
+            <param name="entry">Entry to add.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet.Remove(Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <summary>
+            Removes an entry from the transaction set.
+            </summary>
+            <param name="entry">Transaction to remove.</param>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet.SaltedTxidHasher">
+            <summary>
+            Salted transaction id hasher for comparing transaction hash codes.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet.SaltedTxidHasher.Equals(Blockcore.NBitcoin.uint256,Blockcore.NBitcoin.uint256)">
+            <summary>
+            Whether two transaction hashes are equal.
+            </summary>
+            <param name="x">First hash.</param>
+            <param name="y">Second hash.</param>
+            <returns>Whether the hashes are equal.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet.SaltedTxidHasher.GetHashCode(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Gets the hash code for the transaction hash.
+            </summary>
+            <param name="obj">Transaction hash.</param>
+            <returns></returns>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet.CompareTxMemPoolEntryByDescendantScore">
+            <summary>
+            Sort an entry by max(score/size of entry's tx, score/size with all descendants).
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet.CompareTxMemPoolEntryByDescendantScore.Compare(Blockcore.Features.MemoryPool.TxMempoolEntry,Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet.CompareTxMemPoolEntryByDescendantScore.UseDescendantScore(Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <summary>
+            Calculate which score to use for an entry (avoiding division).
+            </summary>
+            <param name="a">Memory pool entry.</param>
+            <returns>Whether to use descendant score.</returns>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet.CompareTxMemPoolEntryByEntryTime">
+            <summary>
+            Sort by entry time.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet.CompareTxMemPoolEntryByEntryTime.Compare(Blockcore.Features.MemoryPool.TxMempoolEntry,Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet.CompareTxMemPoolEntryByScore">
+            <summary>
+            Sort by score of entry ((fee+delta)/size) in descending order.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet.CompareTxMemPoolEntryByScore.Compare(Blockcore.Features.MemoryPool.TxMempoolEntry,Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet.CompareTxMemPoolEntryByAncestorFee">
+            <summary>
+            Sort by ancestor fee.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.IndexedTransactionSet.CompareTxMemPoolEntryByAncestorFee.Compare(Blockcore.Features.MemoryPool.TxMempoolEntry,Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.TxMempool.CompareIteratorByHash">
+            <summary>
+            Sort by transaction hash.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.CompareIteratorByHash.Compare(Blockcore.Features.MemoryPool.TxMempoolEntry,Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.TxMempool.TxLinks">
+            <summary>
+            Transaction links to parent and child sets for a given transaction.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempool.TxLinks.Parents">
+            <summary>Parent memory pool entries</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempool.TxLinks.Children">
+            <summary>Child memory pool entries</summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.TxMempool.SetEntries">
+            <summary>
+            Set of memory pool entries.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.SetEntries.#ctor">
+            <summary>
+            Constructs a set of memory pool entries.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.SetEntries.Equals(Blockcore.Features.MemoryPool.TxMempool.SetEntries)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.SetEntries.Equals(Blockcore.Features.MemoryPool.TxMempoolEntry,Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.SetEntries.GetHashCode(Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <summary>
+            Gets the hash code for a memory pool entry.
+            </summary>
+            <param name="obj">Memory pool entry.</param>
+            <returns>Hash code.</returns>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.TxMempool.TxlinksMap">
+            <summary>
+            Sorted list of transaction parent/child links.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempool.TxlinksMap.#ctor">
+            <summary>
+            Constructs a new transaction links collection.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.TxMempool.DeltaPair">
+            <summary>
+            A pair of delta, amount pairs.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempool.DeltaPair.Delta">
+            <summary>The value of the delta.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempool.DeltaPair.Amount">
+            <summary>The amount.</summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.TxMempool.NextTxPair">
+            <summary>
+            Next transaction pair.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempool.NextTxPair.OutPoint">
+            <summary>The outpoint of the transaction.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempool.NextTxPair.Transaction">
+            <summary>The next transaction.</summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.LockPoints">
+            <summary>
+            Track the height and time at which transaction was final.
+            </summary>
+            <remarks>
+            Will be set to the blockchain height and median time past
+            values that would be necessary to satisfy all relative locktime
+            raints (BIP68) of this tx given our view of block chain history.
+            </remarks>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.LockPoints.Height">
+            <summary>Block chain height.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.LockPoints.Time">
+            <summary>Median time past values.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.LockPoints.MaxInputBlock">
+            <summary>
+            The block with the highest height of all the blocks which have sequence locked prevouts.
+            </summary>
+            <remarks>
+            As long as the current chain descends from the highest height block
+            containing one of the inputs used in the calculation, then the cached
+            values are still valid even after a reorg.
+            </remarks>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.ITxMempoolFees">
+            <summary>
+            This interface includes the fields required for fee comparison.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.MemoryPool.TxMempoolEntry">
+            <summary>
+            A transaction entry in the memory pool.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempoolEntry.vTxHashesIdx">
+            <summary>Index in memory pools vTxHashes.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempoolEntry.nModSize">
+            <summary>The modified size of the transaction used for priority.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempoolEntry.nUsageSize">
+            <summary>The total memory usage.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempoolEntry.entryPriority">
+            <summary>Priority when entering the memory pool.</summary>
+        </member>
+        <member name="F:Blockcore.Features.MemoryPool.TxMempoolEntry.consensusOptions">
+            <summary> Proof of work consensus options.</summary>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempoolEntry.#ctor(Blockcore.Consensus.TransactionInfo.Transaction,Blockcore.NBitcoin.Money,System.Int64,System.Double,System.Int32,Blockcore.NBitcoin.Money,System.Boolean,System.Int64,Blockcore.Features.MemoryPool.LockPoints,Blockcore.Consensus.ConsensusOptions,Blockcore.Consensus.ConsensusFactory)">
+            <summary>
+            Constructs a transaction memory pool entry.
+            </summary>
+            <param name="transaction">Transaction for the entry.</param>
+            <param name="nFee">Fee for the transaction in the entry in the memory pool.</param>
+            <param name="nTime">The local time when entering the memory pool.</param>
+            <param name="entryPriority">Priority when entering the memory pool.</param>
+            <param name="entryHeight">The chain height when entering the mempool.</param>
+            <param name="inChainInputValue">The sum of all txin values that are already in blockchain.</param>
+            <param name="spendsCoinbase">Whether the transaction spends a coinbase.</param>
+            <param name="nSigOpsCost">The total signature operations cost.</param>
+            <param name="lp">Tthe lock points that track the height and time at which tx was final.</param>
+            <param name="consensusOptions">Proof of work consensus options used to compute transaction weight and modified size.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempoolEntry.#ctor(Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <summary>
+            Copy constructor for a transaction memory pool entry.
+            </summary>
+            <param name="other">Entry to copy.</param>
+            <exception cref="T:System.NotImplementedException"/>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolEntry.Transaction">
+            <summary>Gets the transaction from the entry in the memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolEntry.TransactionHash">
+            <summary>Gets the hash of the transaction in the entry in the memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolEntry.Fee">
+            <summary>Gets the fee for the transaction in the entry in the memory pool.</summary>
+            <remarks>Cached to avoid expensive parent-transaction lookups.</remarks>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolEntry.TxWeight">
+            <summary>
+            Gets the transaction weight of the transaction in the entry in the memory pool.
+            </summary>
+            <remarks>
+            Cached to avoid recomputing transaction weight.
+            Also used for GetTxSize().
+            </remarks>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolEntry.Time">
+            <summary>Gets the local time when entering the memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolEntry.EntryHeight">
+            <summary>Gets the chain height when entering the mempool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolEntry.InChainInputValue">
+            <summary>Gets the sum of all txin values that are already in blockchain.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolEntry.SpendsCoinbase">
+            <summary>Gets whether the transaction spends a coinbase.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolEntry.SigOpCost">
+            <summary>Gets the total signature operations cost.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolEntry.LockPoints">
+            <summary>Gets the lock points that track the height and time at which tx was final.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolEntry.CountWithDescendants">
+            <summary>Gets the number of descendant transactions.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolEntry.SizeWithDescendants">
+            <summary>Gets the size of the transaction with it's decendants.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolEntry.ModFeesWithDescendants">
+            <summary>Gets the total fees of transaction including it's decendants.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolEntry.CountWithAncestors">
+            <summary>Gets the number of ancestor transactions.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolEntry.SizeWithAncestors">
+            <summary>
+            Gets the size of the transaction with it's ancestors.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolEntry.ModFeesWithAncestors">
+            <summary>Gets the total fees of the transaction including it's ancestors.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolEntry.SigOpCostWithAncestors">
+            <summary>Gets the total cost of the signature operations for the transaction including it's ancestors.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolEntry.ModifiedFee">
+            <summary>Gets the modified fee which is the sum of the transaction <see cref="P:Blockcore.Features.MemoryPool.TxMempoolEntry.Fee"/> and the <see cref="P:Blockcore.Features.MemoryPool.TxMempoolEntry.feeDelta"/>.</summary>
+        </member>
+        <member name="P:Blockcore.Features.MemoryPool.TxMempoolEntry.feeDelta">
+            <summary>
+            Gets the difference between transactions fees.
+            </summary>
+            <remarks>
+            Used for determining the priority of the transaction for mining in a block.
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempoolEntry.GetPriority(System.Int32)">
+            <summary>
+            Gets the priority of the memory pool entry given the current chain height.
+            </summary>
+            <param name="currentHeight">Current chain height.</param>
+            <returns>Transaction priority.</returns>
+            <remarks>
+            Fast calculation of lower bound of current priority as update
+            from entry priority. Only inputs that were originally in-chain will age.
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempoolEntry.GetTxSize">
+            <summary>
+            Gets the transaction size. See <see cref="M:Blockcore.Consensus.TransactionInfo.Transaction.GetVirtualSize(System.Int32)"/>.
+            </summary>
+            <returns>The transaction size.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempoolEntry.DynamicMemoryUsage">
+            <summary>
+            Gets the dynamic memory usage in bytes.
+            </summary>
+            <returns>The dynamic memory usage value.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempoolEntry.UpdateDescendantState(System.Int64,Blockcore.NBitcoin.Money,System.Int64)">
+            <summary>
+            Adjusts the descendant state, if this entry is not dirty.
+            </summary>
+            <param name="modifySize">Amount to add to the decendant size of this entry.</param>
+            <param name="modifyFee">Amount to add to the total of the decendants modify fees for this entry.</param>
+            <param name="modifyCount">Count of transactions to add to the total count of descendant transactions for this entry.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempoolEntry.UpdateAncestorState(System.Int64,Blockcore.NBitcoin.Money,System.Int64,System.Int64)">
+            <summary>
+            Adjusts the ancestor state.
+            </summary>
+            <param name="modifySize">Amount to add to the ancestor size of this entry.</param>
+            <param name="modifyFee">Amount to add to the total of the ancestor modify fees for this entry.</param>
+            <param name="modifyCount">Count of transactions to add to the total count of ancestor transactions for this entry.</param>
+            <param name="modifySigOps">Cost to add to the total signature operators cost for all ancestor transactions for this entry.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempoolEntry.UpdateFeeDelta(System.Int64)">
+            <summary>
+            Updates the fee delta used for mining priority score, and the
+            modified fees with descendants.
+            </summary>
+            <param name="newFeeDelta">New fee delta to use.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempoolEntry.UpdateLockPoints(Blockcore.Features.MemoryPool.LockPoints)">
+            <summary>
+            Update the <see cref="P:Blockcore.Features.MemoryPool.TxMempoolEntry.LockPoints"/> after a reorg.
+            </summary>
+            <param name="lp">New lockpoints.</param>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempoolEntry.ToString">
+            <summary>
+            String representation of the memory pool entry.
+            Prepends the transaction hash for this entry to the string.
+            </summary>
+            <returns>The string representation of the memory pool entry.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempoolEntry.CompareTo(System.Object)">
+            <summary>
+            Default comparator for comparing this object to another TxMemPoolEntry object.
+            </summary>
+            <param name="other">Memory pool entry to compare to.</param>
+            <returns>Result of comparison function.</returns>
+        </member>
+        <member name="M:Blockcore.Features.MemoryPool.TxMempoolEntry.CompareFees``1(``0,``0)">
+            <summary>
+            Used to compare fees on objects supporting the IComparable and ITxMempoolFees interfaces.
+            </summary>
+            <typeparam name="T">A type that supports the IComparable and ITxMempoolFees interfaces.</typeparam>
+            <param name="a">The first object to compare.</param>
+            <param name="b">The second object to compare.</param>
+            <returns>Returns -1 if a less than b, 0 if a equals b, and 1 if a greater than b.</returns>
+        </member>
+    </members>
+</doc>

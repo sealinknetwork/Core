@@ -1,0 +1,115 @@
+﻿@page "/setting"
+
+@using Blockcore.Utilities.Extensions
+@using Blockcore.Networks
+@using Blockcore.Consensus.Chain
+
+@inject IFullNode FullNode
+@inject Network Network
+@inject ChainIndexer ChainIndexer
+@inject Blockcore.Connection.IConnectionManager ConnectionManager
+@inject Blockcore.Interfaces.IInitialBlockDownloadState InitialBlockDownloadState
+@inject NavigationManager NavigationManager
+
+@{
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1 class="h2"><strong>Setting</strong></h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <span class="float-right">
+
+            </span>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-xl-12 col-sm-12 ">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Nod Setting</h5>
+                </div>
+                <div class="card-body">
+                    <div class="custom-control custom-checkbox" >
+                        @{
+                            if (FullNode.Ntype == NodeType.Mining || FullNode.Ntype == NodeType.Full)
+                            {
+                                <input type="checkbox" checked="checked" @onchange="ToggleNavMenu1" class="custom-control-input" id="customCheck1">
+                            }
+                            else
+                            {
+                                <input type="checkbox" @onchange="ToggleNavMenu1" class="custom-control-input" id="customCheck1">
+                            }
+                            <label class="custom-control-label" for="customCheck1">Enable Mining</label>
+                        }
+                    </div>
+                    <div class="custom-control custom-checkbox">
+                        @{
+                            if (FullNode.Ntype == NodeType.Smart || FullNode.Ntype == NodeType.Full)
+                            {
+                                <input type="checkbox" checked="checked" @onchange="ToggleNavMenu2" class="custom-control-input" id="customCheck2">
+                            }
+                            else
+                            {
+                                <input type="checkbox" @onchange="ToggleNavMenu2" class="custom-control-input" id="customCheck2">
+                            }
+                        }
+                        <label class="custom-control-label" for="customCheck2">Enable SmartNode (Need 50,000 SLK)</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code{
+
+    private void ToggleNavMenu1()
+    {
+        if (FullNode.Ntype == NodeType.Full)
+        {
+            FullNode.Ntype = NodeType.Smart;
+        }
+        else if (FullNode.Ntype == NodeType.Smart)
+        {
+            FullNode.Ntype = NodeType.Full;
+        }
+        else if (FullNode.Ntype == NodeType.Mining)
+        {
+            FullNode.Ntype = NodeType.Wallet;
+        }
+        else
+        {
+            FullNode.Ntype = NodeType.Mining;
+        }
+        var path = AppDomain.CurrentDomain.BaseDirectory + "cfg.ini";
+        using(System.IO.StreamWriter sw=new System.IO.StreamWriter(path))
+        {
+            sw.Write(FullNode.Ntype);
+        }
+        NavigationManager.NavigateTo("setting", true, true);
+    }
+    private void ToggleNavMenu2()
+    {
+        if (FullNode.Ntype == NodeType.Full)
+        {
+            FullNode.Ntype = NodeType.Mining;
+        }
+        else if (FullNode.Ntype == NodeType.Mining)
+        {
+            FullNode.Ntype = NodeType.Full;
+        }
+        else if (FullNode.Ntype == NodeType.Smart)
+        {
+            FullNode.Ntype = NodeType.Wallet;
+        }
+        else
+        {
+            FullNode.Ntype = NodeType.Smart;
+        }
+        var path = AppDomain.CurrentDomain.BaseDirectory + "cfg.ini";
+        using (System.IO.StreamWriter sw = new System.IO.StreamWriter(path))
+        {
+            sw.Write(FullNode.Ntype);
+        }
+        NavigationManager.NavigateTo("setting", true, true);
+    }
+}

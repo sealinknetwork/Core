@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Blockcore.Networks.Bitcoin</name>
+    </assembly>
+    <members>
+        <member name="F:Blockcore.Networks.Bitcoin.BitcoinMain.BitcoinMaxTimeOffsetSeconds">
+            <summary> Bitcoin maximal value for the calculated time offset. If the value is over this limit, the time syncing feature will be switched off. </summary>
+        </member>
+        <member name="F:Blockcore.Networks.Bitcoin.BitcoinMain.BitcoinDefaultMaxTipAgeInSeconds">
+            <summary> Bitcoin default value for the maximum tip age in seconds to consider the node in initial block download (24 hours). </summary>
+        </member>
+        <member name="F:Blockcore.Networks.Bitcoin.BitcoinMain.BitcoinRootFolderName">
+            <summary> The name of the root folder containing the different Bitcoin blockchains (Main, TestNet, RegTest). </summary>
+        </member>
+        <member name="F:Blockcore.Networks.Bitcoin.BitcoinMain.BitcoinDefaultConfigFilename">
+            <summary> The default name used for the Bitcoin configuration file. </summary>
+        </member>
+        <member name="T:Blockcore.Networks.Bitcoin.Deployments.BitcoinBIP9Deployments">
+            <summary>
+            BIP9 deployments for the Bitcoin network.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.Bitcoin.Deployments.BitcoinBIP9Deployments.#ctor">
+            <summary>
+            Constructs the BIP9 deployments array.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.Bitcoin.Deployments.BitcoinBIP9Deployments.GetFlags(System.Int32)">
+            <summary>
+            Gets the deployment flags to set when the deployment activates.
+            </summary>
+            <param name="deployment">The deployment number.</param>
+            <returns>The deployment flags.</returns>
+        </member>
+        <member name="T:Blockcore.Networks.Bitcoin.Policies.BitcoinStandardScriptsRegistry">
+            <summary>
+            Bitcoin-specific standard transaction definitions.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Networks.Bitcoin.Rules.BitcoinActivationRule">
+            <summary>
+            Check that a <see cref="T:Blockcore.Networks.Bitcoin.BitcoinMain" /> network block has the correct version according to the defined active deployments.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.Bitcoin.Rules.BitcoinActivationRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadVersion">Thrown if block's version is outdated.</exception>
+        </member>
+        <member name="T:Blockcore.Networks.Bitcoin.Rules.BitcoinHeaderVersionRule">
+            <summary>
+            Checks if <see cref="T:Blockcore.Networks.Bitcoin.BitcoinMain"/> network block's header has a valid block version.
+            <seealso cref="T:Blockcore.Networks.Bitcoin.Rules.BitcoinActivationRule" />
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.Bitcoin.Rules.BitcoinHeaderVersionRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>

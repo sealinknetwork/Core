@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Blockcore.Networks.Impleum</name>
+    </assembly>
+    <members>
+        <member name="T:Blockcore.Networks.Impleum.Deployments.ImpleumBIP9Deployments">
+            <summary>
+            BIP9 deployments for the Blockcore sample coin network.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.Impleum.Deployments.ImpleumBIP9Deployments.#ctor">
+            <summary>
+            Constructs the BIP9 deployments array.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.Impleum.Deployments.ImpleumBIP9Deployments.GetFlags(System.Int32)">
+            <summary>
+            Gets the deployment flags to set when the deployment activates.
+            </summary>
+            <param name="deployment">The deployment number.</param>
+            <returns>The deployment flags.</returns>
+        </member>
+        <member name="F:Blockcore.Networks.Impleum.ImpleumSetup.CoinType">
+            <summary>
+            ImpleumX cointype. For Impleum it was 769
+            </summary>
+        </member>
+        <member name="T:Blockcore.Networks.Impleum.Policies.ImpleumStandardScriptsRegistry">
+            <summary>
+            Blockcore sample coin-specific standard transaction definitions.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Networks.Impleum.Rules.ImpleumHeaderVersionRule">
+            <summary>
+            Checks if <see cref="T:Blockcore.Networks.Impleum.ImpleumMain"/> network block's header has a valid block version.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.Impleum.Rules.ImpleumHeaderVersionRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadVersion">Thrown if block's version is outdated or otherwise invalid.</exception>
+        </member>
+    </members>
+</doc>

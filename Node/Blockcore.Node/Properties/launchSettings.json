@@ -1,0 +1,47 @@
+{
+  "profiles": {
+    "SLK (MAIN)": {
+      "commandName": "Project"
+    },
+    "SLK (TEST)": {
+      "commandName": "Project",
+      "commandLineArgs": "-testnet"
+    },
+    "SLK (MAIN/RPC/WS)": {
+      "commandName": "Project",
+      "commandLineArgs": "-server -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcpassword=rpcpassword -rpcuser=rpcuser -enableWS=true -full"
+    },
+    "SLK (TEST/RPC)": {
+      "commandName": "Project",
+      "commandLineArgs": "-server -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcpassword=rpcpassword -rpcuser=rpcuser -testnet"
+    },
+    "SLK (TEST/RPC/WS)": {
+      "commandName": "Project",
+      "commandLineArgs": "-server -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcpassword=rpcpassword -rpcuser=rpcuser -testnet -enableWS=true"
+    },
+    "SLK (MAIN/LOCAL/RPC)": {
+      "commandName": "Project",
+      "commandLineArgs": "-server -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcpassword=rpcpassword -rpcuser=rpcuser -datadir=nodedata"
+    },
+    "SLK (TEST/LOCAL/RPC)": {
+      "commandName": "Project",
+      "commandLineArgs": "-server -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcpassword=rpcpassword -rpcuser=rpcuser -datadir=nodedata -testnet"
+    },
+    "SLK (MAIN/LOCAL/RPC/DEFAULT)": {
+      "commandName": "Project",
+      "commandLineArgs": "-server -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcpassword=rpcpassword -rpcuser=rpcuser -datadir=nodedata -defaultwalletname=default -defaultwalletpassword=default -unlockdefaultwallet -server"
+    },
+    "SLK (TEST/LOCAL/RPC/DEFAULT)": {
+      "commandName": "Project",
+      "commandLineArgs": "-server -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcpassword=rpcpassword -rpcuser=rpcuser -datadir=nodedata -defaultwalletname=default -defaultwalletpassword=default -unlockdefaultwallet -server -testnet"
+    },
+    "SLK (TEST/LOCAL/API/WS/RPC/DEFAULT)": {
+      "commandName": "Project",
+      "commandLineArgs": "-server -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcpassword=rpcpassword -rpcuser=rpcuser -datadir=nodedata -defaultwalletname=default -defaultwalletpassword=default -unlockdefaultwallet -server -testnet -enableUI=true -enableAPI=true -enableWS=true"
+    },
+    "SLK (TEST/NO ASSUME VALID)": {
+      "commandName": "Project",
+      "commandLineArgs": "-testnet -assumevalid=0 -checkpoints=false"
+    }
+  }
+}

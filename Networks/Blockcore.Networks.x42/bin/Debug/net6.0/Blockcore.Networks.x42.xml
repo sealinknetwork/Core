@@ -1,0 +1,187 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Blockcore.Networks.x42</name>
+    </assembly>
+    <members>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.CoinbaseMaturity">
+            <summary>
+            How many blocks should be on top of a block that includes a coinbase transaction until its outputs are considered spendable.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.PremineReward">
+            <summary>
+            Amount of coins mined when a new network is bootstrapped.
+            Set to <see cref="P:Blockcore.NBitcoin.Money.Zero"/> when there is no premine.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.PremineHeight">
+            <summary>
+            The height of the block in which the pre-mined coins should be.
+            Set to 0 when there is no premine.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.ProofOfWorkReward">
+            <summary>
+            The reward that goes to the miner when a block is mined using proof-of-work.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.ProofOfStakeReward">
+            <summary>
+            The reward that goes to the miner when a block is mined using proof-of-stake.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.MaxReorgLength">
+            <summary>
+            Maximal length of reorganization that the node is willing to accept, or 0 to disable long reorganization protection.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.MaxMoney">
+            <summary>
+            The maximum amount of coins in any transaction.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.TargetSpacing">
+            <summary>Expected (or target) block time in seconds.</summary>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.PosNoRetargeting">
+            <summary>
+            If <c>true</c> disables checking the next block's difficulty (work required) target on a Proof-Of-Stake network.
+            <para>
+            This can be used in tests to enable fast mining of blocks.
+            </para>
+            </summary>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.PowNoRetargeting">
+            <summary>
+            If <c>true</c> disables checking the next block's difficulty (work required) target on a Proof-Of-Work network.
+            <para>
+            This can be used in tests to enable fast mining of blocks.
+            </para>
+            </summary>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.MinimumChainWork">
+            <summary> The minimum amount of work the best chain should have. </summary>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.CoinType">
+            <summary>
+            Specify the BIP44 coin type for this network.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.LastPOWBlock">
+            <summary>PoW blocks are not accepted after block with height <see cref="!:Consensus.LastPOWBlock"/>.</summary>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.PosEmptyCoinbase">
+            <summary>
+            This flag will restrict the coinbase in a POS network to be empty.
+            For legacy POS the coinbase is required to be empty.
+            </summary>
+            <remarks>
+            Some implementations will put extra data in the coinbase (for example the witness commitment)
+            To allow such data to be in the coinbase we use this flag, a POS network that already has that limitation will use the coinbase input instead.
+            </remarks>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.PosUseTimeFieldInKernalHash">
+            <summary>
+            POSv4 emits the time field from the pos kernal calculations.
+            </summary>
+            <remarks>
+            POSv3 uses a few fields to create enough randomness so that the kernal cannot be guessed in advance.
+            The time field of the utxo that found the stake is one of those parameters.
+            However POSv4 removes the time form the kernal hash, the prevout utxo provides enough randomness.
+            </remarks>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.ProofOfStakeTimestampMask">
+            <summary>A mask for coinstake transaction's timestamp and header's timestamp.</summary>
+            <remarks>Used to decrease granularity of timestamp. Supposed to be 2^n-1.</remarks>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.IsProofOfStake">
+            <summary>
+            An indicator whether this is a Proof Of Stake network.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.DefaultAssumeValid">
+            <summary>The default hash to use for assuming valid blocks.</summary>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.ConsensusFactory">
+            <summary>
+            A factory that enables overloading base types.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.ConsensusRules">
+            <summary>Group of rules that define a given network.</summary>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.MempoolRules">
+            <summary>Group of mempool validation rules used by the given network.</summary>
+        </member>
+        <member name="P:Blockcore.Networks.x42.Networks.Consensus.x42Consensus.LastProofOfStakeRewardHeight">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Networks.x42.Networks.Consensus.x42PosConsensusOptions.GetStakeMinConfirmations(System.Int32,Blockcore.Networks.Network)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Networks.x42.Networks.Consensus.Rules.x42OpReturnFeeMempoolRule">
+            <summary>
+            Verify the OP_RETURN fee.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Networks.x42.Networks.Deployments.x42BIP9Deployments">
+            <summary>
+            BIP9 deployments for the Blockcore sample coin network.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.x42.Networks.Deployments.x42BIP9Deployments.#ctor">
+            <summary>
+            Constructs the BIP9 deployments array.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.x42.Networks.Deployments.x42BIP9Deployments.GetFlags(System.Int32)">
+            <summary>
+            Gets the deployment flags to set when the deployment activates.
+            </summary>
+            <param name="deployment">The deployment number.</param>
+            <returns>The deployment flags.</returns>
+        </member>
+        <member name="T:Blockcore.Networks.x42.Networks.Policies.x42StandardScriptsRegistry">
+            <summary>
+            x42 coin-specific standard transaction definitions.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Networks.x42.Networks.Rules.x42HeaderVersionRule">
+            <summary>
+            Checks if <see cref="T:Blockcore.Networks.x42.Networks.x42Main"/> network block's header has a valid block version.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.x42.Networks.Rules.x42HeaderVersionRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadVersion">Thrown if block's version is outdated or otherwise invalid.</exception>
+        </member>
+        <member name="M:Blockcore.Networks.x42.Networks.Rules.x42PosCoinviewRule.GetProofOfWorkReward(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Networks.x42.Networks.Rules.x42PosCoinviewRule.GetProofOfStakeReward(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Networks.x42.Networks.Rules.x42PosCoinviewRule.IsPastSubsidyLimit(System.Int32)">
+            <summary>
+            Determines whether the block with specified height is past the Subsidy Limit.
+            </summary>
+            <param name="height">Block's height.</param>
+            <returns><c>true</c> if the block with provided height is past the Subsidy Limit, <c>false</c> otherwise.</returns>
+        </member>
+        <member name="M:Blockcore.Networks.x42.Networks.Rules.x42PosCoinviewRule.IsPastLastPOWBlock(System.Int32)">
+            <summary>
+            Determines whether the block with specified height is past the Subsidy Limit.
+            </summary>
+            <param name="height">Block's height.</param>
+            <returns><c>true</c> if the block with provided height is past the Subsidy Limit, <c>false</c> otherwise.</returns>
+        </member>
+        <member name="M:Blockcore.Networks.x42.Networks.Rules.x42PosCoinviewRule.IsAtOrBeforeEndOfProofOfStakeReward(System.Int32)">
+            <summary>
+            Determines whether the block with specified height is past the Subsidy Limit.
+            </summary>
+            <param name="height">Block's height.</param>
+            <returns><c>true</c> if the block with provided height is before last proof of stake reward, <c>false</c> otherwise.</returns>
+        </member>
+    </members>
+</doc>

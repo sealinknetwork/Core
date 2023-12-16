@@ -1,0 +1,1436 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Blockcore.Features.Miner</name>
+    </assembly>
+    <members>
+        <member name="T:Blockcore.Features.Miner.Api.Controllers.MiningController">
+            <summary>
+            API controller for calls related to PoW mining and PoS minting.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Controllers.MiningController.Generate(Blockcore.Features.Miner.Api.Models.MiningRequest)">
+            <summary>
+            Tries to mine one or more blocks.
+            </summary>
+            <param name="request">Number of blocks to mine.</param>
+            <returns>List of block header hashes of newly mined blocks.</returns>
+            <remarks>It is possible that less than the required number of blocks will be mined because the generating function only
+            tries all possible header nonces values.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Controllers.MiningController.StopMining(System.Boolean)">
+            <summary>
+            Stop mining.
+            </summary>
+            <param name="corsProtection">This body parameter is here to prevent a CORS call from triggering method execution.</param>
+            <remarks>
+            <seealso cref="!:https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#Simple_requests"/>
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Controllers.MiningController.GetAccount">
+            <summary>
+            Finds first available wallet and its account.
+            </summary>
+            <returns>Reference to wallet account.</returns>
+        </member>
+        <member name="T:Blockcore.Features.Miner.Api.Controllers.MiningRpcController">
+            <summary>
+            RPC controller for calls related to PoW mining and PoS minting.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Api.Controllers.MiningRpcController.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Api.Controllers.MiningRpcController.powMining">
+            <summary>PoW miner.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Api.Controllers.MiningRpcController.fullNode">
+            <summary>Full node.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Api.Controllers.MiningRpcController.walletManager">
+            <summary>Wallet manager.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Controllers.MiningRpcController.#ctor(Blockcore.Features.Miner.Interfaces.IPowMining,Blockcore.IFullNode,Microsoft.Extensions.Logging.ILoggerFactory,Blockcore.Features.Wallet.Interfaces.IWalletManager)">
+            <summary>
+            Initializes a new instance of the object.
+            </summary>
+            <param name="powMining">PoW miner.</param>
+            <param name="fullNode">Full node to offer mining RPC.</param>
+            <param name="loggerFactory">Factory to be used to create logger for the node.</param>
+            <param name="walletManager">The wallet manager.</param>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Controllers.MiningRpcController.Generate(System.Int32)">
+            <summary>
+            Tries to mine one or more blocks.
+            </summary>
+            <param name="blockCount">Number of blocks to mine.</param>
+            <returns>List of block header hashes of newly mined blocks.</returns>
+            <remarks>It is possible that less than the required number of blocks will be mined because the generating function only
+            tries all possible header nonces values.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Controllers.MiningRpcController.GenerateToAddress(System.Int32,System.String)">
+            <summary>
+            Tries to mine one or more blocks, with their resulting rewards being assigned to a given addess scriptPubKey.
+            </summary>
+            <param name="blockCount">Number of blocks to mine.</param>
+            /// <param name="address">The address that block rewards should be assigned to, in base58 format.</param>
+            <returns>List of block header hashes of newly mined blocks.</returns>
+            <remarks>It is possible that less than the required number of blocks will be mined because the generating function only
+            tries all possible header nonces values.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Controllers.MiningRpcController.GetAccount">
+            <summary>
+            Finds first available wallet and its account.
+            </summary>
+            <returns>Reference to wallet account.</returns>
+        </member>
+        <member name="T:Blockcore.Features.Miner.Api.Controllers.StakingController">
+            <summary>
+            Controller providing operations on mining feature.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Api.Controllers.StakingController.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Api.Controllers.StakingController.posMinting">
+            <summary>PoS staker.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Api.Controllers.StakingController.fullNode">
+            <summary>Full Node.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Api.Controllers.StakingController.walletManager">
+            <summary>The wallet manager.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Controllers.StakingController.#ctor(Blockcore.IFullNode,Microsoft.Extensions.Logging.ILoggerFactory,Blockcore.Features.Wallet.Interfaces.IWalletManager,Blockcore.Features.Miner.MinerSettings,Blockcore.Features.Miner.Interfaces.IPosMinting)">
+            <summary>
+            Initializes a new instance of the object.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Controllers.StakingController.GetStakingInfo">
+            <summary>
+            Get staking info from the miner.
+            </summary>
+            <returns>All staking info details as per the GetStakingInfoModel.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Controllers.StakingController.GetNetworkStakingInfo">
+            <summary>
+            Get staking info from the miner.
+            </summary>
+            <returns>All staking info details as per the GetStakingInfoModel.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Controllers.StakingController.StartStaking(Blockcore.Features.Miner.Api.Models.StartStakingRequest)">
+            <summary>
+            Start staking.
+            </summary>
+            <param name="request">The name and password of the wallet to stake.</param>
+            <returns>An <see cref="T:Microsoft.AspNetCore.Mvc.OkResult"/> object that produces a status code 200 HTTP response.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Controllers.StakingController.StopStaking(System.Boolean)">
+            <summary>
+            Stop staking.
+            </summary>
+            <param name="corsProtection">This body parameter is here to prevent a CORS call from triggering method execution.</param>
+            <remarks>
+            <seealso cref="!:https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#Simple_requests"/>
+            </remarks>
+            <returns>An <see cref="T:Microsoft.AspNetCore.Mvc.OkResult"/> object that produces a status code 200 HTTP response.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Controllers.StakingController.StakingExpiry(Blockcore.Features.Miner.Api.Models.StakingExpiryRequest)">
+            <summary>
+            Set expiration for an address for staking, this only allowed if <see cref="P:Blockcore.Features.Miner.MinerSettings.EnforceStakingFlag"/> is true.
+            </summary>
+            <returns>An <see cref="T:Microsoft.AspNetCore.Mvc.OkResult"/> object that produces a status code 200 HTTP response.</returns>
+        </member>
+        <member name="T:Blockcore.Features.Miner.Api.Controllers.StakingRpcController">
+            <summary>
+            RPC controller for calls related to PoS minting.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Api.Controllers.StakingRpcController.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Api.Controllers.StakingRpcController.posMinting">
+            <summary>PoS staker.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Api.Controllers.StakingRpcController.fullNode">
+            <summary>Full node.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Api.Controllers.StakingRpcController.walletManager">
+            <summary>Wallet manager.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Controllers.StakingRpcController.#ctor(Blockcore.IFullNode,Microsoft.Extensions.Logging.ILoggerFactory,Blockcore.Features.Wallet.Interfaces.IWalletManager,Blockcore.Features.Miner.Interfaces.IPosMinting)">
+            <summary>
+            Initializes a new instance of the object.
+            </summary>
+            <param name="fullNode">Full node to offer mining RPC.</param>
+            <param name="loggerFactory">Factory to be used to create logger for the node.</param>
+            <param name="walletManager">The wallet manager.</param>
+            <param name="posMinting">PoS staker or null if PoS staking is not enabled.</param>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Controllers.StakingRpcController.StopStaking">
+            <summary>
+            Stops staking.
+            </summary>
+            <returns><c>true</c></returns>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Controllers.StakingRpcController.StartStaking(System.String,System.String)">
+            <summary>
+            Starts staking a wallet.
+            </summary>
+            <param name="walletName">The name of the wallet.</param>
+            <param name="walletPassword">The password of the wallet.</param>
+            <returns><c>true</c></returns>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Controllers.StakingRpcController.GetStakingInfo(System.Boolean)">
+            <summary>
+            Implements "getstakinginfo" RPC call.
+            </summary>
+            <param name="isJsonFormat">Indicates whether to provide data in JSON or binary format.</param>
+            <returns>Staking information RPC response.</returns>
+        </member>
+        <member name="T:Blockcore.Features.Miner.Api.Models.GenerateBlocksModel">
+            <summary>
+            Represents a list of blocks generated through mining, as an API return object.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.GenerateBlocksModel.Blocks">
+            <summary>
+            The list of blocks mined.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.Miner.Api.Models.GetNetworkStakingInfoModel">
+            <summary>
+            Data structure returned by RPC command "getstakinginfo".
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.GetNetworkStakingInfoModel.Difficulty">
+            <summary>Target difficulty that the next block must meet.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.GetNetworkStakingInfoModel.NetStakeWeight">
+            <summary>Estimation of the total staking weight of all nodes on the network.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.RedeemScriptExpiryItem.RedeemScript">
+            <summary>
+            A script that is used for P2SH and P2WSH scenarios (mostly used for staking).
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.RedeemScriptExpiryItem.StakingExpiry">
+            <summary>
+            Specify whether UTXOs associated with this address is within the allowed staking time.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.Miner.Api.Models.GetStakingInfoModel">
+            <summary>
+            Data structure returned by RPC command "getstakinginfo".
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.GetStakingInfoModel.Enabled">
+            <summary><c>true</c> if the staking is enabled.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.GetStakingInfoModel.Staking">
+            <summary><c>true</c> if the node is currently staking.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.GetStakingInfoModel.Errors">
+            <summary>Last recorded warning message related to staking.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.GetStakingInfoModel.CurrentBlockSize">
+            <summary>Size of the next block the node wants to mine in bytes.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.GetStakingInfoModel.CurrentBlockTx">
+            <summary>Number of transactions the node wants to put in the next block.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.GetStakingInfoModel.PooledTx">
+            <summary>Number of transactions in the memory pool.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.GetStakingInfoModel.Difficulty">
+            <summary>Target difficulty that the next block must meet.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.GetStakingInfoModel.SearchInterval">
+            <summary>Length of the last staking search interval in seconds.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.GetStakingInfoModel.Weight">
+            <summary>Staking weight of the node.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.GetStakingInfoModel.NetStakeWeight">
+            <summary>Estimation of the total staking weight of all nodes on the network.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.GetStakingInfoModel.Immature">
+            <summary>The amount in the wallet which is not suitable for staking due to having insufficient confirmations.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.GetStakingInfoModel.ExpectedTime">
+            <summary>Expected time of the node to find new block in seconds.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Models.GetStakingInfoModel.Clone">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Models.GetStakingInfoModel.PauseStaking">
+            <summary>
+            Reset Weight and ExpectedTime values and set Staking to false.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Models.GetStakingInfoModel.ResumeStaking(System.Int64,System.Int64)">
+            <summary>
+            Resume staking. Set staking to true.
+            </summary>
+            <param name="weight">Weight</param>
+            <param name="expectedTime">Expected time</param>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Models.GetStakingInfoModel.StopStaking">
+            <summary>
+            Reset all values to default.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.Miner.Api.Models.RequestModel">
+            <summary>
+            Base model for requests.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Api.Models.RequestModel.ToString">
+            <summary>
+            Creates a JSON serialized object.
+            </summary>
+            <returns>A JSON serialized object.</returns>
+        </member>
+        <member name="T:Blockcore.Features.Miner.Api.Models.StartStakingRequest">
+            <summary>
+            Model for the "startstaking" request.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.StartStakingRequest.Password">
+            <summary>
+            The wallet password.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.StartStakingRequest.Name">
+            <summary>
+            The wallet name.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.Miner.Api.Models.MiningRequest">
+            <summary>
+            Model for the "generate" mining request.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.MiningRequest.BlockCount">
+            <summary>
+            Number of blocks to mine.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.Miner.Api.Models.StakingExpiryRequest">
+            <summary>
+            Model for the staking request.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.StakingExpiryRequest.WalletName">
+            <summary>
+            Name of wallet.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.StakingExpiryRequest.Address">
+            <summary>
+            Address to change.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.StakingExpiryRequest.StakingExpiry">
+            <summary>
+            Specify whether UTXOs associated with this address is within the allowed staing time, null will disable staking. 
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Api.Models.StakingNotExpiredRequest.WalletName">
+            <summary>
+            Name of wallet.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.Miner.BlockDefinition">
+            <summary>
+            A high level class that will allow the ability to override or inject functionality based on what type of block creation logic is used.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.BlockDefinition.ChainTip">
+            <summary>
+            Tip of the chain that this instance will work with without touching any shared chain resources.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.BlockDefinition.ConsensusManager">
+            <summary>Manager of the longest fully validated chain of blocks.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.BlockDefinition.DateTimeProvider">
+            <summary>Provider of date time functions.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.BlockDefinition.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.BlockDefinition.Mempool">
+            <summary>Transaction memory pool for managing transactions in the memory pool.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.BlockDefinition.MempoolLock">
+            <summary>Lock for memory pool access.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.BlockDefinition.Network">
+            <summary>The current network.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.BlockDefinition.Options">
+            <summary>Assembler options specific to the assembler e.g. <see cref="P:Blockcore.Features.Miner.BlockDefinitionOptions.BlockMaxSize"/>.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.BlockDefinition.MaxConsecutiveAddTransactionFailures">
+            <summary>
+            Limit the number of attempts to add transactions to the block when it is
+            close to full; this is just a simple heuristic to finish quickly if the
+            mempool has a lot of entries.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.BlockDefinition.LastBlockTx">
+            <summary>
+            Unconfirmed transactions in the memory pool often depend on other
+            transactions in the memory pool. When we select transactions from the
+            pool, we select by highest fee rate of a transaction combined with all
+            its ancestors.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.BlockDefinition.BlockTemplate">
+            <summary>
+            The constructed block template.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.BlockDefinition.block">
+            <summary>
+            A convenience pointer that always refers to the <see cref="T:Blockcore.Consensus.BlockInfo.Block"/> in <see cref="F:Blockcore.Features.Miner.BlockDefinition.BlockTemplate"/>.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.BlockDefinition.IncludeWitness">
+            <summary>
+            Configuration parameters for the block size.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.BlockDefinition.BlockWeight">
+            <summary>
+            Information on the current status of the block.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.BlockDefinition.height">
+            <summary>
+            Chain context for the block.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockDefinition.ComputeBlockVersion">
+            <summary>
+            Compute the block version.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockDefinition.CreateCoinbase">
+            <summary>
+            Create coinbase transaction.
+            Set the coin base with zero money.
+            Once we have the fee we can update the amount.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockDefinition.Configure">
+            <summary>
+            Configures (resets) the builder to its default state
+            before constructing a new block.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockDefinition.OnBuild(Blockcore.Consensus.Chain.ChainedHeader,Blockcore.Consensus.ScriptInfo.Script)">
+            <summary>
+            Constructs a block template which will be passed to consensus.
+            </summary>
+            <param name="chainTip">Tip of the chain that this instance will work with without touching any shared chain resources.</param>
+            <param name="scriptPubKey">Script that explains what conditions must be met to claim ownership of a coin.</param>
+            <returns>The contructed <see cref="T:Blockcore.Mining.BlockTemplate"/>.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockDefinition.AddOrUpdateCoinbaseCommitmentToBlock(Blockcore.Consensus.BlockInfo.Block)">
+            <summary>
+            Adds the coinbase commitment to the coinbase transaction according to  https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki.
+            </summary>
+            <param name="block">The new block that is being mined.</param>
+            <seealso cref="!:https://github.com/bitcoin/bitcoin/blob/master/src/validation.cpp"/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockDefinition.AddToBlock(Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <summary>
+            Network specific logic to add a transaction to the block from a given mempool entry.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockDefinition.AddTransactionToBlock(Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Adds a transaction to the block and updates the <see cref="F:Blockcore.Features.Miner.BlockDefinition.BlockSize"/> and <see cref="F:Blockcore.Features.Miner.BlockDefinition.BlockTx"/> values.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockDefinition.UpdateBlockStatistics(Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <summary>
+            Updates block statistics from the given mempool entry.
+            <para>The block's <see cref="F:Blockcore.Features.Miner.BlockDefinition.BlockSigOpsCost"/> and <see cref="F:Blockcore.Features.Miner.BlockDefinition.BlockWeight"/> values are adjusted.
+            </para>
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockDefinition.UpdateTotalFees(Blockcore.NBitcoin.Money)">
+            <summary>
+            Updates the total fee amount for this block.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockDefinition.AddTransactions(System.Int32@,System.Int32@)">
+            <summary>
+            Method for how to add transactions to a block.
+            Add transactions based on feerate including unconfirmed ancestors
+            Increments nPackagesSelected / nDescendantsUpdated with corresponding
+            statistics from the package selection (for logging statistics).
+            This transaction selection algorithm orders the mempool based
+            on feerate of a transaction including all unconfirmed ancestors.
+            Since we don't remove transactions from the mempool as we select them
+            for block inclusion, we need an alternate method of updating the feerate
+            of a transaction with its not-yet-selected ancestors as we go.
+            This is accomplished by walking the in-mempool descendants of selected
+            transactions and storing a temporary modified state in mapModifiedTxs.
+            Each time through the loop, we compare the best transaction in
+            mapModifiedTxs with the next transaction in the mempool to decide what
+            transaction package to work on next.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockDefinition.OnlyUnconfirmed(Blockcore.Features.MemoryPool.TxMempool.SetEntries)">
+            <summary>
+            Remove confirmed <see cref="F:Blockcore.Features.Miner.BlockDefinition.inBlock"/> entries from given set.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockDefinition.TestPackage(Blockcore.Features.MemoryPool.TxMempoolEntry,System.Int64,System.Int64)">
+            <summary>
+            Test if a new package would "fit" in the block.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockDefinition.TestPackageTransactions(Blockcore.Features.MemoryPool.TxMempool.SetEntries)">
+            <summary>
+            Perform transaction-level checks before adding to block.
+            <para>
+            <list>
+            <item>Transaction finality (locktime).</item>
+            <item>Premature witness (in case segwit transactions are added to mempool before segwit activation).</item>
+            <item>serialized size (in case -blockmaxsize is in use).</item>
+            </list>
+            </para>
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockDefinition.UpdatePackagesForAdded(Blockcore.Features.MemoryPool.TxMempool.SetEntries,System.Collections.Generic.Dictionary{Blockcore.NBitcoin.uint256,Blockcore.Features.Miner.TxMemPoolModifiedEntry})">
+            <summary>
+            Add descendants of given transactions to mapModifiedTx with ancestor
+            state updated assuming given transactions are inBlock. Returns number
+            of updated descendants.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockDefinition.Build(Blockcore.Consensus.Chain.ChainedHeader,Blockcore.Consensus.ScriptInfo.Script)">
+            <summary>Network specific logic specific as to how the block will be built.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockDefinition.UpdateBaseHeaders">
+            <summary>Update the block's header information.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockDefinition.UpdateHeaders">
+            <summary>Network specific logic specific as to how the block's header will be set.</summary>
+        </member>
+        <member name="T:Blockcore.Features.Miner.BlockDefinitionOptions">
+            <summary>
+            Semi- immutable settings to be used by <see cref="T:Blockcore.Features.Miner.BlockDefinition"/>.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.BlockDefinitionOptions.MinBlockSize">
+            <summary>Minimum block size in bytes. Could be set per network in future.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.BlockDefinitionOptions.BlockMaxWeight">
+            <summary>Maximum block weight (in weight units) for the blocks created by miner.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.BlockDefinitionOptions.BlockMaxSize">
+            <summary>Maximum block size (in bytes) for the blocks created by miner.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.BlockDefinitionOptions.BlockMinFeeRate">
+            <summary>Minimum fee rate for transactions to be included in blocks created by miner.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockDefinitionOptions.RestrictForNetwork(Blockcore.Networks.Network)">
+            <summary>
+            Restrict the options to within those allowed by network consensus rules.
+            If set values are outside those allowed by consensus, set to nearest allowed value (minimum or maximum).
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.Miner.BlockProvider">
+            <inheritdoc/>
+        </member>
+        <member name="F:Blockcore.Features.Miner.BlockProvider.powBlockDefinition">
+            <summary>Defines how proof of work blocks are built.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.BlockProvider.posBlockDefinition">
+            <summary>Defines how proof of stake blocks are built.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.BlockProvider.posPowBlockDefinition">
+            <summary>Defines how proof of work blocks are built on a Proof-of-Stake network.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockProvider.#ctor(Blockcore.Networks.Network,System.Collections.Generic.IEnumerable{Blockcore.Features.Miner.BlockDefinition})">
+            <param name="definitions">A list of block definitions that the builder can utilize.</param>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockProvider.BuildPosBlock(Blockcore.Consensus.Chain.ChainedHeader,Blockcore.Consensus.ScriptInfo.Script)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockProvider.BuildPowBlock(Blockcore.Consensus.Chain.ChainedHeader,Blockcore.Consensus.ScriptInfo.Script)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.BlockProvider.BlockModified(Blockcore.Consensus.Chain.ChainedHeader,Blockcore.Consensus.BlockInfo.Block)">
+            <inheritdoc/>
+        </member>
+        <member name="T:Blockcore.Features.Miner.Broadcasters.StakingBroadcaster">
+            <summary>
+            Broadcasts current staking information to Web Socket clients
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.Miner.Comparers.CompareModifiedEntry">
+            <summary>
+            This matches the calculation in CompareTxMemPoolEntryByAncestorFee,
+            except operating on CTxMemPoolModifiedEntry.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.Miner.Comparers.CompareTxIterByAncestorCount">
+            <summary>
+            A comparator that sorts transactions based on number of ancestors.
+            <para>
+            This is sufficient to sort an ancestor package in an order that is valid
+            to appear in a block.
+            </para>
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.Miner.Interfaces.IPosMinting">
+            <summary>
+            <see cref="T:Blockcore.Features.Miner.Staking.PosMinting"/> is used in order to generate new blocks. It involves a sort of lottery, similar to proof-of-work,
+            but the chances of winning this lottery is proportional to how many coins you are staking, not on hashing power.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Interfaces.IPosMinting.CreateCoinstakeAsync(System.Collections.Generic.List{Blockcore.Features.Miner.Staking.UtxoStakeDescription},Blockcore.Mining.BlockTemplate,Blockcore.Consensus.Chain.ChainedHeader,System.Int64,System.Int64,Blockcore.Features.Miner.Staking.CoinstakeContext)">
+            <summary>
+            Creates a coinstake transaction with kernel that satisfies POS staking target.
+            </summary>
+            <param name="utxoStakeDescriptions">List of UTXOs that are available in the wallet for staking.</param>
+            <param name="blockTemplate">Template of the block that we are trying to stake.</param>
+            <param name="chainTip">Tip of the best chain.</param>
+            <param name="searchInterval">Length of an unexplored block time space in seconds. It only makes sense to look for a solution within this interval.</param>
+            <param name="fees">Transaction fees from the transactions included in the block if we stake it.</param>
+            <param name="coinstakeContext">Information about coinstake transaction and its private key that is to be filled when the kernel is found.</param>
+            <returns><c>true</c> if the function succeeds, <c>false</c> otherwise.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Interfaces.IPosMinting.GenerateBlocksAsync(Blockcore.Features.Miner.Staking.WalletSecret,System.Threading.CancellationToken)">
+            <summary>
+            Attempts to stake new blocks in a loop.
+            <para>
+            Staking is attempted only if the node is fully synchronized and connected to the network.
+            </para>
+            </summary>
+            <param name="walletSecret">Credentials to the wallet with which will be used for staking.</param>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Interfaces.IPosMinting.GetDifficulty(Blockcore.Consensus.Chain.ChainedHeader)">
+            <summary>
+            Calculates staking difficulty for a specific block.
+            </summary>
+            <param name="block">Block at which to calculate the difficulty.</param>
+            <returns>Staking difficulty.</returns>
+            <remarks>
+            The actual idea behind the calculation is a mystery. It was simply ported from
+            <see cref="!:https://github.com/stratisproject/stratisX/blob/47851b7337f528f52ec20e86dca7dcead8191cf5/src/rpcblockchain.cpp#L16"/>.
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Interfaces.IPosMinting.GetGetStakingInfoModel">
+            <summary>
+            Constructs model for RPC "getstakinginfo" call.
+            </summary>
+            <returns>Staking information RPC response.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Interfaces.IPosMinting.GetMatureBalanceAsync(System.Collections.Generic.List{Blockcore.Features.Miner.Staking.UtxoStakeDescription})">
+            <summary>
+            Calculates the total balance from all UTXOs in the wallet that are mature.
+            </summary>
+            <param name="utxoStakeDescriptions">Description of coins in the wallet that will be used for staking.</param>
+            <returns>Total balance from all UTXOs in the wallet that are mature, and the total immature balance.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Interfaces.IPosMinting.GetNetworkWeight">
+            <summary>
+            Estimates the total staking weight of the network.
+            </summary>
+            <returns>Estimated amount of money that is used by all stakers on the network.</returns>
+            <remarks>
+            The idea behind estimating the network staking weight is very similar to estimating
+            the total hash power of PoW network. The difficulty retarget algorithm tries to make
+            sure of certain distribution of the blocks over a period of time. Base on real distribution
+            and using the actual difficulty targets, one is able to compute how much stake was
+            presented on the network to generate each block.
+            <para>
+            The method was ported from
+            <see cref="!:https://github.com/stratisproject/stratisX/blob/47851b7337f528f52ec20e86dca7dcead8191cf5/src/rpcblockchain.cpp#L74"/>.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Interfaces.IPosMinting.Stake(Blockcore.Features.Miner.Staking.WalletSecret)">
+            <summary>
+            Starts the main POS staking loop.
+            </summary>
+            <param name="walletSecret">Credentials to the wallet with which will be used for staking.</param>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Interfaces.IPosMinting.StopStake">
+            <summary>
+            Stop the main POS staking loop.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Interfaces.IPowMining.GenerateBlocks(Blockcore.Features.Miner.ReserveScript,System.UInt64,System.UInt64)">
+            <summary>
+            Generates up to a specified number of blocks with a limited number of attempts.
+            </summary>
+            <param name="reserveScript">The reserve script.</param>
+            <param name="generate">Number of blocks to generate. It is possible that less than the required number of blocks will be mined.</param>
+            <param name="maxTries">Maximum number of attempts the miner will calculate PoW hash in order to find suitable ones to generate specified amount of blocks.</param>
+            <returns>List with generated block's hashes</returns>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Interfaces.IPowMining.IncrementExtraNonce(Blockcore.Consensus.BlockInfo.Block,Blockcore.Consensus.Chain.ChainedHeader,System.Int32)">
+            <summary>
+            Increments or resets the extra nonce based on the previous hash block value on on the pow miner and the passed nExtraNonce.       
+            </summary>
+            <param name="pblock">The template block.</param>
+            <param name="pindexPrev">The previous chained block.</param>
+            <param name="nExtraNonce">The extra nonce counter.</param>
+            <returns>The new extra nonce after incrementing.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Interfaces.IPowMining.Mine(Blockcore.Consensus.ScriptInfo.Script)">
+            <summary>
+            Starts a new async mining loop or returns the existing running mining loop.
+            </summary>
+            <param name="reserveScript">The reserve script to use in the mining loop.</param>
+            <returns>The running async loop.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Interfaces.IPowMining.StopMining">
+            <summary>
+            Stops the async mining loop.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.Miner.MinerSettings">
+            <summary>
+            Configuration related to the miner interface.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.MinerSettings.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.MinerSettings.Stake">
+            <summary>
+            Enable the node to stake.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.MinerSettings.EnableCoinStakeSplitting">
+            <summary>
+            Enable splitting coins when staking.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.MinerSettings.MinimumStakingCoinValue">
+            <summary>
+            Minimum value a coin has to be in order to be considered for staking.
+            </summary>
+            <remarks>
+            This can be used to save on CPU consumption by excluding small coins that would not significantly impact a wallet's staking power.
+            </remarks>
+        </member>
+        <member name="P:Blockcore.Features.Miner.MinerSettings.MinimumSplitCoinValue">
+            <summary>
+            Targeted minimum value of staking coins after splitting.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.MinerSettings.Mine">
+            <summary>
+            Enable the node to mine.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.MinerSettings.EnforceStakingFlag">
+            <summary>
+            If true this will only allow staking coins that have been flagged.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.MinerSettings.MineAddress">
+            <summary>
+            An address to use when mining, if not specified and address from the wallet will be used.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.MinerSettings.WalletPassword">
+            <summary>
+            The wallet password needed when staking to sign blocks.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.MinerSettings.WalletName">
+            <summary>
+            The wallet name to select outputs to stake.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.MinerSettings.BlockDefinitionOptions">
+            <summary>
+            Settings for <see cref="T:Blockcore.Features.Miner.BlockDefinition"/>.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.MinerSettings.#ctor(Blockcore.Configuration.NodeSettings)">
+            <summary>
+            Initializes an instance of the object from the node configuration.
+            </summary>
+            <param name="nodeSettings">The node configuration.</param>
+        </member>
+        <member name="M:Blockcore.Features.Miner.MinerSettings.PrintHelp(Blockcore.Networks.Network)">
+            <summary>
+            Displays mining help information on the console.
+            </summary>
+            <param name="network">Not used.</param>
+        </member>
+        <member name="M:Blockcore.Features.Miner.MinerSettings.BuildDefaultConfigurationFile(System.Text.StringBuilder,Blockcore.Networks.Network)">
+            <summary>
+            Get the default configuration.
+            </summary>
+            <param name="builder">The string builder to add the settings to.</param>
+            <param name="network">The network to base the defaults off.</param>
+        </member>
+        <member name="T:Blockcore.Features.Miner.MiningFeature">
+            <summary>
+            Provides an ability to mine or stake.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.MiningFeature.network">
+            <summary>Specification of the network the node runs on - regtest/testnet/mainnet.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.MiningFeature.minerSettings">
+            <summary>Settings relevant to mining or staking.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.MiningFeature.nodeSettings">
+            <summary>Settings relevant to node.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.MiningFeature.powMining">
+            <summary>POW miner.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.MiningFeature.posMinting">
+            <summary>POS staker.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.MiningFeature.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.MiningFeature.timeSyncBehaviorState">
+            <summary>State of time synchronization feature that stores collected data samples.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.MiningFeature.PrintHelp(Blockcore.Networks.Network)">
+            <summary>
+            Prints command-line help.
+            </summary>
+            <param name="network">The network to extract values from.</param>
+        </member>
+        <member name="M:Blockcore.Features.Miner.MiningFeature.BuildDefaultConfigurationFile(System.Text.StringBuilder,Blockcore.Networks.Network)">
+            <summary>
+            Get the default configuration.
+            </summary>
+            <param name="builder">The string builder to add the settings to.</param>
+            <param name="network">The network to base the defaults off.</param>
+        </member>
+        <member name="M:Blockcore.Features.Miner.MiningFeature.StartStaking(System.String,System.String)">
+            <summary>
+            Starts staking a wallet.
+            </summary>
+            <param name="walletName">The name of the wallet.</param>
+            <param name="walletPassword">The password of the wallet.</param>
+        </member>
+        <member name="M:Blockcore.Features.Miner.MiningFeature.StopStaking">
+            <summary>
+            Stop a staking wallet.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.MiningFeature.StopMining">
+            <summary>
+            Stop a Proof of Work miner.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.MiningFeature.InitializeAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Miner.MiningFeature.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.Miner.MiningFeature.ValidateDependencies(Blockcore.Builder.IFullNodeServiceProvider)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.Miner.FullNodeBuilderMiningExtension">
+            <summary>
+            A class providing extension methods for <see cref="T:Blockcore.Builder.IFullNodeBuilder"/>.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.FullNodeBuilderMiningExtension.AddMining(Blockcore.Builder.IFullNodeBuilder)">
+            <summary>
+            Adds a mining feature to the node being initialized.
+            </summary>
+            <param name="fullNodeBuilder">The object used to build the current node.</param>
+            <returns>The full node builder, enriched with the new component.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Miner.FullNodeBuilderMiningExtension.AddPowPosMining(Blockcore.Builder.IFullNodeBuilder)">
+            <summary>
+            Adds POW and POS miner components to the node, so that it can mine or stake.
+            </summary>
+            <param name="fullNodeBuilder">The object used to build the current node.</param>
+            <returns>The full node builder, enriched with the new component.</returns>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PosBlockDefinition.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PosBlockDefinition.stakeChain">
+            <summary>Database of stake related data for the current blockchain.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PosBlockDefinition.stakeValidator">
+            <summary>Provides functionality for checking validity of PoS blocks.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PosBlockDefinition.futureDriftRule">
+            <summary>
+            The POS rule to determine the allowed drift in time between nodes.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.PosBlockDefinition.AddToBlock(Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.PosBlockDefinition.Build(Blockcore.Consensus.Chain.ChainedHeader,Blockcore.Consensus.ScriptInfo.Script)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.PosBlockDefinition.UpdateHeaders">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.PosBlockDefinition.TestPackage(Blockcore.Features.MemoryPool.TxMempoolEntry,System.Int64,System.Int64)">
+            <inheritdoc/>
+        </member>
+        <member name="T:Blockcore.Features.Miner.PosPowBlockDefinition">
+            <summary>
+            Defines how a proof of work block will be built on a proof of stake network.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PosPowBlockDefinition.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PosPowBlockDefinition.stakeChain">
+            <summary>Database of stake related data for the current blockchain.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PosPowBlockDefinition.stakeValidator">
+            <summary>Provides functionality for checking validity of PoS blocks.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PosPowBlockDefinition.futureDriftRule">
+            <summary>
+            The POS rule to determine the allowed drift in time between nodes.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.PosPowBlockDefinition.AddToBlock(Blockcore.Features.MemoryPool.TxMempoolEntry)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.PosPowBlockDefinition.Build(Blockcore.Consensus.Chain.ChainedHeader,Blockcore.Consensus.ScriptInfo.Script)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.PosPowBlockDefinition.UpdateHeaders">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.PosPowBlockDefinition.TestPackage(Blockcore.Features.MemoryPool.TxMempoolEntry,System.Int64,System.Int64)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.PowBlockDefinition.Build(Blockcore.Consensus.Chain.ChainedHeader,Blockcore.Consensus.ScriptInfo.Script)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.PowBlockDefinition.UpdateHeaders">
+            <inheritdoc/>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PowMining.asyncProvider">
+            <summary>Factory for creating background async loop tasks.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PowMining.blockProvider">
+            <summary>Builder that creates a proof-of-work block template.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PowMining.chainIndexer">
+            <summary>Thread safe chain of block headers from genesis.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PowMining.consensusManager">
+            <summary>Manager of the longest fully validated chain of blocks.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PowMining.dateTimeProvider">
+            <summary>Provider of time functions.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PowMining.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PowMining.loggerFactory">
+            <summary>Factory for creating loggers.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PowMining.mempool">
+            <summary>Transaction memory pool for managing transactions in the memory pool.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PowMining.mempoolLock">
+            <summary>A lock for managing asynchronous access to memory pool.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PowMining.miningLoop">
+            <summary>The async loop we need to wait upon before we can shut down this feature.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PowMining.network">
+            <summary>Specification of the network the node runs on - regtest/testnet/mainnet.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PowMining.nodeLifetime">
+            <summary>Global application life cycle control - triggers when application shuts down.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.PowMining.miningCancellationTokenSource">
+            <summary>
+            A cancellation token source that can cancel the mining processes and is linked to the <see cref="P:Blockcore.Utilities.INodeLifetime.ApplicationStopping"/>.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.PowMining.Mine(Blockcore.Consensus.ScriptInfo.Script)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.PowMining.StopMining">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.PowMining.GenerateBlocks(Blockcore.Features.Miner.ReserveScript,System.UInt64,System.UInt64)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.PowMining.ConsensusIsAtTip(Blockcore.Features.Miner.PowMining.MineBlockContext)">
+            <summary>
+            Ensures that the node is synced before mining is allowed to start.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.PowMining.BuildBlock(Blockcore.Features.Miner.PowMining.MineBlockContext)">
+            <summary>
+            Creates a proof of work or proof of stake block depending on the network the node is running on.
+            <para>
+            If the node is on a POS network, make sure the POS consensus rules are valid. This is required for
+            generation of blocks inside tests, where it is possible to generate multiple blocks within one second.
+            </para>
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.PowMining.MineBlock(Blockcore.Features.Miner.PowMining.MineBlockContext)">
+            <summary>
+            Executes until the required work (difficulty) has been reached. This is the "mining" process.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.PowMining.ValidateMinedBlock(Blockcore.Features.Miner.PowMining.MineBlockContext)">
+            <summary>
+            Ensures that the block was properly mined by checking the block's work against the next difficulty target.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.PowMining.ValidateAndConnectBlock(Blockcore.Features.Miner.PowMining.MineBlockContext)">
+            <summary>
+            Validate the mined block by passing it to the consensus rule engine.
+            <para>
+            On successful block validation the block will be connected to the chain.
+            </para>
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.Miner.PowMining.MineBlockContext">
+            <summary>
+            Context class that holds information on the current state of the mining process (per block).
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.Miner.Staking.CoinstakeContext">
+            <summary>
+            Information about coinstake transaction and its private key.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Staking.CoinstakeContext.CoinstakeTx">
+            <summary>Coinstake transaction being constructed.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Staking.CoinstakeContext.Key">
+            <summary>If the function succeeds, this is filled with private key for signing the coinstake kernel.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Staking.CoinstakeContext.StakeTimeSlot">
+            <summary>The time slot that stake was found.</summary>
+        </member>
+        <member name="T:Blockcore.Features.Miner.Staking.CoinstakeWorkerContext">
+            <summary>
+            Information needed by the coinstake worker for finding the kernel.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Staking.CoinstakeWorkerContext.Index">
+            <summary>Worker's ID / index number.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Staking.CoinstakeWorkerContext.Logger">
+            <summary>Logger with worker's prefix.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Staking.CoinstakeWorkerContext.utxoStakeDescriptions">
+            <summary>List of UTXO descriptions that the worker should check.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Staking.CoinstakeWorkerContext.CoinstakeContext">
+            <summary>Information related to coinstake transaction.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Staking.CoinstakeWorkerContext.Result">
+            <summary>Result shared by all workers. A structure that determines the kernel founder and the kernel UTXO that satisfies the target difficulty.</summary>
+        </member>
+        <member name="T:Blockcore.Features.Miner.Staking.CoinstakeWorkerResult">
+            <summary>
+            Result of a task of coinstake worker that looks for kernel.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.CoinstakeWorkerResult.KernelNotFound">
+            <summary>Invalid worker index as a sign that kernel was not found.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.CoinstakeWorkerResult.kernelFoundIndex">
+            <summary>Index of the worker that found the index, or <see cref="F:Blockcore.Features.Miner.Staking.CoinstakeWorkerResult.KernelNotFound"/> if no one found the kernel (yet).</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Staking.CoinstakeWorkerResult.KernelFoundIndex">
+            <summary>Index of the worker that found the index, or <see cref="F:Blockcore.Features.Miner.Staking.CoinstakeWorkerResult.KernelNotFound"/> if no one found the kernel (yet).</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Staking.CoinstakeWorkerResult.KernelCoin">
+            <summary>UTXO that satisfied the target difficulty.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Staking.CoinstakeWorkerResult.#ctor">
+            <summary>
+            Initializes an instance of the object.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Staking.CoinstakeWorkerResult.SetKernelFoundIndex(System.Int32)">
+            <summary>
+            Sets the founder of the kernel in thread-safe manner.
+            </summary>
+            <param name="WorkerIndex">Worker's index to set as the founder of the kernel.</param>
+            <returns><c>true</c> if the worker's index was set as the kernel founder, <c>false</c> if another worker index was set earlier.</returns>
+        </member>
+        <member name="T:Blockcore.Features.Miner.Staking.PosMinting">
+            <summary>
+            <see cref="T:Blockcore.Features.Miner.Staking.PosMinting"/> is used in order to generate new blocks. It involves a sort of lottery, similar to proof-of-work,
+            but the chances of winning this lottery is proportional to how many coins you are staking, not on hashing power.
+            </summary>
+            <remarks>
+            Staking is attempted only if the node is fully synchronized and connected to the network.
+            If not it will wait till node is synced. Only transactions that were confirmed at least
+            <see cref="M:Blockcore.Consensus.PosConsensusOptions.GetStakeMinConfirmations(System.Int32,Blockcore.Networks.Network)"/> blocks ago are eligible for staking.
+            <para>
+            The overall process for "attempting" to mine a PoS block looks like this:
+            <list type="number">
+            <item>Create new block with transactions from mempool.</item>
+            <item>Get UTXOs that can participate in staking (have suitable depth).</item>
+            <item>Split these UTXOs in subsets and create tasks processing each subset to allow for parallel processing.</item>
+            <item>Each of the tasks mentioned above will try to find a solution for proof of stake target. This is done by creating a coinstake
+            transaction with each of the available UTXOs combined with all valid unix timestamps that were not checked.
+            Those timestamps are within a time interval from now to now - searchInterval seconds. Only timestamps that are divisible by
+            <c><see cref="!:BlockHeaderPosContextualRule.StakeTimestampMask"/> + 1</c> are valid candidates (this is done to decrease granularity of timestamps).
+            Search interval is a length of an unexplored block time space in seconds.
+            Task calculates the kernel's hash (kernel is the first input in the coinstake transaction) using the next formula:
+            <c>hash(stakeModifierV2 + stakingCoins.Time + prevout.Hash + prevout.N + transactionTime)</c>.
+            Then it calculates staking target using the next formula: <c>block difficulty * UTXO value</c>.
+            We compare kernel's hash against the staking target, if it's greater then we met the criteria and kernel is found.
+            So the more coins we stake the higher the staking target and so the higher the chance to meet the criteria.</item>
+            <item>In case kernel is found we add a coinstake transaction, sign the block and add it to the chain.</item>
+            </list>
+            </para>
+            <para>
+            Coinstake transaction invalidates previous inputs and spends the inputs to new outputs with the additional stake reward.
+            </para>
+            <para>
+            The purpose of stake modifier is to prevent a UTXO owner from computing future proof-of-stake
+            generated by this UTXO at the time of transaction confirmation. As described above, the stake modifier
+            is included in the hash that must meet the difficulty target. As the stake modifier changes with each block
+            and the new value depends on the kernel, it is hard to predict its value in the future.
+            </para>
+            </remarks>
+        </member>
+        <member name="T:Blockcore.Features.Miner.Staking.PosMinting.CurrentState">
+            <summary>
+            Indicates the current state: idle, staking requested, staking in progress and stop staking requested.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.MaxBlockSize">
+            <summary>The maximum allowed size for a serialized block, in bytes (network rule).</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.MaxBlockSizeGen">
+            <summary>The maximum size for mined blocks.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.blockProvider">
+            <summary>Builder that creates a proof-of-stake block template.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.CoinstakeSplitEnabled">
+            <summary><c>true</c> if coinstake transaction splits the coin and generates extra UTXO
+            to prevent halting chain; <c>false</c> to disable coinstake splitting.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.CoinstakeSplitLimitMultiplier">
+            <summary> If <see cref="F:Blockcore.Features.Miner.Staking.PosMinting.CoinstakeSplitEnabled"/> is set, the coinstake will be split if
+            the number of non-empty UTXOs in the wallet is lower than the required coin age for staking plus 1,
+            multiplied by this value. See <see cref="!:GetSplitStake(int, ChainedHeader)"/>.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.UtxoStakeDescriptionsPerCoinstakeWorker">
+            <summary>Number of UTXO descriptions that a single worker's task will process.</summary>
+            <remarks>To achieve a good level of parallelism, this should be low enough so that CPU threads are used,
+            but high enough to compensate for tasks' overhead.</remarks>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.consensusManager">
+            <summary>Consensus manager class.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.chainIndexer">
+            <summary>Thread safe access to the best chain of block headers (that the node is aware of) from genesis.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.network">
+            <summary>Specification of the network the node runs on - regtest/testnet/mainnet.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.dateTimeProvider">
+            <summary>Provides date time functionality.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.nodeLifetime">
+            <summary>Global application life cycle control - triggers when application shuts down.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.coinView">
+            <summary>Consensus' view of UTXO set.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.stakeChain">
+            <summary>Database of stake related data for the current blockchain.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.stakeValidator">
+            <summary>Provides functionality for checking validity of PoS blocks.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.asyncProvider">
+            <summary>Factory for creating background async loop tasks.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.walletManager">
+            <summary>A manager providing operations on wallets.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.loggerFactory">
+            <summary>Factory for creating loggers.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.stakingLoop">
+            <summary>Loop in which the node attempts to generate new POS blocks by staking coins from its wallet.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.currentState">
+            <summary>A flag that indicates the current state based on the <see cref="T:Blockcore.Features.Miner.Staking.PosMinting.CurrentState"/> enum.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.MinimumStakingCoinValue">
+            <summary>
+            We don't stake coins that are smaller than 0.1 in order to save on CPU as these have a very small chance to be used
+            to generate a block anyway.
+            <seealso cref="!:https://github.com/stratisproject/StratisBitcoinFullNode/issues/1180"/>
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.SplitFactor">
+            <summary>When splitting a big utxo, this is the number of smaller utxos we divide it into.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.MinimumSplitCoinValue">
+            <summary>Minimum value of a split utxo we are aiming for (after splitting it into <see cref="F:Blockcore.Features.Miner.Staking.PosMinting.SplitFactor" /> equal parts).</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.targetReserveBalance">
+            <summary>
+            Target reserved balance that will not participate in staking.
+            It is possible that less than this amount will be reserved.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.minerSleep">
+            <summary>Time in milliseconds between attempts to generate PoS blocks.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.systemTimeOutOfSyncSleep">
+            <summary>Time in milliseconds between attempts to generate PoS blocks, when the system time is out of sync.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.mempoolLock">
+            <summary>A lock for managing asynchronous access to memory pool.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.mempool">
+            <summary>Memory pool of pending transactions.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.ValidStakingTemplates">
+            <summary>Script types that can participate in staking.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.rpcGetStakingInfoModel">
+            <summary>Information about node's staking for RPC "getstakinginfo" command.</summary>
+            <remarks>This object does not need a synchronized access because there is no execution logic
+            that depends on the reported information.</remarks>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.networkWeight">
+            <summary>Estimation of the total staking weight of all nodes on the network.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.lastCoinStakeSearchTime">
+            <summary>
+            Timestamp of the last attempt to search for POS solution.
+            <para>
+            It is used to prevent searching for solutions that were already proved wrong in the past.
+            If there is no new block since last time we searched for the solution, it does not make
+            sense to try timestamps earlier than this value.
+            </para>
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.lastCoinStakeSearchPrevBlockHash">
+            <summary>
+            Hash of the block headers of the block that was at the tip of the chain during our last
+            search for POS solution.
+            <para>
+            It is used to prevent searching for solutions that were already proved wrong in the past.
+            If the tip changes, <see cref="F:Blockcore.Features.Miner.Staking.PosMinting.lastCoinStakeSearchTime"/> is set to the new tip's header hash.
+            </para>
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.stakeCancellationTokenSource">
+            <summary>
+            A cancellation token source that can cancel the staking processes and is linked to the <see cref="P:Blockcore.Utilities.INodeLifetime.ApplicationStopping"/>.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.initialBlockDownloadState">
+            <summary>Provider of IBD state.</summary>
+        </member>
+        <member name="F:Blockcore.Features.Miner.Staking.PosMinting.timeSyncBehaviorState">
+            <summary>State of time synchronization feature that stores collected data samples.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Staking.PosMinting.Stake(Blockcore.Features.Miner.Staking.WalletSecret)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Staking.PosMinting.StopStake">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Staking.PosMinting.GenerateBlocksAsync(Blockcore.Features.Miner.Staking.WalletSecret,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Staking.PosMinting.CheckStakeAsync(Blockcore.Consensus.BlockInfo.Block,Blockcore.Consensus.Chain.ChainedHeader)">
+            <summary>
+            Once a new block is staked, this method is used to verify that it
+            is a valid block and if so, it will add it to the chain.
+            </summary>
+            <param name="block">The new block.</param>
+            <param name="chainTip">Block that was considered as a chain tip when the block staking started.</param>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Staking.PosMinting.StakeAndSignBlockAsync(System.Collections.Generic.List{Blockcore.Features.Miner.Staking.UtxoStakeDescription},Blockcore.Mining.BlockTemplate,Blockcore.Consensus.Chain.ChainedHeader,System.Int64,System.UInt32)">
+            <summary>
+            Attempts to find a POS staking solution and if it succeeds, then it completes a block
+            to be mined and signes it.
+            </summary>
+            <param name="utxoStakeDescriptions">List of UTXOs that are available in the wallet for staking.</param>
+            <param name="blockTemplate">Template of the block that we are trying to mine.</param>
+            <param name="chainTip">Tip of the best chain.</param>
+            <param name="fees">Transaction fees from the transactions included in the block if we mine it.</param>
+            <param name="coinstakeTimestamp">Maximal timestamp of the coinstake transaction. The actual timestamp can be lower, but not higher.</param>
+            <returns><c>true</c> if the function succeeds, <c>false</c> otherwise.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Staking.PosMinting.CreateCoinstakeAsync(System.Collections.Generic.List{Blockcore.Features.Miner.Staking.UtxoStakeDescription},Blockcore.Mining.BlockTemplate,Blockcore.Consensus.Chain.ChainedHeader,System.Int64,System.Int64,Blockcore.Features.Miner.Staking.CoinstakeContext)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Staking.PosMinting.CoinstakeWorker(Blockcore.Features.Miner.Staking.CoinstakeWorkerContext,Blockcore.Consensus.Chain.ChainedHeader,Blockcore.Consensus.BlockInfo.Block,System.Int64,System.Int64)">
+            <summary>
+            Worker method that tries to find coinstake kernel within a small list of UTXOs.
+            <para>
+            There are multiple worker tasks created, each checking subset of all available UTXOs.
+            This allows the kernel finding task to be processed on multiple processors in parallel.
+            </para>
+            </summary>
+            <param name="context">Context information with worker task description. Results of the worker's attempt are also stored in this context.</param>
+            <param name="chainTip">Tip of the best chain. Used only to stop working as soon as the chain advances.</param>
+            <param name="block">Template of the block that we are trying to mine.</param>
+            <param name="minimalAllowedTime">Minimal valid timestamp for new coinstake transaction.</param>
+            <param name="searchInterval">Length of an unexplored block time space in seconds. It only makes sense to look for a solution within this interval.</param>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Staking.PosMinting.SignTransactionInput(Blockcore.Features.Miner.Staking.UtxoStakeDescription,Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Signs input of a transaction.
+            </summary>
+            <param name="input">Transaction input.</param>
+            <param name="transaction">Transaction being built.</param>
+            <returns><c>true</c> if the function succeeds, <c>false</c> otherwise.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Staking.PosMinting.GetMatureBalanceAsync(System.Collections.Generic.List{Blockcore.Features.Miner.Staking.UtxoStakeDescription})">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Staking.PosMinting.GetUtxoStakeDescriptionsSuitableForStakingAsync(System.Collections.Generic.List{Blockcore.Features.Miner.Staking.UtxoStakeDescription},Blockcore.Consensus.Chain.ChainedHeader,System.UInt32,System.Int64)">
+            <summary>
+            Selects UTXOs that are suitable for staking.
+            <para>
+            Such a UTXO has to be confirmed with enough confirmations - i.e. has suitable depth,
+            and it also has to be mature and meet requirement for minimal value.
+            </para>
+            </summary>
+            <param name="utxoStakeDescriptions">List of UTXO descriptions that are candidates for being used for staking.</param>
+            <param name="chainTip">Tip of the best chain.</param>
+            <param name="spendTime">Timestamp of the coinstake transaction.</param>
+            <param name="targetValue">Target money amount of UTXOs that can be used for staking.</param>
+            <returns>List of UTXO descriptions that meet the requirements for staking.</returns>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Staking.PosMinting.GetBlocksCountToMaturityAsync(Blockcore.Features.Miner.Staking.UtxoStakeDescription)">
+            <summary>
+            Calculates the number of blocks until a coinbase or coinstake UTXO is considered mature for staking.
+            </summary>
+            <param name="utxoStakeDescription">The UTXO stake description.</param>
+            <returns>How many blocks are left till UTXO is considered mature for staking.</returns>
+            <remarks>Do NOT use this for general-purpose maturity calculations outside of <see cref="T:Blockcore.Features.Miner.Staking.PosMinting"/> as it will give off-by-one errors.
+            This method is making the assumption that we are adding a new block to the chain, and thus reduces the maturity threshold by 1.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Staking.PosMinting.GetDepthInMainChainAsync(Blockcore.Features.Miner.Staking.UtxoStakeDescription)">
+            <summary>
+            Gets depth of transaction in blockchain.
+            </summary>
+            <param name="utxoStakeDescription">The UTXO stake description.</param>
+            <returns>
+            <c>-1</c> if not in blockchain, and not in memory pool (conflicted transaction).
+            <c>0</c> if in memory pool, waiting to be included in a block.
+            Value greater than <c>1</c> if included in a block. Shows how many blocks deep in the main chain.
+            </returns>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Staking.PosMinting.GetDifficulty(Blockcore.Consensus.Chain.ChainedHeader)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Staking.PosMinting.GetNetworkWeight">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Staking.PosMinting.GetGetStakingInfoModel">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.Miner.Staking.PosMinting.ShouldSplitStake(System.Int32,System.Int64,System.Int64,System.Int32)">
+            <summary>
+            Checks whether the coinstake should be split or not.
+            </summary>
+            <param name="stakedUtxosCount">Number of UTXOs that the wallet could stake, if coin base maturity and stake minimum confirmations were not taken into account.</param>
+            <param name="amountStaked">Total amount currently at stake.</param>
+            <param name="coinValue">Value of the coin we are considering to split.</param>
+            <param name="chainHeight">Current height of the chain.</param>
+            <returns><c>true</c> if the coinstake should be split, <c>false</c> otherwise.</returns>
+            <remarks>
+            We do not split a coin if the value of new coins after the split would be less than <see cref="F:Blockcore.Features.Miner.Staking.PosMinting.MinimumSplitCoinValue" />. Because we split the coin to multiple outputs defined by split factor, we only consider coins with value at least <see cref="F:Blockcore.Features.Miner.Staking.PosMinting.MinimumSplitCoinValue" /> * <see cref="F:Blockcore.Features.Miner.Staking.PosMinting.SplitFactor" />.
+            <para>
+            If the above-mentioned criteria is satisfied, then we split the coin if its value is greater than an expected average value of coins that we would have if we have perfect distribution of the value among all our coins while having a specific number of coins that we aim for. The optimal number of coins we are looking for is calculated based on consensus settings of coin maturity and minimum required coin age for staking.
+            </para>
+            </remarks>
+            <seealso cref="F:Blockcore.Features.Miner.Staking.PosMinting.CoinstakeSplitLimitMultiplier" />
+            <seealso cref="F:Blockcore.Features.Miner.Staking.PosMinting.SplitFactor" />
+        </member>
+        <member name="T:Blockcore.Features.Miner.Staking.UtxoStakeDescription">
+            <summary>
+            Information related to UTXO that is required for staking.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Staking.UtxoStakeDescription.HashBlock">
+            <summary>Block's hash.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Staking.UtxoStakeDescription.TxOut">
+            <summary>UTXO that participates in staking. It's a part of <see cref="P:Blockcore.Features.Miner.Staking.UtxoStakeDescription.UtxoSet"/>.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Staking.UtxoStakeDescription.OutPoint">
+            <summary>Information about transaction id and index.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Staking.UtxoStakeDescription.Address">
+            <summary>Address of the transaction that has spendable coins for staking.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Staking.UtxoStakeDescription.UtxoSet">
+            <summary>Selected outputs of a transaction.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Staking.UtxoStakeDescription.Secret">
+            <summary>Credentials to wallet that contains the private key for the staking UTXO.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Staking.UtxoStakeDescription.Key">
+            <summary>Private key that is needed for spending coins associated with the <see cref="P:Blockcore.Features.Miner.Staking.UtxoStakeDescription.Address"/>.</summary>
+        </member>
+        <member name="T:Blockcore.Features.Miner.Staking.WalletSecret">
+            <summary>
+            Credentials to wallet that contains the private key for the staking UTXO.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Staking.WalletSecret.WalletPassword">
+            <summary>Wallet's password that is needed for getting wallet's private key which is used for signing generated blocks.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.Staking.WalletSecret.WalletName">
+            <summary>Name of the wallet which UTXOs are used for staking.</summary>
+        </member>
+        <member name="T:Blockcore.Features.Miner.TxMemPoolModifiedEntry">
+            <summary>
+            Container for tracking updates to ancestor feerate as we include (parent) transactions in a block.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.TxMemPoolModifiedEntry.SizeWithAncestors">
+            <summary>
+            Gets the size of the transaction with it's ancestors.</summary>
+        </member>
+        <member name="P:Blockcore.Features.Miner.TxMemPoolModifiedEntry.ModFeesWithAncestors">
+            <summary>Gets the total fees of the transaction including it's ancestors.</summary>
+        </member>
+        <member name="M:Blockcore.Features.Miner.TxMemPoolModifiedEntry.CompareTo(System.Object)">
+            <summary>
+            Default comparator for comparing this object to another TxMemPoolModifiedEntry object.
+            </summary>
+            <param name="other">Modified memory pool entry to compare to.</param>
+            <returns>Result of comparison function.</returns>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,34 @@
+{
+  "Version": 1,
+  "Hash": "Us0Yk35+Z5D6L2hkgklKPbtXkloHTxjyimXZ2HdIH2E=",
+  "Source": "Blockcore.Features.ColdStaking",
+  "BasePath": "_content/Blockcore.Features.ColdStaking",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [
+    {
+      "Identity": "C:\\Users\\Administrator\\source\\repos\\blockcore\\src\\Features\\Blockcore.Features.NodeHost\\Blockcore.Features.NodeHost.csproj",
+      "Version": 2,
+      "Source": "Blockcore.Features.NodeHost",
+      "GetPublishAssetsTargets": "ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems",
+      "AdditionalPublishProperties": "Configuration=Release;Platform=AnyCPU",
+      "AdditionalPublishPropertiesToRemove": "TargetFramework;RuntimeIdentifier;SelfContained",
+      "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
+      "AdditionalBuildProperties": "Configuration=Release;Platform=AnyCPU",
+      "AdditionalBuildPropertiesToRemove": "TargetFramework;RuntimeIdentifier;SelfContained"
+    },
+    {
+      "Identity": "C:\\Users\\Administrator\\source\\repos\\blockcore\\src\\Features\\Blockcore.Features.Wallet\\Blockcore.Features.Wallet.csproj",
+      "Version": 2,
+      "Source": "Blockcore.Features.Wallet",
+      "GetPublishAssetsTargets": "ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems",
+      "AdditionalPublishProperties": "Configuration=Release;Platform=AnyCPU",
+      "AdditionalPublishPropertiesToRemove": "TargetFramework;RuntimeIdentifier;SelfContained",
+      "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
+      "AdditionalBuildProperties": "Configuration=Release;Platform=AnyCPU",
+      "AdditionalBuildPropertiesToRemove": "TargetFramework;RuntimeIdentifier;SelfContained"
+    }
+  ],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

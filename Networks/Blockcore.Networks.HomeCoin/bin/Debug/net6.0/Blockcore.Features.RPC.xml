@@ -1,0 +1,1022 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Blockcore.Features.RPC</name>
+    </assembly>
+    <members>
+        <member name="T:Blockcore.Features.RPC.Controllers.FullNodeController">
+            <summary>
+            A <see cref="T:Blockcore.Controllers.FeatureController"/> that implements several RPC methods for the full node.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.Controllers.FullNodeController.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.Controllers.FullNodeController.pooledTransaction">
+            <summary>An interface implementation used to retrieve a transaction.</summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.Controllers.FullNodeController.pooledGetUnspentTransaction">
+            <summary>An interface implementation used to retrieve unspent transactions from a pooled source.</summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.Controllers.FullNodeController.getUnspentTransaction">
+            <summary>An interface implementation used to retrieve unspent transactions.</summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.Controllers.FullNodeController.networkDifficulty">
+            <summary>An interface implementation used to retrieve the network difficulty target.</summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.Controllers.FullNodeController.networkWeight">
+            <summary>An interface implementation used to retrieve the total network weight.</summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.Controllers.FullNodeController.blockStore">
+            <summary>An interface implementation for the blockstore.</summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.Controllers.FullNodeController.ibdState">
+            <summary>A interface implementation for the initial block download state.</summary>
+        </member>
+        <member name="M:Blockcore.Features.RPC.Controllers.FullNodeController.Stop">
+            <summary>
+            Stops the full node.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.RPC.Controllers.FullNodeController.GetRawTransactionAsync(System.String,System.Boolean,System.String)">
+            <summary>
+            Retrieves a transaction given a transaction hash in either simple or verbose form.
+            </summary>
+            <param name="txid">The transaction hash.</param>
+            <param name="verbose">True if verbose model wanted.</param>
+            <param name="blockHash">The hash of the block in which to look for the transaction.</param>
+            <returns>A <see cref="T:Blockcore.Controllers.Models.TransactionBriefModel"/> or <see cref="T:Blockcore.Controllers.Models.TransactionVerboseModel"/> as specified by verbose. <c>null</c> if no transaction matching the hash.</returns>
+            <exception cref="T:System.ArgumentException">Thrown if txid is invalid uint256.</exception>"
+            <remarks>When called with a blockhash argument, getrawtransaction will return the transaction if the specified block is available and the transaction is found in that block.
+            When called without a blockhash argument, getrawtransaction will return the transaction if it is in the mempool, or if -txindex is enabled and the transaction is in a block in the blockchain.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.RPC.Controllers.FullNodeController.DecodeRawTransaction(System.String)">
+            <summary>
+            Decodes a transaction from its raw hexadecimal format.
+            </summary>
+            <param name="hex">The raw transaction hex.</param>
+            <returns>A <see cref="T:Blockcore.Controllers.Models.TransactionVerboseModel"/> or <c>null</c> if the transaction could not be decoded.</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.Controllers.FullNodeController.GetTxOutAsync(System.String,System.UInt32,System.Boolean)">
+            <summary>
+            Implements gettextout RPC call.
+            </summary>
+            <param name="txid">The transaction id.</param>
+            <param name="vout">The vout number.</param>
+            <param name="includeMemPool">Whether to include the mempool.</param>
+            <returns>A <see cref="T:Blockcore.Controllers.Models.GetTxOutModel"/> containing the unspent outputs of the transaction id and vout. <c>null</c> if unspent outputs not found.</returns>
+            <exception cref="T:System.ArgumentException">Thrown if txid is invalid.</exception>"
+        </member>
+        <member name="M:Blockcore.Features.RPC.Controllers.FullNodeController.GetBlockCount">
+            <summary>
+            Implements the getblockcount RPC call.
+            </summary>
+            <returns>The current consensus tip height.</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.Controllers.FullNodeController.GetInfo">
+            <summary>
+            Implements the getinfo RPC call.
+            </summary>
+            <returns>A <see cref="T:Blockcore.Features.RPC.Models.GetInfoModel"/> with information about the full node.</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.Controllers.FullNodeController.GetBlockHeader(System.String,System.Boolean)">
+            <summary>
+            Implements getblockheader RPC call.
+            </summary>
+            <param name="hash">Hash of the block.</param>
+            <param name="isJsonFormat">Indicates whether to provide data in Json or binary format.</param>
+            <returns>The block header rpc format.</returns>
+            <remarks>The binary format is not supported with RPC.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.RPC.Controllers.FullNodeController.ValidateAddress(System.String)">
+            <summary>
+            Returns information about a bitcoin address and it's validity.
+            </summary>
+            <param name="address">The bech32 or base58 <see cref="T:Blockcore.NBitcoin.BitcoinAddress"/> to validate.</param>
+            <returns><see cref="T:Blockcore.Controllers.Models.ValidatedAddress"/> instance containing information about the bitcoin address and it's validity.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if address provided is null or empty.</exception>
+        </member>
+        <member name="M:Blockcore.Features.RPC.Controllers.FullNodeController.GetBlock(System.String,System.Int32)">
+            <summary>
+            RPC method for returning a block.
+            <para>
+            Supports Json format by default, and optionally raw (hex) format by supplying <c>0</c> to <see cref="!:verbosity"/>.
+            </para>
+            </summary>
+            <param name="blockHash">Hash of block to find.</param>
+            <param name="verbosity">Defaults to 1. 0 for hex encoded data, 1 for a json object, and 2 for json object with transaction data.</param>
+            <returns>The block according to format specified in <see cref="!:verbosity"/></returns>
+        </member>
+        <member name="T:Blockcore.Features.RPC.Controllers.RPCController">
+            <summary>
+            Controller providing API operations on the RPC feature.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.Controllers.RPCController.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.Controllers.RPCController.fullNode">
+            <summary>Full Node.</summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.Controllers.RPCController.rpcSettings">
+            <summary>RPC Settings.</summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.Controllers.RPCController.rpcClientFactory">
+            <summary>RPC Client Factory.</summary>
+        </member>
+        <member name="P:Blockcore.Features.RPC.Controllers.RPCController.ActionDescriptors">
+            <summary>ControllerActionDescriptor dictionary.</summary>
+        </member>
+        <member name="M:Blockcore.Features.RPC.Controllers.RPCController.#ctor(Blockcore.IFullNode,Microsoft.Extensions.Logging.ILoggerFactory,Blockcore.Features.RPC.RpcSettings,Blockcore.Features.RPC.IRPCClientFactory,Blockcore.Features.RPC.IRPCFeature)">
+            <summary>
+            Initializes a new instance of the object.
+            </summary>
+            <param name="fullNode">The full node.</param>
+            <param name="loggerFactory">Factory to be used to create logger for the node.</param>
+            <param name="rpcSettings">The RPC Settings of the full node.</param>
+        </member>
+        <member name="M:Blockcore.Features.RPC.Controllers.RPCController.GetActionDescriptors">
+            <summary>
+            Returns the collection of available action descriptors.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.RPC.Controllers.RPCController.SendRPCRequest(Blockcore.Features.RPC.RPCRequest)">
+            <summary>
+            Processes a Remote Procedural Call.
+            </summary>
+            <param name="request">The request to process.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.Controllers.RPCController.CallByName(Newtonsoft.Json.Linq.JObject)">
+            <summary>
+            Makes a Remote Procedural Call method by name.
+            </summary>
+            <param name="body">A JObject containing the name of the method to process.</param>
+            <returns>A JSON result that varies depending on the RPC method.</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.Controllers.RPCController.ListMethods">
+            <summary>
+            Lists the available Remote Procedural Call methods on this node.
+            </summary>
+            <returns>A JSON result that lists the RPC methods.</returns>
+        </member>
+        <member name="T:Blockcore.Features.RPC.IPAddressBlock">
+            <summary>
+            The class of an object representing a block of ip addresses.
+            See https://www.mediawiki.org/wiki/Help:Range_blocks.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.RPC.IPAddressBlock.CIDRSuffix">
+            <summary>The CIDR suffix determines the number of significant bits in the <see cref="P:Blockcore.Features.RPC.IPAddressBlock.BlockAddress"/>.</summary>
+        </member>
+        <member name="P:Blockcore.Features.RPC.IPAddressBlock.BlockAddress">
+            <summary>The block address which is the same as the first ip address in the block.</summary>
+        </member>
+        <member name="P:Blockcore.Features.RPC.IPAddressBlock.CIDRMaxSuffix">
+            <summary>The maximum length of the CIDR suffix.</summary>
+        </member>
+        <member name="M:Blockcore.Features.RPC.IPAddressBlock.#ctor(System.Net.IPAddress,System.Nullable{System.Int32})">
+            <summary>
+            Constructs an object representing a block of ip addresses.
+            </summary>
+            <param name="blockAddress">The block address.</param>
+            <param name="suffix">The suffix determines the number of significant bits of the block address.</param>
+            <exception cref="T:System.FormatException">If the block format is incorrect.</exception>
+        </member>
+        <member name="M:Blockcore.Features.RPC.IPAddressBlock.op_Implicit(System.Net.IPAddress)~Blockcore.Features.RPC.IPAddressBlock">
+            <summary>
+            Allow implicit cast from IPAddress to IPAddressBlock for convenience.
+            </summary>
+            <param name="address">The IPAddress to cast to an IPAddressBlock.</param>
+        </member>
+        <member name="M:Blockcore.Features.RPC.IPAddressBlock.Parse(System.String)">
+            <summary>
+            Parses the string representation of a block of ip addresses and creates a corresponding object.
+            </summary>
+            <param name="value">The string representation of a block of ip addresses.</param>
+            <returns>An object representing a block of ip addresses.</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.IPAddressBlock.Contains(System.Net.IPAddress)">
+             <summary>
+             Determines if the passed ip address occurs in the CIDR range defined by this object.
+             </summary>
+             <param name="address">The ip adddress.</param>
+             <returns><c>True</c> if the ip address occurs in this range and <c>false</c> otherwise.</returns>
+             <remarks>
+             As per https://www.mediawiki.org/wiki/Help:Range_blocks - "Technical Explanation":
+            
+             CIDR notation is written as the IP address, a slash, and the CIDR suffix (for example, the
+             IPv4 "10.2.3.41/24" or IPv6 "a3:bc00::/24").  The CIDR suffix is the number of starting digits
+             every IP address in the range have in common when written in binary.
+            
+             For example: "10.10.1.32" is binary "00001010.00001010.00000001.00100000",  so 10.10.1.32/27
+             will match the first 27 digits("00001010.00001010.00000001.00100000"). The IP addresses
+             10.10.1.32–10.10.1.63, when converted to binary, all have the same 27 first digits and will be blocked
+             if 10.10.1.32 / 27 is blocked.
+             </remarks>
+        </member>
+        <member name="M:Blockcore.Features.RPC.IPAddressBlock.ToString">
+            <summary>
+            Returns the block of ip addresses defined by this object as a string.
+            </summary>
+            <returns>The block of ip addresses defined by this object as a string.</returns>
+        </member>
+        <member name="T:Blockcore.Features.RPC.IRPCClient">
+            <summary>
+            Interface for an RPC client.
+            </summary>
+            <remarks>Extend where necessary.</remarks>
+            <see cref="!:https://en.bitcoin.it/wiki/Original_Bitcoin_client/API_calls_list"/>
+        </member>
+        <member name="M:Blockcore.Features.RPC.IRPCClient.SendCommand(Blockcore.Features.RPC.RPCOperations,System.Object[])">
+            <summary>Send a command over RPC.</summary>
+            <param name="commandName">The command to execute.</param>
+            <param name="parameters">An array of command parameters.</param>
+            <returns>The RPC response.</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.IRPCClient.SendCommand(Blockcore.Features.RPC.RPCRequest,System.Boolean)">
+            <summary>Send a command over RPC.</summary>
+            <param name="request">The rpc request to execute.</param>
+            <param name="throwIfRPCError">A value indicating whether an exception should be thrown when there is an RPC error.</param>
+            <returns>The RPC response.</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.IRPCClient.SendCommand(System.String,System.Object[])">
+            <summary>Send a command over RPC.</summary>
+            <param name="commandName">The command to execute.</param>
+            <param name="parameters">An array of command parameters.</param>
+            <returns>The RPC response.</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.IRPCClient.SendCommandAsync(Blockcore.Features.RPC.RPCOperations,System.Object[])">
+            <summary>Send a command over RPC.</summary>
+            <param name="commandName">The command to execute.</param>
+            <param name="parameters">An array of command parameters.</param>
+            <returns>The RPC response.</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.IRPCClient.SendCommandAsync(Blockcore.Features.RPC.RPCRequest,System.Boolean)">
+            <summary>Send a command over RPC.</summary>
+            <param name="request">The rpc request to execute.</param>
+            <param name="throwIfRPCError">A value indicating whether an exception should be thrown when there is an RPC error.</param>
+            <returns>The RPC response.</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.IRPCClient.SendCommandAsync(System.String,System.Object[])">
+            <summary>Send a command over RPC.</summary>
+            <param name="commandName">The command to execute.</param>
+            <param name="parameters">An array of command parameters.</param>
+            <returns>The RPC response.</returns>
+        </member>
+        <member name="T:Blockcore.Features.RPC.ModelBinders.IntToBoolAttribute">
+            <summary>
+            Marker attribute to force integer conversion to a boolean
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.RPC.Models.RpcCommandModel">
+            <summary>
+            This model defines a list item returned by the RPC API method "listmethods".
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.RPC.RestClient">
+            <summary>
+            Client class for the unauthenticated REST Interface
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RestClient.#ctor(System.Uri,Blockcore.Networks.Network)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Blockcore.Features.RPC.RestClient"/> class.
+            </summary>
+            <param name="address">The rest API endpoint</param>
+            <param name="network">The network to operate with</param>
+            <exception cref="T:System.ArgumentNullException">Null rest API endpoint</exception>
+            <exception cref="T:System.ArgumentException">Invalid value for RestResponseFormat</exception>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RestClient.GetBlockAsync(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Gets the block.
+            </summary>
+            <param name="blockId">The block identifier.</param>
+            <returns>Given a block hash (id) returns the requested block object.</returns>
+            <exception cref="T:System.ArgumentNullException">blockId cannot be null.</exception>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RestClient.GetBlock(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Gets the block.
+            </summary>
+            <param name="blockId">The block identifier.</param>
+            <returns>Given a block hash (id) returns the requested block object.</returns>
+            <exception cref="T:System.ArgumentNullException">blockId cannot be null.</exception>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RestClient.GetTransactionAsync(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Gets a transaction.
+            </summary>
+            <param name="txId">The transaction identifier.</param>
+            <returns>Given a transaction hash (id) returns the requested transaction object.</returns>
+            <exception cref="T:System.ArgumentNullException">txId cannot be null</exception>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RestClient.GetTransaction(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Gets a transaction.
+            </summary>
+            <param name="txId">The transaction identifier.</param>
+            <returns>Given a transaction hash (id) returns the requested transaction object.</returns>
+            <exception cref="T:System.ArgumentNullException">txId cannot be null</exception>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RestClient.GetBlockHeadersAsync(Blockcore.NBitcoin.uint256,System.Int32)">
+            <summary>
+            Gets blocks headers.
+            </summary>
+            <param name="blockId">The initial block identifier.</param>
+            <param name="count">how many headers to get.</param>
+            <returns>Given a block hash (blockId) returns as much block headers as specified.</returns>
+            <exception cref="T:System.ArgumentNullException">blockId cannot be null</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">count must be greater or equal to one.</exception>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RestClient.GetBlockHeaders(Blockcore.NBitcoin.uint256,System.Int32)">
+            <summary>
+            Gets blocks headers.
+            </summary>
+            <param name="blockId">The initial block identifier.</param>
+            <param name="count">how many headers to get.</param>
+            <returns>Given a block hash (blockId) returns as much block headers as specified.</returns>
+            <exception cref="T:System.ArgumentNullException">blockId cannot be null</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">count must be greater or equal to one.</exception>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RestClient.GetChainInfoAsync">
+            <summary>
+            Gets the chain information.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RestClient.GetUnspentOutputsAsync(System.Collections.Generic.IEnumerable{Blockcore.Consensus.TransactionInfo.OutPoint},System.Boolean)">
+            <summary>
+            Gets unspect outputs.
+            </summary>
+            <param name="outPoints">The out points identifiers (TxIn-N).</param>
+            <param name="checkMempool">if set to <c>true</c> [check mempool].</param>
+            <returns>The unspent transaction outputs (UTXO) for the given outPoints.</returns>
+            <exception cref="T:System.ArgumentNullException">outPoints cannot be null.</exception>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RestClient.GetTxOutAsync(Blockcore.NBitcoin.uint256,System.UInt32,System.Boolean)">
+            <summary>
+            Gets an unspent transaction
+            </summary>
+            <param name="txid">The transaction id</param>
+            <param name="vout">The vout of the transaction</param>
+            <param name="includeMemPool">Whether or not to include the mempool</param>
+            <returns>The unspent transaction for the specified transaction and vout</returns>
+        </member>
+        <member name="P:Blockcore.Features.RPC.RPCClient.Capabilities">
+            <summary>
+            The RPC Capabilities of this RPCClient instance, this property will be set by a call to ScanRPCCapabilitiesAsync
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.ScanRPCCapabilitiesAsync">
+            <summary>
+            Run several RPC function to scan the RPC capabilities, then set RPCClient.Capabilities
+            </summary>
+            <returns>The RPCCapabilities</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.ScanRPCCapabilities">
+            <summary>
+            Run several RPC function to scan the RPC capabilities, then set RPCClient.RPCCapabilities
+            </summary>
+            <returns>The RPCCapabilities</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.#ctor(System.String,System.Uri,Blockcore.Networks.Network)">
+            <summary>
+            Create a new RPCClient instance
+            </summary>
+            <param name="authenticationString">username:password or the content of the .cookie file or null to auto configure</param>
+            <param name="address">The address to connect to.</param>
+            <param name="network">The network.</param>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.#ctor(Blockcore.Features.RPC.RpcSettings,System.Uri,Blockcore.Networks.Network)">
+            <summary>
+            Create a new RPCClient instance
+            </summary>
+            <param name="rpcSettings">The RPC settings.</param>
+            <param name="address">The URI to use to connect with.</param>
+            <param name="network">The network.</param>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.GetRPCBlockAsync(Blockcore.NBitcoin.uint256)">
+            <summary>Get the a whole block.</summary>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.SendCommand(System.String,System.Object[])">
+            <summary>Send a command.</summary>
+            <param name="commandName">https://en.bitcoin.it/wiki/Original_Bitcoin_client/API_calls_list</param>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.SendBatch">
+            <summary>Send all commands in one batch.</summary>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.CancelBatch">
+            <summary>Cancel all commands.</summary>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.SendBatchAsync">
+            <summary>Send all commands in one batch.</summary>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.GetBlockAsync(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Get the a whole block
+            </summary>
+            <param name="blockId"></param>
+            <remarks>This method is not compatible with stratisX, which always returns a JSON object no matter what parameters are passed to the second argument.</remarks>
+            <returns></returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.GetBlock(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Get the a whole block
+            </summary>
+            <param name="blockId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.GetTransactions(Blockcore.NBitcoin.uint256)">
+            <summary>
+            GetTransactions only returns on txn which are not entirely spent unless you run bitcoinq with txindex=1.
+            </summary>
+            <param name="blockHash"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.GetRawTransaction(Blockcore.NBitcoin.uint256,Blockcore.NBitcoin.uint256,System.Boolean)">
+            <summary>
+            getrawtransaction only returns on txn which are not entirely spent unless you run bitcoinq with txindex=1.
+            </summary>
+            <param name="txid">The transaction id to retrieve.</param>
+            <param name="blockHash">The optional block hash in which to look.</param>
+            <param name="throwIfNotFound">Whether to throw an exception if not found.</param>
+            <returns>The transaction </returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.ValidateAddress(Blockcore.NBitcoin.BitcoinAddress)">
+            <summary>
+            Returns information about a base58 or bech32 Bitcoin address
+            </summary>
+            <param name="address">a Bitcoin Address</param>
+            <returns>{ IsValid }</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.EstimateFee(System.Int32)">
+            <summary>
+            Get the estimated fee per kb for being confirmed in nblock
+            </summary>
+            <param name="nblock"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.EstimateFeeAsync(System.Int32)">
+            <summary>
+            Get the estimated fee per kb for being confirmed in nblock
+            </summary>
+            <param name="nblock"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.EstimateFeeRate(System.Int32)">
+            <summary>
+            Get the estimated fee per kb for being confirmed in nblock
+            </summary>
+            <param name="nblock">The time expected, in block, before getting confirmed</param>
+            <returns>The estimated fee rate</returns>
+            <exception cref="T:Blockcore.Features.RPC.Exceptions.NoEstimationException">The Fee rate couldn't be estimated because of insufficient data from Bitcoin Core</exception>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.TryEstimateFeeRateAsync(System.Int32)">
+            <summary>
+            Tries to get the estimated fee per kb for being confirmed in nblock
+            </summary>
+            <param name="nblock">The time expected, in block, before getting confirmed</param>
+            <returns>The estimated fee rate or null</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.TryEstimateFeeRate(System.Int32)">
+            <summary>
+            Tries to get the estimated fee per kb for being confirmed in nblock
+            </summary>
+            <param name="nblock">The time expected, in block, before getting confirmed</param>
+            <returns>The estimated fee rate or null</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.EstimateFeeRateAsync(System.Int32)">
+            <summary>
+            Get the estimated fee per kb for being confirmed in nblock
+            </summary>
+            <param name="nblock">The time expected, in block, before getting confirmed</param>
+            <returns>The estimated fee rate</returns>
+            <exception cref="T:Blockcore.Features.RPC.Exceptions.NoEstimationException">when fee couldn't be estimated</exception>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.SendToAddress(Blockcore.NBitcoin.BitcoinAddress,Blockcore.NBitcoin.Money,System.String,System.String,System.Nullable{System.Decimal})">
+            <summary>
+            Requires wallet support. Requires an unlocked wallet or an unencrypted wallet.
+            </summary>
+            <param name="address">A P2PKH or P2SH address to which the bitcoins should be sent</param>
+            <param name="amount">The amount to spend</param>
+            <param name="commentTx">A locally-stored (not broadcast) comment assigned to this transaction. Default is no comment</param>
+            <param name="commentDest">A locally-stored (not broadcast) comment assigned to this transaction. Meant to be used for describing who the payment was sent to. Default is no comment</param>
+            <returns>The TXID of the sent transaction</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.SendToAddressAsync(Blockcore.NBitcoin.BitcoinAddress,Blockcore.NBitcoin.Money,System.String,System.String,System.Nullable{System.Decimal})">
+            <summary>
+            Requires wallet support. Requires an unlocked wallet or an unencrypted wallet.
+            </summary>
+            <param name="address">A P2PKH or P2SH address to which the bitcoins should be sent</param>
+            <param name="amount">The amount to spend</param>
+            <param name="commentTx">A locally-stored (not broadcast) comment assigned to this transaction. Default is no comment</param>
+            <param name="commentDest">A locally-stored (not broadcast) comment assigned to this transaction. Meant to be used for describing who the payment was sent to. Default is no comment</param>
+            <returns>The TXID of the sent transaction</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.GetAddressesByAccount(System.String)">
+            <summary>
+            Returns a list of every address assigned to a particular account.
+            </summary>
+            <param name="account">
+            The name of the account containing the addresses to get. To get addresses from the default account,
+            pass an empty string ("").
+            </param>
+            <returns>
+            A collection of all addresses belonging to the specified account.
+            If the account has no addresses, the collection will be empty.
+            </returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.GetReceivedByAddress(Blockcore.NBitcoin.BitcoinAddress)">
+            <summary>
+            Returns the total amount received by the specified address in transactions with at
+            least one (default) confirmations. It does not count coinbase transactions.
+            </summary>
+            <param name="address">The address whose transactions should be tallied.</param>
+            <returns>The number of bitcoins received by the address, excluding coinbase transactions. May be 0.</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.GetReceivedByAddress(Blockcore.NBitcoin.BitcoinAddress,System.Int32)">
+            <summary>
+            Returns the total amount received by the specified address in transactions with the
+            specified number of confirmations. It does not count coinbase transactions.
+            </summary>
+            <param name="confirmations">
+            The minimum number of confirmations an externally-generated transaction must have before
+            it is counted towards the balance. Transactions generated by this node are counted immediately.
+            Typically, externally-generated transactions are payments to this wallet and transactions
+            generated by this node are payments to other wallets. Use 0 to count unconfirmed transactions.
+            Default is 1.
+            </param>
+            <returns>The number of bitcoins received by the address, excluding coinbase transactions. May be 0.</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.ListAccounts">
+            <summary>
+            Lists accounts and their balances, with the default number of confirmations for balances (1),
+            and not including watch only addresses (default false).
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.ListAccounts(System.Int32)">
+            <summary>
+            Lists accounts and their balances, based on the specified number of confirmations.
+            </summary>
+            <param name="confirmations">
+            The minimum number of confirmations an externally-generated transaction must have before
+            it is counted towards the balance. Transactions generated by this node are counted immediately.
+            Typically, externally-generated transactions are payments to this wallet and transactions
+            generated by this node are payments to other wallets. Use 0 to count unconfirmed transactions.
+            Default is 1.
+            </param>
+            <returns>
+            A list of accounts and their balances.
+            </returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.ListAccounts(System.Int32,System.Boolean)">
+            <summary>
+            Lists accounts and their balances, based on the specified number of confirmations,
+            and including watch only accounts if specified. (Added in Bitcoin Core 0.10.0)
+            </summary>
+            <param name="confirmations">
+            The minimum number of confirmations an externally-generated transaction must have before
+            it is counted towards the balance. Transactions generated by this node are counted immediately.
+            Typically, externally-generated transactions are payments to this wallet and transactions
+            generated by this node are payments to other wallets. Use 0 to count unconfirmed transactions.
+            Default is 1.
+            </param>
+            <param name="includeWatchOnly">
+            If set to true, include watch-only addresses in details and calculations as if they were
+            regular addresses belonging to the wallet. If set to false (the default), treat watch-only
+            addresses as if they didn’t belong to this wallet.
+            </param>
+            <returns>
+            A list of accounts and their balances.
+            </returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.ListUnspent">
+            <summary>
+            Returns an array of unspent transaction outputs belonging to this wallet.
+            </summary>
+            <remarks>
+            <para>
+            Note: as of Bitcoin Core 0.10.0, outputs affecting watch-only addresses will be returned;
+            see the spendable field in the results.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.ListUnspent(System.Int32,System.Int32,Blockcore.NBitcoin.BitcoinAddress[])">
+            <summary>
+            Returns an array of unspent transaction outputs belonging to this wallet,
+            specifying the minimum and maximum number of confirmations to include,
+            and the list of addresses to include.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.ListUnspentAsync">
+            <summary>
+            Returns an array of unspent transaction outputs belonging to this wallet.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.ListUnspentAsync(System.Int32,System.Int32,Blockcore.NBitcoin.BitcoinAddress[])">
+            <summary>
+            Returns an array of unspent transaction outputs belonging to this wallet,
+            specifying the minimum and maximum number of confirmations to include,
+            and the list of addresses to include.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.WalletPassphrase(System.String,System.Int32)">
+            <summary>
+            The walletpassphrase RPC stores the wallet decryption key in memory for the indicated number of seconds.Issuing the walletpassphrase command while the wallet is already unlocked will set a new unlock time that overrides the old one.
+            </summary>
+            <param name="passphrase">The passphrase</param>
+            <param name="timeout">Timeout in seconds</param>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.WalletPassphraseAsync(System.String,System.Int32)">
+            <summary>
+            The walletpassphrase RPC stores the wallet decryption key in memory for the indicated number of seconds.Issuing the walletpassphrase command while the wallet is already unlocked will set a new unlock time that overrides the old one.
+            </summary>
+            <param name="passphrase">The passphrase</param>
+            <param name="timeout">Timeout in seconds</param>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.SignRawTransaction(Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Sign a transaction
+            </summary>
+            <param name="tx">The transaction to be signed</param>
+            <returns>The signed transaction</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClient.SignRawTransactionAsync(Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Sign a transaction
+            </summary>
+            <param name="tx">The transaction to be signed</param>
+            <returns>The signed transaction</returns>
+        </member>
+        <member name="T:Blockcore.Features.RPC.IRPCClientFactory">
+            <summary>
+            An interface for a factory that can create <see cref="T:Blockcore.Features.RPC.IRPCClient"/> instances.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.RPC.IRPCClientFactory.Create(Blockcore.Features.RPC.RpcSettings,System.Uri,Blockcore.Networks.Network)">
+            <summary>
+            Create a new RPCClient instance.
+            </summary>
+            <param name="rpcSettings">The RPC settings.</param>
+            <param name="address">The binding address.</param>
+            <param name="network">The network.</param>
+        </member>
+        <member name="T:Blockcore.Features.RPC.RPCClientFactory">
+            <summary>
+            A factory for creating new instances of an <see cref="T:Blockcore.Features.RPC.RPCClient"/>.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCClientFactory.Create(Blockcore.Features.RPC.RpcSettings,System.Uri,Blockcore.Networks.Network)">
+            <inheritdoc/>
+        </member>
+        <member name="P:Blockcore.Features.RPC.RPCCredentialString.UseDefault">
+            <summary>
+            Use default connection settings of the chain
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.RPC.RPCCredentialString.CookieFile">
+            <summary>
+            Path to cookie file
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.RPC.RPCCredentialString.UserPassword">
+            <summary>
+            Username and password
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.RPC.RPCErrorCode">
+            <summary>
+            RPC error code thrown by the <see cref="T:Blockcore.Features.RPC.RPCClient"/>.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_INVALID_REQUEST">
+            <summary>
+            RPC_INVALID_REQUEST is internally mapped to HTTP_BAD_REQUEST (400).
+            It should not be used for application-layer errors. 
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_METHOD_NOT_FOUND">
+            <summary>
+            RPC_METHOD_NOT_FOUND is internally mapped to HTTP_NOT_FOUND (404).
+            It should not be used for application-layer errors.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_INTERNAL_ERROR">
+            <summary>
+            RPC_INTERNAL_ERROR should only be used for genuine errors in bitcoind
+            (for example datadir corruption).
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_MISC_ERROR">
+            <summary>
+            Exception thrown in command handling.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_FORBIDDEN_BY_SAFE_MODE">
+            <summary>
+            Server is in safe mode, and command is not allowed in safe mode.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_TYPE_ERROR">
+            <summary>
+            Unexpected type was passed as parameter.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_INVALID_ADDRESS_OR_KEY">
+            <summary>
+            Invalid address or key.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_OUT_OF_MEMORY">
+            <summary>
+            Ran out of memory during operation.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_INVALID_PARAMETER">
+            <summary>
+            Invalid, missing or duplicate parameter.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_DATABASE_ERROR">
+            <summary>
+            Database error.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_DESERIALIZATION_ERROR">
+            <summary>
+            Error parsing or validating structure in raw format.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_VERIFY_ERROR">
+            <summary>
+            General error during transaction or block submission.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_VERIFY_REJECTED">
+            <summary>
+            Transaction or block was rejected by network rules.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_VERIFY_ALREADY_IN_CHAIN">
+            <summary>
+            Transaction already in chain.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_IN_WARMUP">
+            <summary>
+            Client still warming up.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_METHOD_DEPRECATED">
+            <summary>
+            RPC method is deprecated.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_CLIENT_NOT_CONNECTED">
+            <summary>
+            Bitcoin is not connected.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_CLIENT_IN_INITIAL_DOWNLOAD">
+            <summary>
+            Still downloading initial blocks.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_CLIENT_NODE_ALREADY_ADDED">
+            <summary>
+            Node is already added.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_CLIENT_NODE_NOT_ADDED">
+            <summary>
+            Node has not been added before.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_CLIENT_NODE_NOT_CONNECTED">
+            <summary>
+            Node to disconnect not found in connected nodes.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_CLIENT_INVALID_IP_OR_SUBNET">
+            <summary>
+            Invalid IP/Subnet.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_CLIENT_P2P_DISABLED">
+            <summary>
+            No valid connection manager instance found.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_WALLET_ERROR">
+            <summary>
+            Unspecified problem with wallet (key not found etc.).
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_WALLET_INSUFFICIENT_FUNDS">
+            <summary>
+            Not enough funds in wallet or account.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_WALLET_INVALID_ACCOUNT_NAME">
+            <summary>
+            Invalid account name.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_WALLET_KEYPOOL_RAN_OUT">
+            <summary>
+            Keypool ran out, call keypoolrefill first.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_WALLET_UNLOCK_NEEDED">
+            <summary>
+            Enter the wallet passphrase with walletpassphrase first.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_WALLET_PASSPHRASE_INCORRECT">
+            <summary>
+            The wallet passphrase entered was incorrect.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_WALLET_WRONG_ENC_STATE">
+            <summary>
+            Command given in wrong wallet encryption state (encrypting an encrypted wallet etc.).
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_WALLET_ENCRYPTION_FAILED">
+            <summary>
+            Failed to encrypt the wallet.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_WALLET_ALREADY_UNLOCKED">
+            <summary>
+            Wallet is already unlocked.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_WALLET_NOT_FOUND">
+            <summary>
+            Invalid wallet specified.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCErrorCode.RPC_WALLET_NOT_SPECIFIED">
+            <summary>
+            No wallet specified (error when there are multiple wallets loaded).
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RPCFeature.NodeHostStopTimeoutSeconds">
+            <summary>How long we are willing to wait for the NodeHost to stop.</summary>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCFeature.PrintHelp(Blockcore.Networks.Network)">
+            <summary>
+            Prints command-line help.
+            </summary>
+            <param name="network">The network to extract values from.</param>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCFeature.BuildDefaultConfigurationFile(System.Text.StringBuilder,Blockcore.Networks.Network)">
+            <summary>
+            Get the default configuration.
+            </summary>
+            <param name="builder">The string builder to add the settings to.</param>
+            <param name="network">The network to base the defaults off.</param>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCFeature.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.RPC.FullNodeBuilderRPCExtension">
+            <summary>
+            A class providing extension methods for <see cref="T:Blockcore.Builder.IFullNodeBuilder"/>.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCJsonMvcOptionsSetup.#ctor(Microsoft.Extensions.Logging.ILoggerFactory,Microsoft.Extensions.Options.IOptions{Microsoft.AspNetCore.Mvc.MvcNewtonsoftJsonOptions},System.Buffers.ArrayPool{System.Char},Microsoft.Extensions.ObjectPool.ObjectPoolProvider)">
+            <summary>
+            Intiailizes a new instance of <see cref="T:Microsoft.AspNetCore.Mvc.Formatters.Json.Internal.MvcJsonMvcOptionsSetup" />.
+            </summary>
+            <param name="loggerFactory">The <see cref="T:Microsoft.Extensions.Logging.ILoggerFactory" />.</param>
+            <param name="jsonOptions"></param>
+            <param name="charPool"></param>
+            <param name="objectPoolProvider"></param>
+        </member>
+        <member name="P:Blockcore.Features.RPC.RPCJsonOutputFormatter.JsonSerializer">
+            <summary>
+            Used during serialization get <see cref="T:Newtonsoft.Json.JsonSerializer" />.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.RPC.RPCJsonOutputFormatter.SerializerSettings">
+            <summary>
+            Gets the <see cref="T:Newtonsoft.Json.JsonSerializerSettings" /> used to configure the <see cref="T:Newtonsoft.Json.JsonSerializer" />.
+            </summary>
+            <remarks>
+            Any modifications to the <see cref="T:Newtonsoft.Json.JsonSerializerSettings" /> object after this
+            <see cref="T:Microsoft.AspNetCore.Mvc.Formatters.JsonOutputFormatter" /> has been used will have no effect.
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCJsonOutputFormatter.#ctor(Newtonsoft.Json.JsonSerializerSettings)">
+            <summary>
+            Initializes a new <see cref="T:Microsoft.AspNetCore.Mvc.Formatters.JsonOutputFormatter" /> instance.
+            </summary>
+            <param name="serializerSettings">
+            The <see cref="T:Newtonsoft.Json.JsonSerializerSettings" />. Should be either the application-wide settings
+            (<see cref="P:Microsoft.AspNetCore.Mvc.MvcJsonOptions.SerializerSettings" />) or an instance
+            <see cref="M:Microsoft.AspNetCore.Mvc.Formatters.JsonSerializerSettingsProvider.CreateSerializerSettings" /> initially returned.
+            </param>        
+            <returns>The <see cref="T:Newtonsoft.Json.JsonSerializer" /> used during serialization and deserialization.</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCJsonOutputFormatter.WriteResponseBodyAsync(Microsoft.AspNetCore.Mvc.Formatters.OutputFormatterWriteContext,System.Text.Encoding)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCMiddleware.InvokeBatchAsync(Microsoft.AspNetCore.Http.HttpContext,Newtonsoft.Json.Linq.JArray)">
+            <summary>
+            Invokes batch request.
+            </summary>
+            <param name="httpContext">Source batch request context.</param>
+            <param name="requests">Array of requests.</param>
+            <returns>Array of response objects.</returns>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RPCMiddleware.InvokeSingleAsync(Microsoft.AspNetCore.Http.HttpContext,Newtonsoft.Json.Linq.JObject)">
+            <summary>
+            Invokes single request.
+            </summary>
+            <param name="httpContext">Source batch request context.</param>
+            <param name="requestObj">Single request object.</param>
+            <returns>Single response objects.</returns>
+        </member>
+        <member name="T:Blockcore.Features.RPC.RpcSettings">
+            <summary>
+            Configuration related to RPC interface.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.RPC.RpcSettings.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="P:Blockcore.Features.RPC.RpcSettings.Server">
+            <summary>Indicates whether the RPC server is being used</summary>
+        </member>
+        <member name="P:Blockcore.Features.RPC.RpcSettings.RpcUser">
+            <summary>User name for RPC authorization.</summary>
+        </member>
+        <member name="P:Blockcore.Features.RPC.RpcSettings.RpcPassword">
+            <summary>Password for RPC authorization.</summary>
+        </member>
+        <member name="P:Blockcore.Features.RPC.RpcSettings.RPCPort">
+            <summary>TCP port for RPC interface.</summary>
+        </member>
+        <member name="P:Blockcore.Features.RPC.RpcSettings.DefaultBindings">
+            <summary>Default bindings from config.</summary>
+        </member>
+        <member name="P:Blockcore.Features.RPC.RpcSettings.Bind">
+            <summary>List of network endpoints that the node will listen and provide RPC on.</summary>
+        </member>
+        <member name="P:Blockcore.Features.RPC.RpcSettings.AllowIp">
+            <summary>List of IP addresses that are allowed to connect to RPC interfaces.</summary>
+        </member>
+        <member name="P:Blockcore.Features.RPC.RpcSettings.RPCContentType">
+            <summary>Can load the RPCContentType with or without charset.</summary>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RpcSettings.#ctor(Blockcore.Configuration.NodeSettings)">
+            <summary>
+            Initializes an instance of the object from the node configuration.
+            </summary>
+            <param name="nodeSettings">The node configuration.</param>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RpcSettings.LoadSettingsFromConfig(Blockcore.Configuration.NodeSettings)">
+            <summary>
+            Loads the rpc settings from the application configuration.
+            </summary>
+            <param name="nodeSettings">Application configuration.</param>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RpcSettings.CheckConfigurationValidity(Microsoft.Extensions.Logging.ILogger)">
+            <summary>
+            Checks the validity of the RPC settings or forces them to be valid.
+            </summary>
+            <param name="logger">Logger to use.</param>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RpcSettings.PrintHelp(Blockcore.Networks.Network)">
+            <summary> Prints the help information on how to configure the rpc settings to the logger.</summary>
+            <param name="network">The network to use.</param>
+        </member>
+        <member name="M:Blockcore.Features.RPC.RpcSettings.GetUrls">
+            <summary>Obtains a list of HTTP URLs to RPC interfaces.</summary>
+            <returns>List of HTTP URLs to RPC interfaces.</returns>
+        </member>
+        <member name="F:Blockcore.Controllers.ConnectionManagerRPCController.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="M:Blockcore.Controllers.ConnectionManagerRPCController.AddNode(System.String,System.String)">
+            <summary>
+            Sends a command to a node.
+            </summary>
+            <param name="endpointStr">The endpoint in string format.</param>
+            <param name="command">The command to run. Three commands are valid: add, remove, and onetry</param>
+            <returns><c>true</c> if successful.</returns>
+            <exception cref="T:System.ArgumentException">Thrown if unsupported command given.</exception>
+        </member>
+        <member name="M:Blockcore.Controllers.ConnectionManagerRPCController.GetPeerInfo">
+            <summary>
+            RPC implementation of "getpeerinfo".
+            </summary>
+            <see cref="!:https://github.com/bitcoin/bitcoin/blob/0.14/src/rpc/net.cpp"/>
+            <returns>List of connected peer nodes as <see cref="T:Blockcore.Connection.PeerNodeModel"/>.</returns>
+        </member>
+    </members>
+</doc>

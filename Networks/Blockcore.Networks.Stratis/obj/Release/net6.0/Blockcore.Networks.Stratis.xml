@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Blockcore.Networks.Stratis</name>
+    </assembly>
+    <members>
+        <member name="T:Blockcore.Networks.Stratis.Deployments.StratisBIP9Deployments">
+            <summary>
+            BIP9 deployments for the Stratis network.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.Stratis.Deployments.StratisBIP9Deployments.#ctor">
+            <summary>
+            Constructs the BIP9 deployments array.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.Stratis.Deployments.StratisBIP9Deployments.GetFlags(System.Int32)">
+            <summary>
+            Gets the deployment flags to set when the deployment activates.
+            </summary>
+            <param name="deployment">The deployment number.</param>
+            <returns>The deployment flags.</returns>
+        </member>
+        <member name="T:Blockcore.Networks.Stratis.Policies.StratisStandardScriptsRegistry">
+            <summary>
+            Stratis-specific standard transaction definitions.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Networks.Stratis.Rules.StratisBugFixPosFutureDriftRule">
+            <summary>
+            A rule that will verify the block time drift is according to the PoS consensus rules for the <see cref="T:Blockcore.Networks.Stratis.StratisMain"/> network (and its test networks).
+            New networks must use the <see cref="T:Blockcore.Features.Consensus.Rules.CommonRules.PosFutureDriftRule"/>.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Networks.Stratis.Rules.StratisBugFixPosFutureDriftRule.DriftingBugFixTimestamp">
+            <summary>Drifting Bug Fix, hardfork on Sat, 19 Nov 2016 00:00:00 GMT.</summary>
+        </member>
+        <member name="F:Blockcore.Networks.Stratis.Rules.StratisBugFixPosFutureDriftRule.BugFutureDriftSeconds">
+            <summary>Old future drift in seconds before the hardfork.</summary>
+        </member>
+        <member name="M:Blockcore.Networks.Stratis.Rules.StratisBugFixPosFutureDriftRule.GetFutureDrift(System.Int64)">
+            <summary>
+            Gets future drift for the provided timestamp.
+            </summary>
+            <remarks>
+            Future drift is maximal allowed block's timestamp difference over adjusted time.
+            If this difference is greater block won't be accepted.
+            </remarks>
+            <param name="time">UNIX timestamp.</param>
+            <returns>Value of the future drift.</returns>
+        </member>
+        <member name="M:Blockcore.Networks.Stratis.Rules.StratisBugFixPosFutureDriftRule.IsDriftReduced(System.Int64)">
+            <summary>
+            Checks whether the future drift should be reduced after provided timestamp.
+            </summary>
+            <param name="time">UNIX timestamp.</param>
+            <returns><c>true</c> if for this timestamp future drift should be reduced, <c>false</c> otherwise.</returns>
+        </member>
+        <member name="T:Blockcore.Networks.Stratis.Rules.StratisHeaderVersionRule">
+            <summary>
+            Checks if <see cref="T:Blockcore.Networks.Stratis.StratisMain"/> network block's header has a valid block version.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.Stratis.Rules.StratisHeaderVersionRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadVersion">Thrown if block's version is outdated or otherwise invalid.</exception>
+        </member>
+        <member name="F:Blockcore.Networks.Stratis.StratisMain.StratisMaxTimeOffsetSeconds">
+            <summary> Stratis maximal value for the calculated time offset. If the value is over this limit, the time syncing feature will be switched off. </summary>
+        </member>
+        <member name="F:Blockcore.Networks.Stratis.StratisMain.StratisDefaultMaxTipAgeInSeconds">
+            <summary> Stratis default value for the maximum tip age in seconds to consider the node in initial block download (2 hours). </summary>
+        </member>
+        <member name="F:Blockcore.Networks.Stratis.StratisMain.StratisRootFolderName">
+            <summary> The name of the root folder containing the different Stratis blockchains (StratisMain, StratisTest, StratisRegTest). </summary>
+        </member>
+        <member name="F:Blockcore.Networks.Stratis.StratisMain.StratisDefaultConfigFilename">
+            <summary> The default name used for the Stratis configuration file. </summary>
+        </member>
+    </members>
+</doc>

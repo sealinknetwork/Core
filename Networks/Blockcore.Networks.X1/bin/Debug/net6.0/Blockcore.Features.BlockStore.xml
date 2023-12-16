@@ -1,0 +1,801 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Blockcore.Features.BlockStore</name>
+    </assembly>
+    <members>
+        <member name="T:Blockcore.Features.BlockStore.AddressIndexing.IAddressIndexer">
+            <summary>Component that builds an index of all addresses and deposits\withdrawals that happened to\from them.</summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.AddressIndexing.IAddressIndexer.GetAddressBalances(System.String[],System.Int32)">
+            <summary>Returns balance of the given address confirmed with at least <paramref name="minConfirmations"/> confirmations.</summary>
+            <param name="addresses">The set of addresses that will be queried.</param>
+            <param name="minConfirmations">Only blocks below consensus tip less this parameter will be considered.</param>
+            <returns>Balance of a given address or <c>null</c> if address wasn't indexed or doesn't exists.</returns>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.AddressIndexing.IAddressIndexer.GetAddressIndexerState(System.String[])">
+            <summary>Returns verbose balances data.</summary>
+            <param name="addresses">The set of addresses that will be queried.</param>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.FallBackMaxReorg">
+            <summary>Max supported reorganization length for networks without max reorg property.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.DelayTimeMs">
+            <summary>
+            Time to wait before attempting to index the next block.
+            Waiting happens after a failure to get next block to index.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.ConsiderSyncedMaxDistance">
+            <summary>Max distance between consensus and indexer tip to consider indexer synced.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.addressIndexRepository">
+            <summary>A mapping between addresses and their balance changes.</summary>
+            <remarks>All access should be protected by <see cref="F:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.lockObject"/>.</remarks>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.outpointsRepository">
+            <summary>Script pub keys and amounts mapped by outpoints.</summary>
+            <remarks>All access should be protected by <see cref="F:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.lockObject"/>.</remarks>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.lockObject">
+            <summary>Protects access to <see cref="F:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.addressIndexRepository"/> and <see cref="F:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.outpointsRepository"/>.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.lastPurgeTime">
+            <summary>Last time rewind data was purged.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.lastSavedHeight">
+            <summary>Indexer height at the last save.</summary>
+            <remarks>Should be protected by <see cref="F:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.lockObject"/>.</remarks>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.compactionTriggerDistance">
+            <summary>Distance in blocks from consensus tip at which compaction should start.</summary>
+            <remarks>It can't be lower than maxReorg since compacted data can't be converted back to uncompacted state for partial reversion.</remarks>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.SyncBuffer">
+            <summary>
+            This is a window of some blocks that is needed to reduce the consequences of nodes having different view of consensus chain.
+            We assume that nodes usually don't have view that is different from other nodes by that constant of blocks.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.GetMaxReorgOrFallbackMaxReorg(Blockcore.Networks.Network)">
+            <summary>Returns maxReorg of <see cref="F:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.FallBackMaxReorg"/> in case maxReorg is <c>0</c>.</summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.ProcessBlock(Blockcore.Consensus.BlockInfo.Block,Blockcore.Consensus.Chain.ChainedHeader)">
+            <summary>Processes a block that was added or removed from the consensus chain.</summary>
+            <param name="block">The block to process.</param>
+            <param name="header">The chained header associated to the block being processed.</param>
+            <returns><c>true</c> if block was sucessfully processed.</returns>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.ProcessBalanceChangeLocked(System.Int32,System.String,Blockcore.NBitcoin.Money,System.Boolean)">
+            <summary>Adds a new balance change entry to to the <see cref="F:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.addressIndexRepository"/>.</summary>
+            <param name="height">The height of the block this being processed.</param>
+            <param name="address">The address receiving the funds.</param>
+            <param name="amount">The amount being received.</param>
+            <param name="deposited"><c>false</c> if this is an output being spent, <c>true</c> otherwise.</param>
+            <remarks>Should be protected by <see cref="F:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.lockObject"/>.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.GetAddressBalances(System.String[],System.Int32)">
+            <inheritdoc />
+            <remarks>This is currently not in use but will be required for exchange integration.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.GetAddressIndexerState(System.String[])">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexer.Dispose">
+            <inheritdoc/>
+        </member>
+        <member name="T:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexerOutpointsRepository">
+            <summary>Repository for <see cref="T:Blockcore.Features.BlockStore.AddressIndexing.OutPointData"/> items with cache layer built in.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexerOutpointsRepository.addressIndexerOutPointData">
+            <summary>Represents the output collection.</summary>
+            <remarks>Should be protected by <see cref="!:LockObject"/></remarks>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexerOutpointsRepository.addressIndexerRewindData">
+            <summary>Represents the rewind data collection.</summary>
+            <remarks>Should be protected by <see cref="!:LockObject"/></remarks>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexerOutpointsRepository.RecordRewindData(Blockcore.Features.BlockStore.AddressIndexing.AddressIndexerRewindData)">
+            <summary>Persists rewind data into the repository.</summary>
+            <param name="rewindData">The data to be persisted.</param>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexerOutpointsRepository.PurgeOldRewindData(System.Int32)">
+            <summary>Deletes rewind data items that were originated at height lower than <paramref name="height"/>.</summary>
+            <param name="height">The threshold below which data will be deleted.</param>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexerOutpointsRepository.RewindDataAboveHeight(System.Int32)">
+            <summary>Reverts changes made by processing blocks with height higher than <param name="height">.</param></summary>
+            <param name="height">The height above which to restore outpoints.</param>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexerOutpointsRepository.IsCacheFullLocked(Blockcore.Utilities.MemoryCache{System.String,Blockcore.Features.BlockStore.AddressIndexing.OutPointData}.CacheItem)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexRepository">
+            <summary>Repository for <see cref="T:Blockcore.Controllers.Models.AddressIndexerData"/> items with cache layer built in.</summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexRepository.GetOrCreateAddress(System.String)">
+            <summary>Retrieves address data, either the cached version if it exists, or directly from the underlying database.
+            If it is a previously unseen address an empty record will be created and added to the cache.</summary>
+            <param name="address">The address to retrieve data for.</param>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexRepository.GetAddressesHigherThanHeight(System.Int32)">
+            <summary>
+            Checks for addresses that are affected by balance changes above a given block height.
+            This method should only be relied upon for block heights lower than the consensus tip and higher
+            than (tip - maxReorg). This is because it is only used while reorging the address indexer.
+            </summary>
+            <param name="height">The block height above which balance changes should be considered.</param>
+            <returns>A list of affected addresses containing balance changes above the specified block height.</returns>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.AddressIndexing.AddressIndexRepository.ItemRemovedLocked(Blockcore.Utilities.MemoryCache{System.String,Blockcore.Controllers.Models.AddressIndexerData}.CacheItem)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.BlockStore.Api.IBlockStoreClient">
+            <summary>Rest client for <see cref="T:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreController"/>.</summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Api.IBlockStoreClient.GetAddressBalancesAsync(System.Collections.Generic.IEnumerable{System.String},System.Int32,System.Threading.CancellationToken)">
+            <summary><see cref="M:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreController.GetAddressesBalances(System.String,System.Int32)"/></summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Api.IBlockStoreClient.GetVerboseAddressesBalancesDataAsync(System.Collections.Generic.IEnumerable{System.String},System.Threading.CancellationToken)">
+            <summary><see cref="M:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreController.GetVerboseAddressesBalancesData(System.String)"/></summary>
+        </member>
+        <member name="T:Blockcore.Features.BlockStore.Api.BlockStoreClient">
+            <inheritdoc cref="T:Blockcore.Features.BlockStore.Api.IBlockStoreClient"/>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Api.BlockStoreClient.#ctor(Microsoft.Extensions.Logging.ILoggerFactory,System.Net.Http.IHttpClientFactory,System.String,System.Int32)">
+            <summary>
+            Currently the <paramref name="url"/> is required as it needs to be configurable for testing.
+            <para>
+            In a production/live scenario the sidechain and mainnet federation nodes should run on the same machine.
+            </para>
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Api.BlockStoreClient.GetAddressBalancesAsync(System.Collections.Generic.IEnumerable{System.String},System.Int32,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Api.BlockStoreClient.GetVerboseAddressesBalancesDataAsync(System.Collections.Generic.IEnumerable{System.String},System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreController">
+            <summary>Controller providing operations on a blockstore.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreController.blockStore">
+            <summary>Provides access to the block store on disk.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreController.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreController.chainState">
+            <summary>An interface that provides information about the chain and validation.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreController.chainIndexer">
+            <summary>The chain.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreController.network">
+            <summary>Current network for the active controller instance.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreController.utxoIndexer">
+            <summary>UTXO indexer.</summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreController.GetAddressIndexerTip">
+            <summary>
+            Retrieves the <see cref="F:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreController.addressIndexer"/>'s tip.
+            </summary>
+            <returns>An instance of <see cref="T:Blockcore.Features.BlockStore.Models.AddressIndexerTipModel"/> containing the tip's hash and height.</returns>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreController.GetBlock(Blockcore.Features.BlockStore.Models.SearchByHashRequest)">
+            <summary>
+            Retrieves the block which matches the supplied block hash.
+            </summary>
+            <param name="query">An object containing the necessary parameters to search for a block.</param>
+            <returns><see cref="T:Blockcore.Controllers.Models.BlockModel"/> if block is found, <see cref="T:Microsoft.AspNetCore.Mvc.NotFoundObjectResult"/> if not found. Returns <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> with error information if exception thrown.</returns>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreController.GetBlockCount">
+            <summary>
+            Gets the current consensus tip height.
+            </summary>
+            <remarks>This is an API implementation of an RPC call.</remarks>
+            <returns>The current tip height. Returns <c>null</c> if fails. Returns <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> with error information if exception thrown.</returns>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreController.GetAddressesBalances(System.String,System.Int32)">
+            <summary>Provides balance of the given addresses confirmed with at least <paramref name="minConfirmations"/> confirmations.</summary>
+            <param name="addresses">A comma delimited set of addresses that will be queried.</param>
+            <param name="minConfirmations">Only blocks below consensus tip less this parameter will be considered.</param>
+            <returns>A result object containing the balance for each requested address and if so, a meesage stating why the indexer is not queryable.</returns>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreController.GetVerboseAddressesBalancesData(System.String)">
+            <summary>Provides verbose balance data of the given addresses.</summary>
+            <param name="addresses">A comma delimited set of addresses that will be queried.</param>
+            <returns>A result object containing the balance for each requested address and if so, a meesage stating why the indexer is not queryable.</returns>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreController.GetUtxoSet(System.Int32)">
+            <summary>Returns every UTXO as of a given block height. This may take some time for large chains.</summary>
+            <param name="atBlockHeight">Only process blocks up to this height for the purposes of constructing the UTXO set.</param>
+            <returns>A result object containing the UTXOs.</returns>
+            <response code="200">Returns the UTXO set.</response>
+            <response code="400">Unexpected exception occurred</response>
+        </member>
+        <member name="T:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreRPCController">
+            <summary>
+            Controller providing RPC operations on a watch-only wallet.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreRPCController.consensusManager">
+            <summary>Consensus manager class.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreRPCController.chainIndexer">
+            <summary>Thread safe access to the best chain of block headers from genesis.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreRPCController.blockStore">
+            <summary>Provides access to the block store database.</summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreRPCController.#ctor(Blockcore.IFullNode,Blockcore.Consensus.IConsensusManager,Blockcore.Consensus.Chain.ChainIndexer,Blockcore.Networks.Network,Blockcore.Interfaces.IBlockStore)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Api.Controllers.BlockStoreRPCController.GetTxOutProof(System.String[],System.String)">
+            <summary>
+            By default this function only works when there is an unspent output in the utxo for this transaction.
+            To make it work, you need to maintain a transaction index, using the -txindex command line option.
+            </summary>
+            <param name="txids">The txids to filter</param>
+            <param name="blockhash">If specified, looks for txid in the block with this hash</param>
+            <returns></returns>
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.Models.BlockTransactionDetailsModel.Transactions">
+            <summary>
+            Hides the existing Transactions property of type <see cref="!:string[]"/> and replaces with the <see cref="!:TransactionVerboseModel[]"/>.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.BlockStore.Models.SearchByHashRequest">
+            <summary>
+            A class containing the necessary parameters for a block search request.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.Models.SearchByHashRequest.Hash">
+            <summary>
+            The hash of the required block.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.Models.SearchByHashRequest.ShowTransactionDetails">
+            <summary>
+            A flag that indicates whether to return each block transaction complete with details
+            or simply return transaction hashes (TX IDs).
+            </summary>
+            <remarks>This flag is not used when <see cref="P:Blockcore.Features.BlockStore.Models.RequestBase.OutputJson"/> is set to false.</remarks>
+        </member>
+        <member name="T:Blockcore.Features.BlockStore.Models.SignMessageResult">
+            <summary>
+            Class containing details of a signature message.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.IBlockStoreBehavior.AnnounceBlocksAsync(System.Collections.Generic.List{Blockcore.Consensus.Chain.ChainedHeader})">
+            <summary>
+            Sends information about newly discovered blocks to network peers using "headers" or "inv" message.
+            </summary>
+            <param name="blocksToAnnounce">List of chained block headers to announce.</param>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreBehavior.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreBehavior.loggerFactory">
+            <summary>Factory for creating loggers.</summary>
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.BlockStoreBehavior.CanRespondToGetBlocksPayload">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.BlockStoreBehavior.CanRespondToGetDataPayload">
+            <inheritdoc />
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreBehavior.PreferHeaders">
+            <summary>Local resources.</summary>
+            <remarks>Public for testing.</remarks>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreBehavior.getBlocksBatchLastItemHash">
+            <summary>Hash of the last block we've sent to the peer in response to "getblocks" message,
+            or <c>null</c> if the peer haven't used "getblocks" message or if we sent a tip to it already.</summary>
+            <remarks>
+            In case the peer is syncing using outdated "getblocks" message, we need to maintain
+            the hash of the last block we sent to it in an inventory batch. Once the peer asks
+            for block data of the block with this hash, we will send a continuation inventory message.
+            This will cause the peer to ask for more.
+            </remarks>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreBehavior.lastSentHeader">
+            <summary>Chained header of the last header sent to the peer.</summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreBehavior.ProcessGetBlocksAsync(Blockcore.P2P.Peer.INetworkPeer,Blockcore.P2P.Protocol.Payloads.GetBlocksPayload)">
+            <summary>
+            Processes "getblocks" message received from the peer.
+            </summary>
+            <param name="peer">Peer that sent the message.</param>
+            <param name="getBlocksPayload">Payload of "getblocks" message to process.</param>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreBehavior.AnnounceBlocksAsync(System.Collections.Generic.List{Blockcore.Consensus.Chain.ChainedHeader})">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreBehavior.BuildHeadersAnnouncePayload(System.Collections.Generic.IEnumerable{Blockcore.Consensus.Chain.ChainedHeader})">
+            <summary>
+            Builds payload that announces to the peers new blocks that we've connected.
+            This method can be overridden to return different type of HeadersPayload, e.g. <see cref="T:Blockcore.P2P.Protocol.Payloads.ProvenHeadersPayload" />
+            </summary>
+            <param name="headers">The headers.</param>
+            <returns>
+            The <see cref="T:Blockcore.P2P.Protocol.Payloads.HeadersPayload" /> instance to announce to the peer.
+            </returns>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreFeature.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreFeature.loggerFactory">
+            <summary>Factory for creating loggers.</summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreFeature.PrintHelp(Blockcore.Networks.Network)">
+            <summary>
+            Prints command-line help. Invoked via reflection.
+            </summary>
+            <param name="network">The network to extract values from.</param>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreFeature.BuildDefaultConfigurationFile(System.Text.StringBuilder,Blockcore.Networks.Network)">
+            <summary>
+            Get the default configuration. Invoked via reflection.
+            </summary>
+            <param name="builder">The string builder to add the settings to.</param>
+            <param name="network">The network to base the defaults off.</param>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreFeature.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.BlockStore.FullNodeBuilderBlockStoreExtension">
+            <summary>
+            A class providing extension methods for <see cref="T:Blockcore.Builder.IFullNodeBuilder"/>.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.BlockStore.BlockStoreQueue">
+            <summary>
+            Saves blocks to the database in batches, removes reorged blocks from the database.
+            </summary>
+            <remarks>
+            <para>
+            The batch is saved when total serialized size of all blocks in a batch reaches <see cref="F:Blockcore.Features.BlockStore.BlockStoreQueue.BatchThresholdSizeBytes"/>,
+            or when more than <see cref="F:Blockcore.Features.BlockStore.BlockStoreQueue.BatchMaxSaveIntervalSeconds"/> passed since last batch was saved, or when node is shutting down.
+            </para>
+            <para>
+            When we save new blocks to the database, in case <see cref="T:Blockcore.Features.BlockStore.Repository.IBlockRepository"/> contains blocks that
+            are no longer a part of our best chain, they are removed from the database.
+            </para>
+            <para>
+            When block store is being initialized we delete blocks that are not on the best chain.
+            </para>
+            </remarks>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreQueue.BatchMaxSaveIntervalSeconds">
+            <summary>Maximum interval between saving batches.</summary>
+            <remarks>Interval value is a prime number that wasn't used as an interval in any other component. That prevents having CPU consumption spikes.</remarks>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreQueue.BatchThresholdSizeBytes">
+            <summary>Maximum number of bytes the batch can hold until the downloaded blocks are stored to the disk.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreQueue.currentBatchSizeBytes">
+            <summary>The current batch size in bytes.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreQueue.blocksQueueSizeBytes">
+            <summary>The current pending blocks size in bytes.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreQueue.storeTip">
+            <summary>The highest stored block in the repository.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreQueue.logger">
+            <inheritdoc cref="T:Microsoft.Extensions.Logging.ILogger"/>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreQueue.chainState">
+            <inheritdoc cref="T:Blockcore.Base.IChainState"/>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreQueue.storeSettings">
+            <inheritdoc cref="T:Blockcore.Features.BlockStore.StoreSettings"/>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreQueue.chainIndexer">
+            <inheritdoc cref="T:Blockcore.Consensus.Chain.ChainIndexer"/>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreQueue.blockRepository">
+            <inheritdoc cref="T:Blockcore.Features.BlockStore.Repository.IBlockRepository"/>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreQueue.blocksQueue">
+            <summary>Queue which contains blocks that should be saved to the database.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreQueue.batch">
+            <summary>Batch of blocks which should be saved in the database.</summary>
+            <remarks>Write access should be protected by <see cref="F:Blockcore.Features.BlockStore.BlockStoreQueue.blocksCacheLock"/>.</remarks>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreQueue.dequeueLoopTask">
+            <summary>Task that runs <see cref="M:Blockcore.Features.BlockStore.BlockStoreQueue.DequeueBlocksContinuouslyAsync"/>.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreQueue.blocksCacheLock">
+            <summary>Protects the batch from being modifying while <see cref="M:Blockcore.Features.BlockStore.BlockStoreQueue.GetBlock(Blockcore.NBitcoin.uint256)"/> method is using the batch.</summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "F:Blockcore.Features.BlockStore.BlockStoreQueue.pendingBlocksCache" -->
+        <member name="P:Blockcore.Features.BlockStore.BlockStoreQueue.BlockStoreCacheTip">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreQueue.Initialize">
+            <summary>
+            Initializes the <see cref="T:Blockcore.Features.BlockStore.BlockStoreQueue"/>.
+            <para>
+            If <see cref="F:Blockcore.Features.BlockStore.BlockStoreQueue.storeTip"/> is <c>null</c>, the store is out of sync. This can happen when:</para>
+            <list>
+                <item>The node crashed.</item>
+                <item>The node was not closed down properly.</item>
+            </list>
+            <para>
+            To recover we walk back the chain until a common block header is found and set the <see cref="T:Blockcore.Features.BlockStore.BlockStoreQueue"/>'s <see cref="F:Blockcore.Features.BlockStore.BlockStoreQueue.storeTip"/> to that.
+            </para>
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreQueue.GetTransactionById(Blockcore.NBitcoin.uint256)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreQueue.GetTransactionsByIds(Blockcore.NBitcoin.uint256[],System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreQueue.GetBlockIdByTransactionId(Blockcore.NBitcoin.uint256)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreQueue.GetBlock(Blockcore.NBitcoin.uint256)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreQueue.SetStoreTip(Blockcore.Consensus.Chain.ChainedHeader)">
+            <summary>Sets the internal store tip and exposes the store tip to other components through the chain state.</summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreQueue.RecoverStoreTip">
+            <summary>
+            Sets block store tip to the last block that exists both in the repository and in the <see cref="T:Blockcore.Consensus.Chain.ChainIndexer"/>.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreQueue.AddToPending(Blockcore.Consensus.Chain.ChainedHeaderBlock)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreQueue.DequeueBlocksContinuouslyAsync">
+            <summary>
+            Dequeues the blocks continuously and saves them to the database when max batch size is reached or timer ran out.
+            </summary>
+            <remarks>Batch is always saved on shutdown.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreQueue.FlushAllCollections">
+            <summary>
+            Ensures that any blocks queued in <see cref="F:Blockcore.Features.BlockStore.BlockStoreQueue.blocksQueue"/> gets added to <see cref="F:Blockcore.Features.BlockStore.BlockStoreQueue.batch"/>
+            so that it can be persisted on dispose.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreQueue.SaveBatch">
+            <summary>
+            Checks if repository contains reorged blocks and deletes them; saves batch on top.
+            The last block in the list is considered to be on the current main chain and will be used to determine if a database reorg is required.
+            </summary>
+            <exception cref="T:DBreeze.Exceptions.DBreezeException">Thrown if an error occurs during database operations.</exception>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreQueue.GetBatchWithoutReorgedBlocks">
+            <summary>
+            Cleans the batch in a way that all headers from the latest one are consecutive.
+            Those that violate consecutiveness are removed.
+            </summary>
+            <returns>List of consecutive blocks.</returns>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreQueue.RemoveReorgedBlocksFromStore(Blockcore.Consensus.Chain.ChainedHeader)">
+            <summary>Removes reorged blocks from the database.</summary>
+            <param name="expectedStoreTip">Highest block that should be in the store.</param>
+            <exception cref="T:DBreeze.Exceptions.DBreezeException">Thrown if an error occurs during database operations.</exception>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreQueue.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.BlockStore.BlockStoreQueueFlushCondition">
+            <inheritdoc/>
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.BlockStoreQueueFlushCondition.ShouldFlush">
+            <inheritdoc/>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreSignaled.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreSignaled.nodeLifetime">
+            <summary>Global application life cycle control - triggers when application shuts down.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreSignaled.blocksToAnnounce">
+            <summary>Queue of chained blocks that will be announced to the peers.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreSignaled.initialBlockDownloadState">
+            <summary>Provider of IBD state.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreSignaled.BatchIntervalMs">
+            <summary>Interval between batches in milliseconds.</summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.BlockStoreSignaled.dequeueLoopTask">
+            <summary>Task that runs <see cref="M:Blockcore.Features.BlockStore.BlockStoreSignaled.DequeueContinuouslyAsync"/>.</summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreSignaled.AddBlockToQueue(Blockcore.Consensus.Chain.ChainedHeaderBlock,System.Boolean)">
+            <summary>
+            Adds the block to queue.
+            Ensures the block is written to disk before relaying to peers.
+            </summary>
+            <param name="blockPair">The block pair.</param>
+            <param name="isIBD">Is node in IBD.</param>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreSignaled.DequeueContinuouslyAsync">
+            <summary>
+            Continuously dequeues items from <see cref="F:Blockcore.Features.BlockStore.BlockStoreSignaled.blocksToAnnounce"/> and sends
+            them  to the peers after the timer runs out or if the last item is a tip.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreSignaled.SendBatchAsync(System.Collections.Generic.List{Blockcore.Consensus.Chain.ChainedHeader})">
+            <summary>
+            A method that relays blocks found in <see cref="!:batch"/> to connected peers on the network.
+            </summary>
+            <remarks>
+            <para>
+            The list <see cref="!:batch"/> contains hashes of blocks that were validated by the consensus rules.
+            </para>
+            <para>
+            These block hashes need to be relayed to connected peers. A peer that does not have a block
+            will then ask for the entire block, that means only blocks that have been stored/cached should be relayed.
+            </para>
+            <para>
+            During IBD blocks are not relayed to peers.
+            </para>
+            <para>
+            If no nodes are connected the blocks are just discarded, however this is very unlikely to happen.
+            </para>
+            <para>
+            Before relaying, verify the block is still in the best chain else discard it.
+            </para>
+            <para>
+            </para>
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.BlockStoreSignaled.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.BlockStore.ProvenHeadersBlockStoreBehavior">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.ProvenHeadersBlockStoreBehavior.BuildHeadersAnnouncePayload(System.Collections.Generic.IEnumerable{Blockcore.Consensus.Chain.ChainedHeader})">
+            <inheritdoc />
+            <returns>The <see cref="T:Blockcore.P2P.Protocol.Payloads.HeadersPayload"/> instance to announce to the peer, or <see cref="T:Blockcore.P2P.Protocol.Payloads.ProvenHeadersPayload"/> if the peers requires it.</returns>
+        </member>
+        <member name="T:Blockcore.Features.BlockStore.ProvenHeadersBlockStoreSignaled">
+            <summary>
+            The goal of this behavior is to ensure that we have always a Proven Header for each block signaled, because our node
+            must be able to serve a Proven Header for every block we announce
+            </summary>
+            <seealso cref="T:Blockcore.Features.BlockStore.BlockStoreSignaled" />
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.ProvenHeadersBlockStoreSignaled.AddBlockToQueue(Blockcore.Consensus.Chain.ChainedHeaderBlock,System.Boolean)">
+            <inheritdoc />
+            <remarks>When a block is signaled, we check if its header is a Proven Header, if not, we need to generate and store it.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.ProvenHeadersBlockStoreSignaled.CreateAndStoreProvenHeader(System.Int32,Blockcore.Consensus.Chain.ChainedHeaderBlock,System.Boolean)">
+            <summary>
+            Creates and store a <see cref="T:Blockcore.Consensus.BlockInfo.ProvenBlockHeader" /> generated by the signaled <see cref="T:Blockcore.Consensus.Chain.ChainedHeaderBlock"/>.
+            </summary>
+            <param name="blockHeight">Height of the block used to generate its Proven Header.</param>
+            <param name="chainedHeaderBlock">Block used to generate its Proven Header.</param>
+            <param name="isIBD">Is node in IBD.</param>
+        </member>
+        <member name="T:Blockcore.Features.BlockStore.Pruning.IPruneBlockStoreService">
+            <summary>
+            This service starts an async loop task that periodically deletes from the blockstore.
+            <para>
+            If the height of the node's block store is more than <see cref="!:PruneBlockStoreService.MaxBlocksToKeep"/>, the node will 
+            be pruned, leaving a margin of <see cref="!:PruneBlockStoreService.MaxBlocksToKeep"/> in the block database.
+            </para>
+            <para>
+            For example if the block store's height is 5000, the node will be pruned up to height 4000, meaning that 1000 blocks will be kept on disk.
+            </para>
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.Pruning.IPruneBlockStoreService.PrunedUpToHeaderTip">
+            <summary>
+             This is the header of where the node has been pruned up to.
+             <para>
+             It should be noted that deleting (pruning) blocks from the repository only removes the reference, it does not decrease the actual size on disk.
+             </para>
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Pruning.IPruneBlockStoreService.Initialize">
+            <summary>
+            Starts an async loop task that periodically deletes from the blockstore.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Pruning.IPruneBlockStoreService.PruneBlocks">
+            <summary>
+            Delete blocks continuously from the back of the store.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.BlockStore.Pruning.IPrunedBlockRepository">
+            <summary>
+            Prunes and compacts the block store database by deleting blocks lower than a certain height and recreating the database file on disk.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Pruning.IPrunedBlockRepository.Initialize">
+            <summary>
+            Initializes the pruned block repository.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.Pruning.IPrunedBlockRepository.PrunedTip">
+            <summary>
+            The lowest block hash and height that the repository has.
+            <para>
+            This also indicated where the node has been pruned up to.
+            </para>
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Pruning.IPrunedBlockRepository.UpdatePrunedTip(Blockcore.Consensus.Chain.ChainedHeader)">
+            <summary>
+            Sets the pruned tip.
+            <para>
+            It will be saved once the block database has been compacted on node initialization or shutdown.
+            </para>
+            </summary>
+            <param name="tip">The tip to set.</param>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Pruning.IPrunedBlockRepository.PrepareDatabase">
+            <summary>
+            Prepare the pruned tip.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.BlockStore.Pruning.PruneBlockStoreService">
+            <inheritdoc/>
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.Pruning.PruneBlockStoreService.PrunedUpToHeaderTip">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Pruning.PruneBlockStoreService.Initialize">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Pruning.PruneBlockStoreService.PruneBlocks">
+            <inheritdoc/>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Pruning.PruneBlockStoreService.Dispose">
+            <inheritdoc/>
+        </member>
+        <member name="T:Blockcore.Features.BlockStore.Repository.IBlockRepository">
+            <summary>
+            <see cref="T:Blockcore.Features.BlockStore.Repository.IBlockRepository"/> is the interface to all the logics interacting with the blocks stored in the database.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.Repository.IBlockRepository.DbInstance">
+            <summary> The dbreeze database engine.</summary>
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.Repository.IBlockRepository.Locker">
+            <summary>Really ugly temporary hack.</summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Repository.IBlockRepository.DeleteBlocks(System.Collections.Generic.List{Blockcore.NBitcoin.uint256})">
+            <summary>
+            Deletes blocks and indexes for transactions that belong to deleted blocks.
+            <para>
+            It should be noted that this does not delete the entries from disk (only the references are removed) and
+            as such the file size remains the same.
+            </para>
+            </summary>
+            <remarks>TODO: This will need to be revisited once DBreeze has been fixed or replaced with a solution that works.</remarks>
+            <param name="hashes">List of block hashes to be deleted.</param>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Repository.IBlockRepository.PutBlocks(Blockcore.Utilities.HashHeightPair,System.Collections.Generic.List{Blockcore.Consensus.BlockInfo.Block})">
+            <summary>
+            Persist the next block hash and insert new blocks into the database.
+            </summary>
+            <param name="newTip">Hash and height of the new repository's tip.</param>
+            <param name="blocks">Blocks to be inserted.</param>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Repository.IBlockRepository.Delete(Blockcore.Utilities.HashHeightPair,System.Collections.Generic.List{Blockcore.NBitcoin.uint256})">
+            <summary>
+            Wipe out blocks and their transactions then replace with a new block.
+            </summary>
+            <param name="newTip">Hash and height of the new repository's tip.</param>
+            <param name="hashes">List of all block hashes to be deleted.</param>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Repository.IBlockRepository.Exist(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Determine if a block already exists
+            </summary>
+            <param name="hash">The hash.</param>
+            <returns><c>true</c> if the block hash can be found in the database, otherwise return <c>false</c>.</returns>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Repository.IBlockRepository.ReIndex">
+            <summary>
+            Iterate over every block in the database.
+            If <see cref="P:Blockcore.Features.BlockStore.Repository.IBlockRepository.TxIndex"/> is true, we store the block hash alongside the transaction hash in the transaction table, otherwise clear the transaction table.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Repository.IBlockRepository.SetTxIndex(System.Boolean)">
+            <summary>
+            Set whether to index transactions by block hash, as well as storing them inside of the block.
+            </summary>
+            <param name="txIndex">Whether to index transactions.</param>
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.Repository.IBlockRepository.TipHashAndHeight">
+            <summary>Hash and height of the repository's tip.</summary>
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.Repository.IBlockRepository.TxIndex">
+            <summary> Indicates that the node should store all transaction data in the database.</summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.Repository.IBlockRepository.EnumerateBatch(System.Collections.Generic.List{Blockcore.Consensus.Chain.ChainedHeader})">
+            <summary>
+            Enumerate the list of blocks from block store.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.BlockStore.StoreSettings">
+            <summary>
+            Configuration related to storage of transactions.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.BlockStore.StoreSettings.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.StoreSettings.AmountOfBlocksToKeep">
+            <summary>Amount of blocks that we should keep in case node is running in pruned mode.</summary>
+            <remarks>Should only be used if <see cref="P:Blockcore.Features.BlockStore.StoreSettings.PruningEnabled"/> is <c>true</c>.</remarks>
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.StoreSettings.MaxCacheSize">
+            <summary>The maximum size of bytes the cache can contain.</summary>
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.StoreSettings.TxIndex">
+            <summary><c>true</c> to maintain a full transaction index.</summary>
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.StoreSettings.ReIndex">
+            <summary><c>true</c> to rebuild block index from block data files on disk.</summary>
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.StoreSettings.ReIndexChain">
+            <summary><c>true</c> to rebuild chain state from block data files on disk.</summary>
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.StoreSettings.AddressIndex">
+            <summary><c>true</c> to maintain a full addresses index.</summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.StoreSettings.GetMinPruningAmount">
+            <summary>Calculates minimum amount of blocks we need to keep during pruning.</summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.StoreSettings.#ctor(Blockcore.Configuration.NodeSettings)">
+            <summary>
+            Initializes an instance of the object from the node configuration.
+            </summary>
+            <param name="nodeSettings">The node configuration.</param>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.StoreSettings.PrintHelp(Blockcore.Networks.Network)">
+            <summary>Prints the help information on how to configure the block store settings to the logger.</summary>
+        </member>
+        <member name="M:Blockcore.Features.BlockStore.StoreSettings.BuildDefaultConfigurationFile(System.Text.StringBuilder,Blockcore.Networks.Network)">
+            <summary>
+            Get the default configuration.
+            </summary>
+            <param name="builder">The string builder to add the settings to.</param>
+            <param name="network">The network to base the defaults off.</param>
+        </member>
+        <member name="T:Blockcore.Features.BlockStore.ReconstructedCoinviewContext">
+            <summary>
+            This is so named to indicate that it is not really intended for use outside of the block store's controller, i.e. it is not part of consensus.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.ReconstructedCoinviewContext.UnspentOutputs">
+            <summary>
+            All of the outputs that haven't been spent at this point in time.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.BlockStore.ReconstructedCoinviewContext.Transactions">
+            <summary>
+            Easy access to all of the loaded transactions.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.BlockStore.UtxoIndexer">
+            <summary>
+            This is a separate use case from the address indexer, as we need full details about the current items in the UTXO set in order to
+            be able to potentially build transactions from them. The address indexer is also intended for long-running use cases, and does
+            incur overhead in processing each block. This indexer, conversely, is designed for occasional usage without the requirement
+            of persisting its output for rapid lookup.
+            The actual coindb is not well suited to this kind of query either, as it is being accessed frequently and lacks a 'snapshot'
+            facility. This indexer therefore trades query speed for implementation simplicity, as we only have to enumerate the entire chain
+            without regard for significantly impacting other components.
+            Allowing the height to be specified is an additional convenience that the coindb on its own would not give us without additional
+            consistency safeguards, which may be invasive. For example, halting consensus at a specific height to build a snapshot.
+            </summary>
+            <remarks>This borrows heavily from the <see cref="!:Stratis.Bitcoin.Features.SmartContracts.ReflectionExecutor.Controllers.BalancesController"/>, but is less specialised.</remarks>
+        </member>
+    </members>
+</doc>

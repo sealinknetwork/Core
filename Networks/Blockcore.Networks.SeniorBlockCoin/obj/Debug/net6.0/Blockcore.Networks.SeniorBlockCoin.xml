@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Blockcore.Networks.SeniorBlockCoin</name>
+    </assembly>
+    <members>
+        <member name="T:Blockcore.Networks.SeniorBlockCoin.Networks.Deployments.SeniorBlockCoinBIP9Deployments">
+            <summary>
+            BIP9 deployments for the Blockcore sample coin network.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.SeniorBlockCoin.Networks.Deployments.SeniorBlockCoinBIP9Deployments.#ctor">
+            <summary>
+            Constructs the BIP9 deployments array.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.SeniorBlockCoin.Networks.Deployments.SeniorBlockCoinBIP9Deployments.GetFlags(System.Int32)">
+            <summary>
+            Gets the deployment flags to set when the deployment activates.
+            </summary>
+            <param name="deployment">The deployment number.</param>
+            <returns>The deployment flags.</returns>
+        </member>
+        <member name="T:Blockcore.Networks.SeniorBlockCoin.Networks.Policies.SeniorBlockCoinStandardScriptsRegistry">
+            <summary>
+            Blockcore sample coin-specific standard transaction definitions.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Networks.SeniorBlockCoin.Networks.Rules.SeniorBlockCoinHeaderVersionRule">
+            <summary>
+            Checks if <see cref="T:Blockcore.Networks.SeniorBlockCoin.Networks.SeniorBlockCoinMain"/> network block's header has a valid block version.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.SeniorBlockCoin.Networks.Rules.SeniorBlockCoinHeaderVersionRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadVersion">Thrown if block's version is outdated or otherwise invalid.</exception>
+        </member>
+    </members>
+</doc>

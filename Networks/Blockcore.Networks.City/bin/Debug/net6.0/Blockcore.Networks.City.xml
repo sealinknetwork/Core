@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Blockcore.Networks.City</name>
+    </assembly>
+    <members>
+        <member name="F:Blockcore.Networks.City.Networks.Consensus.CityPosConsensusOptions.CityCoinstakeMinConfirmationActivationHeightMainnet">
+            <summary>Coinstake minimal confirmations softfork activation height for mainnet.</summary>
+        </member>
+        <member name="F:Blockcore.Networks.City.Networks.Consensus.CityPosConsensusOptions.CityCoinstakeMinConfirmationActivationHeightTestnet">
+            <summary>Coinstake minimal confirmations softfork activation height for testnet.</summary>
+        </member>
+        <member name="T:Blockcore.Networks.City.Networks.Deployments.CityBIP9Deployments">
+            <summary>
+            BIP9 deployments for the City Chain network.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.City.Networks.Deployments.CityBIP9Deployments.#ctor">
+            <summary>
+            Constructs the BIP9 deployments array.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.City.Networks.Deployments.CityBIP9Deployments.GetFlags(System.Int32)">
+            <summary>
+            Gets the deployment flags to set when the deployment activates.
+            </summary>
+            <param name="deployment">The deployment number.</param>
+            <returns>The deployment flags.</returns>
+        </member>
+        <member name="T:Blockcore.Networks.City.Networks.Policies.CityStandardScriptsRegistry">
+            <summary>
+            Blockcore sample coin-specific standard transaction definitions.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Networks.City.Networks.Rules.CityCheckPosUtxosetRule">
+            <summary>
+            Proof of stake override for the coinview rules - BIP68, MaxSigOps and BlockReward checks.
+            The City rule reduces the coinbase reward from 20 to 2 at block height 1 111 111?
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.City.Networks.Rules.CityCheckPosUtxosetRule.GetProofOfWorkReward(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Networks.City.Networks.Rules.CityCheckPosUtxosetRule.GetProofOfStakeReward(System.Int32)">
+            <summary>
+            Gets miner's coin stake reward.
+            </summary>
+            <param name="height">Target block height.</param>
+            <returns>Miner's coin stake reward.</returns>
+        </member>
+        <member name="T:Blockcore.Networks.City.Networks.Rules.CityHeaderVersionRule">
+            <summary>
+            Checks if <see cref="T:Blockcore.Networks.City.Networks.CityMain"/> network block's header has a valid block version.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.City.Networks.Rules.CityHeaderVersionRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadVersion">Thrown if block's version is outdated or otherwise invalid.</exception>
+        </member>
+    </members>
+</doc>

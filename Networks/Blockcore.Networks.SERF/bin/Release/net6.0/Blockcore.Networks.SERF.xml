@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Blockcore.Networks.SERF</name>
+    </assembly>
+    <members>
+        <member name="T:Blockcore.Networks.SERF.Deployments.SERFBIP9Deployments">
+            <summary>
+            BIP9 deployments for the Blockcore sample coin network.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.SERF.Deployments.SERFBIP9Deployments.#ctor">
+            <summary>
+            Constructs the BIP9 deployments array.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.SERF.Deployments.SERFBIP9Deployments.GetFlags(System.Int32)">
+            <summary>
+            Gets the deployment flags to set when the deployment activates.
+            </summary>
+            <param name="deployment">The deployment number.</param>
+            <returns>The deployment flags.</returns>
+        </member>
+        <member name="T:Blockcore.Networks.SERF.Policies.SERFStandardScriptsRegistry">
+            <summary>
+            Blockcore sample coin-specific standard transaction definitions.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Networks.SERF.Rules.SERFHeaderVersionRule">
+            <summary>
+            Checks if <see cref="T:Blockcore.Networks.SERF.SERFMain"/> network block's header has a valid block version.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.SERF.Rules.SERFHeaderVersionRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadVersion">Thrown if block's version is outdated or otherwise invalid.</exception>
+        </member>
+        <member name="F:Blockcore.Networks.SERF.SERFMain.BitcoinMaxTimeOffsetSeconds">
+            <summary> Bitcoin maximal value for the calculated time offset. If the value is over this limit, the time syncing feature will be switched off. </summary>
+        </member>
+        <member name="F:Blockcore.Networks.SERF.SERFMain.BitcoinDefaultMaxTipAgeInSeconds">
+            <summary> Bitcoin default value for the maximum tip age in seconds to consider the node in initial block download (24 hours). </summary>
+        </member>
+    </members>
+</doc>

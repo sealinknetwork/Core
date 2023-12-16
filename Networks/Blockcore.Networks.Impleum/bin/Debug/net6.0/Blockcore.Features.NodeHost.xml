@@ -1,0 +1,992 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Blockcore.Features.NodeHost</name>
+    </assembly>
+    <members>
+        <member name="M:Blockcore.Features.NodeHost.CertificateStore.TryGet(System.String,System.Security.Cryptography.X509Certificates.X509Certificate2@)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.NodeHost.Events.EventSubscriptionService">
+            <summary>
+            This class subscribes to Blockcore.EventBus.EventBus messages and proxy's them
+            to Web Socket messages.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.NodeHost.Events.EventSubscriptionService.UnsubscribeAll(System.String)">
+            <summary>
+            Call to unsubscribe to all events registered on this consumer Id.
+            </summary>
+            <param name="id"></param>
+        </member>
+        <member name="T:Blockcore.Features.NodeHost.Hubs.NodeHub">
+            <summary>
+            Node Hub can be used to perform many tasks on the node, including the majority of features available in the REST API.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.NodeHost.Hubs.NodeHub.Echo(System.String)">
+            <summary>
+            Basic echo method that can be used to verify connection.
+            </summary>
+            <param name="message">Any message to echo back.</param>
+            <returns>Returns the same message supplied.</returns>
+        </member>
+        <member name="T:Blockcore.Features.NodeHost.ICertificateStore">
+            <summary>
+            An interface providing operations on certificate repositories.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.NodeHost.ICertificateStore.TryGet(System.String,System.Security.Cryptography.X509Certificates.X509Certificate2@)">
+            <summary>
+            Tries to retrieve a certificate from the file system.
+            </summary>
+            <param name="filePath">The full path of the certificate file.</param>
+            <param name="certificate">The certificate, if found.</param>
+            <returns>A value indicating whether or not the certificate has been found at the specified location.</returns>
+        </member>
+        <member name="T:Blockcore.Features.NodeHost.LoggingActionFilter">
+            <summary>
+            An asynchronous action filter whose role is to log details from the Http requests to the API.
+            </summary>
+            <seealso cref="T:Microsoft.AspNetCore.Mvc.Filters.IAsyncActionFilter" />
+        </member>
+        <member name="M:Blockcore.Features.NodeHost.MvcBuilderExtensions.AddControllers(Microsoft.Extensions.DependencyInjection.IMvcBuilder,System.Collections.Generic.IEnumerable{Blockcore.Builder.Feature.IFullNodeFeature},Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Identifies the assemblies to include for controller discovery.
+            </summary>
+            <param name="builder">The builder</param>
+            <param name="features">The selected features to include the assemblies of.</param>
+            <param name="serviceCollection">The full node services.</param>
+            <returns>The Mvc builder</returns>
+        </member>
+        <member name="T:Blockcore.Features.NodeHost.NoCacheMiddleware">
+            <summary>
+            Middleware to set the response Cache-Control to no-cache.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.NodeHost.NodeHostFeature">
+            <summary>
+            Provides an Api to the full node
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.NodeHost.NodeHostFeature.NodeHostStopTimeoutSeconds">
+            <summary>How long we are willing to wait for the NodeHost to stop.</summary>
+        </member>
+        <member name="M:Blockcore.Features.NodeHost.NodeHostFeature.PrintHelp(Blockcore.Networks.Network)">
+            <summary>
+            Prints command-line help.
+            </summary>
+            <param name="network">The network to extract values from.</param>
+        </member>
+        <member name="M:Blockcore.Features.NodeHost.NodeHostFeature.BuildDefaultConfigurationFile(System.Text.StringBuilder,Blockcore.Networks.Network)">
+            <summary>
+            Get the default configuration.
+            </summary>
+            <param name="builder">The string builder to add the settings to.</param>
+            <param name="network">The network to base the defaults off.</param>
+        </member>
+        <member name="M:Blockcore.Features.NodeHost.NodeHostFeature.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.NodeHost.NodeHostFeatureExtension">
+            <summary>
+            A class providing extension methods for <see cref="T:Blockcore.Builder.IFullNodeBuilder"/>.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.NodeHost.NodeHostSettings">
+            <summary>
+            Configuration related to the API interface.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.NodeHost.NodeHostSettings.DefaultApiHost">
+            <summary>The default port used by the API when the node runs on the network.</summary>
+        </member>
+        <member name="F:Blockcore.Features.NodeHost.NodeHostSettings.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="P:Blockcore.Features.NodeHost.NodeHostSettings.ApiUri">
+            <summary>URI to node's API interface.</summary>
+        </member>
+        <member name="P:Blockcore.Features.NodeHost.NodeHostSettings.ApiPort">
+            <summary>Port of node's API interface.</summary>
+        </member>
+        <member name="P:Blockcore.Features.NodeHost.NodeHostSettings.EnableWS">
+            <summary>
+            If true then the node will add and start the Web Socket feature. This should never be enabled if node is accessible to the public.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.NodeHost.NodeHostSettings.EnableUI">
+            <summary>
+            If true the node will host a UI available in the NodeHost. This should never be enabled if node is accessible to the public.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.NodeHost.NodeHostSettings.EnableAPI">
+            <summary>
+            If true the node will host a REST API in the NodeHost. This should never be enabled if node is accessible to the public.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.NodeHost.NodeHostSettings.EnableAuth">
+            <summary>
+            If true will require authentication on all sensitive APIs. Some APIs will be public available.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.NodeHost.NodeHostSettings.HttpsCertificateFilePath">
+            <summary>
+            The HTTPS certificate file path.
+            </summary>
+            <remarks>
+            Password protected certificates are not supported. On MacOs, only p12 certificates can be used without password.
+            Please refer to .Net Core documentation for usage: <seealso cref="!:https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.x509certificate2.-ctor?view=netcore-2.1#System_Security_Cryptography_X509Certificates_X509Certificate2__ctor_System_Byte___" />.
+            </remarks>
+        </member>
+        <member name="P:Blockcore.Features.NodeHost.NodeHostSettings.UseHttps">
+            <summary>Use HTTPS or not.</summary>
+        </member>
+        <member name="P:Blockcore.Features.NodeHost.NodeHostSettings.ApiTitle">
+            <summary>Use title from agent</summary>
+        </member>
+        <member name="M:Blockcore.Features.NodeHost.NodeHostSettings.#ctor(Blockcore.Configuration.NodeSettings)">
+            <summary>
+            Initializes an instance of the object from the node configuration.
+            </summary>
+            <param name="nodeSettings">The node configuration.</param>
+        </member>
+        <member name="M:Blockcore.Features.NodeHost.NodeHostSettings.PrintHelp(Blockcore.Networks.Network)">
+            <summary>Prints the help information on how to configure the API settings to the logger.</summary>
+            <param name="network">The network to use.</param>
+        </member>
+        <member name="M:Blockcore.Features.NodeHost.NodeHostSettings.BuildDefaultConfigurationFile(System.Text.StringBuilder,Blockcore.Networks.Network)">
+            <summary>
+            Get the default configuration.
+            </summary>
+            <param name="builder">The string builder to add the settings to.</param>
+            <param name="network">The network to base the defaults off.</param>
+        </member>
+        <member name="T:Blockcore.Features.NodeHost.EditorRCLConfigureOptions">
+            <summary>
+            This class will allow to read the wwwroot folder
+            which has been set ad an embeded folder in to the dll (in the project file)
+            </summary>
+        </member>
+        <member name="T:Blockcore.Features.NodeHost.SwaggerApiDocumentationScaffolder">
+            <summary>
+            Utility class that adds XML documentation references to the API
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.NodeHost.SwaggerApiDocumentationScaffolder.Scaffold(Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenOptions)">
+            <summary>
+            Scaffolds the folder to obtain documentation related to Controllers.
+            </summary>
+            <param name="options">The options.</param>
+        </member>
+        <member name="T:Blockcore.Broadcasters.ClientBroadcasterBase">
+            <summary>
+            Base class for all Web Socket Broadcasters
+            </summary>
+        </member>
+        <member name="T:Blockcore.Controllers.ConnectionManagerController">
+            <summary>
+            A <see cref="T:Blockcore.Controllers.FeatureController"/> that implements API and RPC methods for the connection manager.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Controllers.ConnectionManagerController.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="M:Blockcore.Controllers.ConnectionManagerController.AddNode(System.String,System.String)">
+            <summary>
+            Sends a command to the connection manager.
+            </summary>
+            <param name="endpoint">The endpoint in string format. Specify an IP address. The default port for the network will be added automatically.</param>
+            <param name="command">The command to run. {add, remove, onetry}</param>
+            <returns>Json formatted <c>True</c> indicating success. Returns <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> formatted exception if fails.</returns>
+            <remarks>This is an API implementation of an RPC call.</remarks>
+            <exception cref="T:System.ArgumentException">Thrown if either command not supported/empty or if endpoint is invalid/empty.</exception>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Blockcore.Controllers.ConnectionManagerController.GetPeerInfo" -->
+        <member name="T:Blockcore.Controllers.Converters.BtcDecimalJsonConverter">
+            <summary>
+            Converts a decimal value to a string with the minimum number of decimals used by bitcoin (8).
+            </summary>
+        </member>
+        <member name="M:Blockcore.Controllers.Converters.BtcDecimalJsonConverter.WriteJson(Newtonsoft.Json.JsonWriter,System.Object,Newtonsoft.Json.JsonSerializer)">
+            <summary>
+            Method for writing a string formatted decimal to Json that truncates at <see cref="F:Blockcore.Controllers.Converters.BtcDecimalJsonConverter.MinDecimals"/> decimal points.</summary>
+            <param name="writer">A <see cref="T:Newtonsoft.Json.JsonWriter"/> instance.</param>
+            <param name="value">The value to be written.</param>
+            <param name="serializer">A <see cref="T:Newtonsoft.Json.JsonSerializer"/> instance.</param>
+        </member>
+        <member name="M:Blockcore.Controllers.Converters.BtcDecimalJsonConverter.ReadJson(Newtonsoft.Json.JsonReader,System.Type,System.Object,Newtonsoft.Json.JsonSerializer)">
+            <summary>
+            A method for reading a string formatted decimal in Json that was truncated at <see cref="F:Blockcore.Controllers.Converters.BtcDecimalJsonConverter.MinDecimals"/> decimals.
+            </summary>
+            <remarks>Not implemented.</remarks>
+        </member>
+        <member name="T:Blockcore.Controllers.DashboardController">
+            <summary>
+            Controller providing HTML Dashboard
+            </summary>
+        </member>
+        <member name="M:Blockcore.Controllers.DashboardController.Stats">
+            <summary>
+            Gets a web page containing the last log output for this node.
+            </summary>
+            <returns>text/html content</returns>
+        </member>
+        <member name="M:Blockcore.Controllers.DashboardController.AsyncLoopsStats">
+            <summary>
+            Returns a web page with Async Loops statistics
+            </summary>
+            <returns>text/html content</returns>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.AddressBalancesResult">
+            <summary>
+             A class that contains a list of balances per address as requested.
+             <para>
+             Should the request fail the <see cref="P:Blockcore.Controllers.Models.AddressBalancesResult.Reason"/> will be populated.
+             </para>
+            </summary>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.AddressBalanceResult">
+            <summary>
+             A class that contains the balance for a given address.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.VerboseAddressBalancesResult">
+            <summary>
+            A class that contains a list of balances data per address as requested.
+            <para>Should the request fail the <see cref="P:Blockcore.Controllers.Models.VerboseAddressBalancesResult.Reason"/> will be populated.</para>
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.AddressBalanceChange.Deposited">
+            <summary><c>true</c> if there was a deposit to an address, <c>false</c> if it was a withdrawal.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.AddressBalanceChange.BalanceChangedHeight">
+            <summary>Height of a block in which operation was confirmed.</summary>
+        </member>
+        <member name="M:Blockcore.Controllers.Models.AddressBalanceChange.ToString">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Controllers.Models.AsyncLoopModel">
+            <summary>
+            A class representing an async loop and its current status.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.AsyncLoopModel.LoopName">
+            <summary>
+            The name of the loop.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.AsyncLoopModel.Status">
+            <summary>
+            The loop's status.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.BannedPeerModel">
+            <summary>
+            Class representing a banned peer.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.BlockHeaderModel">
+            <summary>
+            Data structure for block headers.
+            Copied from RPC
+            <see cref="!:https://bitcoin.org/en/developer-reference#getblockheader"/>
+            </summary>
+        </member>
+        <member name="M:Blockcore.Controllers.Models.BlockHeaderModel.#ctor(Blockcore.Consensus.BlockInfo.BlockHeader)">
+            <summary>
+            Constructs a BlockHeaderModel from a block header object.
+            </summary>
+            <param name="blockHeader">The block header.</param>
+        </member>
+        <member name="M:Blockcore.Controllers.Models.BlockHeaderModel.#ctor">
+            <summary>
+            Constructs a BlockHeaderModel.
+            Used when deserializing block header from Json.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.BlockHeaderModel.Version">
+            <summary>
+            The blocks version number.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.BlockHeaderModel.MerkleRoot">
+            <summary>
+            The merkle root for this block encoded as hex in RPC byte order.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.BlockHeaderModel.Nonce">
+            <summary>
+            The nonce which was successful at turning this particular block
+            into one that could be added to the best block chain.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.BlockHeaderModel.Bits">
+            <summary>
+            The target threshold this block's header had to pass.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.BlockHeaderModel.PreviousBlockHash">
+            <summary>
+            The hash of the header of the previous block,
+            encoded as hex in RPC byte order.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.BlockHeaderModel.Time">
+            <summary>
+            The block time in seconds since epoch (Jan 1 1970 GMT).
+            </summary>
+        </member>
+        <member name="M:Blockcore.Controllers.Models.BlockHeaderModel.GetBytes(System.UInt32)">
+            <summary>
+            Convert compact of miner challenge to byte format,
+            serialized for transmission via RPC.
+            </summary>
+            <param name="compact">Compact representation of challenge.</param>
+            <returns>Byte representation of challenge.</returns>
+            <seealso cref="T:Blockcore.NBitcoin.Target"/>
+        </member>
+        <member name="M:Blockcore.Controllers.Models.BlockModel.#ctor">
+            <summary>
+            Creates a block model
+            Used for deserializing from Json
+            </summary>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.ConnectedPeerModel">
+            <summary>
+            Represents a connected peer.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.ConnectedPeerModel.IsInbound">
+            <summary>A value indicating whether this peer is connected via an inbound or outbound connection.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.ConnectedPeerModel.Version">
+            <summary>The version this peer is running.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.ConnectedPeerModel.RemoteSocketEndpoint">
+            <summary>The endpoint where this peer is located.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.ConnectedPeerModel.TipHeight">
+            <summary>The height of this connected peer's tip.</summary>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.DecodeRawTransactionModel">
+            <summary>
+            A class containing the necessary parameters for a block search request.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.DecodeRawTransactionModel.RawHex">
+            <summary>The transaction to be decoded in hex format.</summary>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.DisconnectPeerViewModel">
+            <summary>
+            Represents the model that will disconnect a connected peer.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.DisconnectPeerViewModel.PeerAddress">
+            <summary> The IP address and port of the connected peer to disconnect.</summary>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.GetTxOutModel">
+            <summary>
+            A model returned by a gettxout request
+            </summary>
+        </member>
+        <member name="M:Blockcore.Controllers.Models.GetTxOutModel.#ctor(Blockcore.Utilities.UnspentOutput,Blockcore.Networks.Network,Blockcore.Consensus.Chain.ChainedHeader)">
+            <summary>
+            Initializes a GetTxOutModel instance.
+            </summary>
+            <param name="unspentOutputs">The <see cref="T:Blockcore.Utilities.UnspentOutput"/>.</param>
+            <param name="network">The network the transaction occurred on.</param>
+            <param name="tip">The current consensus tip's <see cref="T:Blockcore.Consensus.Chain.ChainedHeader"/>.</param>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.GetTxOutModel.BestBlock">
+            <summary>The block hash of the consensus tip.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.GetTxOutModel.Confirmations">
+            <summary>The number of confirmations for the unspent output.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.GetTxOutModel.Value">
+            <summary>The value of the output.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.GetTxOutModel.ScriptPubKey">
+            <summary>The output's <see cref="P:Blockcore.Controllers.Models.GetTxOutModel.ScriptPubKey"/></summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.GetTxOutModel.Coinbase">
+            <summary>Boolean indicating if the unspent output is a coinbase transaction.</summary>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.LogRuleModel">
+            <summary>
+            A class representing a log rule as found in NLog.config.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.LogRuleModel.RuleName">
+            <summary>
+            The name of the rule.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.LogRuleModel.LogLevel">
+            <summary>
+            The log level.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.LogRuleModel.Filename">
+            <summary>
+            The full path of the log file.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.LogRuleRequest.RuleName">
+            <summary>
+            The name of the rule.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.LogRuleRequest.LogLevel">
+            <summary>
+            The log level.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.SetBanPeerViewModel">
+            <summary>
+            Represents the model that will ban and disconnect a connected peer.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.SetBanPeerViewModel.BanCommand">
+            <summary>
+            Whether to add or remove the node from the banned list.
+            <para>
+            Options are "Add" or "Remove".
+            </para>
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.SetBanPeerViewModel.BanDurationSeconds">
+            <summary>
+            The duration in seconds the peer will be banned.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.SetBanPeerViewModel.PeerAddress">
+            <summary>
+            The IP address of the connected peer to ban.
+            <para>
+            The port should not be specified in this instance.
+            </para>
+            </summary>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.StatusModel">
+            <summary>
+            Class representing the status of the currently running node.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Controllers.Models.StatusModel.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Blockcore.Controllers.Models.StatusModel"/> class.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.StatusModel.Agent">
+            <summary>The node's user agent that will be shared with peers in the version handshake.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.StatusModel.Version">
+            <summary>The node's version.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.StatusModel.ExternalAddress">
+            <summary>The public IP address of the node, either specified in config or ascertained by the endpoint tracker.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.StatusModel.Network">
+            <summary>The network the current node is running on.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.StatusModel.CoinTicker">
+            <summary>The coin ticker to use with external applications.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.StatusModel.ProcessId">
+            <summary>System identifier of the node's process.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.StatusModel.ConsensusHeight">
+            <summary>The height of the consensus.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.StatusModel.BlockStoreHeight">
+            <summary>Height of the most recent block in persistent storage.</summary>
+            <seealso cref="!:Blockcore.Features.BlockRepository.HighestPersistedBlock.Height"/>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.StatusModel.BestPeerHeight">
+            <summary>The tip of the most advanced peer our node is connected to or <c>null</c> if no peer is connected.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.StatusModel.InboundPeers">
+            <summary>A collection of inbound peers.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.StatusModel.OutboundPeers">
+            <summary>A collection of outbound peers.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.StatusModel.FeaturesData">
+            <summary>A collection of all the features enabled by this node.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.StatusModel.DataDirectoryPath">
+            <summary>The path to the directory where the data is saved.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.StatusModel.RunningTime">
+            <summary>Time this node has been running.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.StatusModel.Difficulty">
+            <summary>The current network difficulty target.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.StatusModel.ProtocolVersion">
+            <summary>The node's protocol version</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.StatusModel.Testnet">
+            <summary>Is the node on the testnet.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.StatusModel.RelayFee">
+            <summary>The current transaction relay fee.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.StatusModel.State">
+            <summary>Returns the status of the node.</summary>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.FeatureData">
+            <summary>
+            Class containing some details about the features loaded by this node.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.FeatureData.Namespace">
+            <summary>
+            The namespace of the feature.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.FeatureData.State">
+            <summary>
+            The state in which the feature currently is.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.TransactionModel">
+            <summary>
+            A class representing a transaction.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Controllers.Models.TransactionModel.#ctor(Blockcore.Consensus.TransactionInfo.Transaction)">
+            <summary>
+            Creates a <see cref="T:Blockcore.Controllers.Models.TransactionModel"/> containing the hash of the given transaction.
+            </summary>
+            <param name="trx">A valid <see cref="T:Blockcore.Consensus.TransactionInfo.Transaction"/></param>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.TransactionModel.Hex">
+            <summary>The transaction in hexadecimal format.</summary>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.TransactionBriefModel">
+            <summary>
+            Creates a concise transaction model containing the hashed transaction.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.TransactionVerboseModel">
+            <summary>
+            Creates a more robust transaction model.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Controllers.Models.TransactionVerboseModel.#ctor(Blockcore.Consensus.TransactionInfo.Transaction,Blockcore.Networks.Network,Blockcore.Consensus.Chain.ChainedHeader,Blockcore.Consensus.Chain.ChainedHeader)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Blockcore.Controllers.Models.TransactionVerboseModel"/> class.
+            </summary>
+            <param name="trx">The transaction.</param>
+            <param name="network">The network the transaction occurred on.</param>
+            <param name="block">A <see cref="T:Blockcore.Consensus.Chain.ChainedHeader"/> of the block that contains the transaction.</param>
+            <param name="tip">A <see cref="T:Blockcore.Consensus.Chain.ChainedHeader"/> of the current tip.</param>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.TransactionVerboseModel.TxId">
+            <summary>The transaction id.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.TransactionVerboseModel.Hash">
+            <summary>The transaction hash (differs from txid for witness transactions).</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.TransactionVerboseModel.Version">
+            <summary>The transaction version number (typically 1).</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.TransactionVerboseModel.Size">
+            <summary>The serialized transaction size.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.TransactionVerboseModel.VSize">
+            <summary>The virtual transaction size (differs from size for witness transactions).</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.TransactionVerboseModel.Weight">
+            <summary>The transaction's weight (between vsize*4-3 and vsize*4).</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.TransactionVerboseModel.LockTime">
+            <summary>If nonzero, block height or timestamp when transaction is final.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.TransactionVerboseModel.VIn">
+            <summary>A list of inputs.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.TransactionVerboseModel.VOut">
+            <summary>A list of outputs.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.TransactionVerboseModel.BlockHash">
+            <summary>The hash of the block containing this transaction.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.TransactionVerboseModel.Confirmations">
+            <summary>The number of confirmations of the transaction.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.TransactionVerboseModel.Time">
+            <summary>The time the transaction was added to a block.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.TransactionVerboseModel.BlockTime">
+            <summary>The time the block was confirmed.</summary>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.Vin">
+            <summary>
+            A class describing a transaction input.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Controllers.Models.Vin.#ctor(Blockcore.Consensus.TransactionInfo.OutPoint,Blockcore.NBitcoin.Sequence,Blockcore.Consensus.ScriptInfo.Script)">
+            <summary>
+            Initializes a <see cref="T:Blockcore.Controllers.Models.Vin"/> instance.
+            </summary>
+            <param name="prevOut">The previous output being used as an input.</param>
+            <param name="sequence">The transaction's sequence number.</param>
+            <param name="scriptSig">The scriptSig</param>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.Vin.Coinbase">
+            <summary>The scriptsig if this was a coinbase transaction.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.Vin.TxId">
+            <summary>The transaction ID.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.Vin.VOut">
+            <summary>The index of the output.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.Vin.ScriptSig">
+            <summary>The transaction's scriptsig.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.Vin.Sequence">
+            <summary>The transaction's sequence number. <see cref="!:https://bitcoin.org/en/developer-guide#locktime-and-sequence-number"/></summary>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.Vout">
+            <summary>
+            A class describing a transaction output.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Controllers.Models.Vout.#ctor(System.Int32,Blockcore.Consensus.TransactionInfo.TxOut,Blockcore.Networks.Network)">
+            <summary>
+            Initializes an instance of the <see cref="T:Blockcore.Controllers.Models.Vout"/> class.
+            </summary>
+            <param name="n">The index of the output.</param>
+            <param name="txout">A <see cref="T:Blockcore.Consensus.TransactionInfo.TxOut"/></param>
+            <param name="network">The network where the transaction occured.</param>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.Vout.Value">
+            <summary>The value of the output.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.Vout.N">
+            <summary>The index of the output.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.Vout.ScriptPubKey">
+            <summary>The output's scriptpubkey.</summary>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.Script">
+            <summary>
+            A class describing a transaction script.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Controllers.Models.Script.#ctor(Blockcore.Consensus.ScriptInfo.Script)">
+            <summary>
+            Initializes a transaction <see cref="T:Blockcore.Controllers.Models.Script"/>, which contains the assembly and a hexadecimal representation of the script.
+            </summary>
+            <param name="script">A <see cref="T:Blockcore.Consensus.ScriptInfo.Script"/>.</param>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.Script.Asm">
+            <summary>The script's assembly.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.Script.Hex">
+            <summary>A hexadecimal representation of the script.</summary>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.ScriptPubKey">
+            <summary>
+            A class describing a ScriptPubKey.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Controllers.Models.ScriptPubKey.#ctor(Blockcore.Consensus.ScriptInfo.Script,Blockcore.Networks.Network)">
+            <summary>
+            Initializes an instance of the <see cref="T:Blockcore.Controllers.Models.ScriptPubKey"/> class.
+            </summary>
+            <param name="script">The script.</param>
+            <param name="network">The network where the transaction was conducted.</param>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.ScriptPubKey.ReqSigs">
+            <summary>The number of required sigs.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.ScriptPubKey.Type">
+            <summary>The type of script.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.Models.ScriptPubKey.Addresses">
+            <summary>A list of output addresses.</summary>
+        </member>
+        <member name="M:Blockcore.Controllers.Models.ScriptPubKey.GetScriptType(Blockcore.Consensus.ScriptInfo.ScriptTemplate)">
+            <summary>
+            A method that returns a script type description.
+            </summary>
+            <param name="template">A <see cref="T:Blockcore.Consensus.ScriptInfo.ScriptTemplate"/> used for the script.</param>
+            <returns>A string describin the script type.</returns>
+        </member>
+        <member name="T:Blockcore.Controllers.Models.ValidatedAddress">
+            <summary>
+            
+            https://bitcoincore.org/en/doc/0.17.0/rpc/util/validateaddress/
+            
+            validateaddress "address"
+            
+            Return information about the given bitcoin address.
+            
+            DEPRECATION WARNING: Parts of this command have been deprecated and moved to getaddressinfo. Clients must
+            transition to using getaddressinfo to access this information before upgrading to v0.18. The following deprecated
+            fields have moved to getaddressinfo and will only be shown here with -deprecatedrpc= validateaddress: ismine, iswatchonly,
+            script, hex, pubkeys, sigsrequired, pubkey, addresses, embedded, iscompressed, account, timestamp, hdkeypath, kdmasterkeyid.
+            
+            Arguments:
+            1. "address"                    (string, required) The bitcoin address to validate
+            
+            
+            Result:
+            {
+                "isvalid" : true|false,     (boolean) If the address is valid or not.If not, this is the only property returned.
+                "address" : "address",      (string) The bitcoin address validated
+                "scriptPubKey" : "hex",     (string) The hex encoded scriptPubKey generated by the address
+                "isscript" : true|false,    (boolean) If the key is a script
+                "iswitness" : true|false,   (boolean) If the address is a witness address
+                "witness_version" : version (numeric, optional) The version number of the witness program
+                "witness_program" : "hex"   (string, optional) The hex value of the witness program
+            }
+            </summary>
+        </member>
+        <member name="T:Blockcore.Controllers.NetworkController">
+            <summary>
+            Provides methods that interact with the network elements of the full node.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Controllers.NetworkController.connectionManager">
+            <summary>The connection manager.</summary>
+        </member>
+        <member name="F:Blockcore.Controllers.NetworkController.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Controllers.NetworkController.network">
+            <summary>The network the node is running on.</summary>
+        </member>
+        <member name="F:Blockcore.Controllers.NetworkController.peerBanning">
+            <summary>Network peer banning behaviour.</summary>
+        </member>
+        <member name="M:Blockcore.Controllers.NetworkController.DisconnectPeer(Blockcore.Controllers.Models.DisconnectPeerViewModel)">
+            <summary>
+            Disconnects a connected peer.
+            </summary>
+            <param name="viewModel">The model that represents the peer to disconnect.</param>
+            <returns><see cref="T:Microsoft.AspNetCore.Mvc.OkResult"/></returns>
+        </member>
+        <member name="M:Blockcore.Controllers.NetworkController.SetBan(Blockcore.Controllers.Models.SetBanPeerViewModel)">
+            <summary>
+            Adds or remove a peer from the node's banned peers list.
+            </summary>
+            <param name="viewModel">The model that represents the peer to add or remove from the banned list.</param>
+            <returns><see cref="T:Microsoft.AspNetCore.Mvc.OkResult"/></returns>
+        </member>
+        <member name="M:Blockcore.Controllers.NetworkController.ClearBannedPeers(System.Boolean)">
+            <summary>
+            Clears the node of all banned peers.
+            </summary>
+            <param name="corsProtection">This body parameter is here to prevent a CORS call from triggering method execution.</param>
+            <remarks>
+            <seealso cref="!:https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#Simple_requests"/>
+            </remarks>
+            <returns><see cref="T:Microsoft.AspNetCore.Mvc.OkResult"/></returns>
+        </member>
+        <member name="T:Blockcore.Controllers.NodeController">
+            <summary>
+            Provides methods that interact with the full node.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Controllers.NodeController.fullNode">
+            <summary>Full Node.</summary>
+        </member>
+        <member name="F:Blockcore.Controllers.NodeController.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Controllers.NodeController.chainState">
+            <summary>Information about node's chain.</summary>
+        </member>
+        <member name="F:Blockcore.Controllers.NodeController.dateTimeProvider">
+            <summary>Provider of date and time functions.</summary>
+        </member>
+        <member name="F:Blockcore.Controllers.NodeController.nodeSettings">
+            <summary>The settings for the node.</summary>
+        </member>
+        <member name="F:Blockcore.Controllers.NodeController.connectionManager">
+            <summary>The connection manager.</summary>
+        </member>
+        <member name="F:Blockcore.Controllers.NodeController.chainIndexer">
+            <summary>Thread safe access to the best chain of block headers from genesis.</summary>
+        </member>
+        <member name="F:Blockcore.Controllers.NodeController.networkDifficulty">
+            <summary>An interface implementation used to retrieve the network's difficulty target.</summary>
+        </member>
+        <member name="F:Blockcore.Controllers.NodeController.pooledTransaction">
+            <summary>An interface implementaiton used to retrieve a pooled transaction.</summary>
+        </member>
+        <member name="F:Blockcore.Controllers.NodeController.pooledGetUnspentTransaction">
+            <summary>An interface implementation used to retrieve unspent transactions from a pooled source.</summary>
+        </member>
+        <member name="F:Blockcore.Controllers.NodeController.getUnspentTransaction">
+            <summary>An interface implementation used to retrieve unspent transactions.</summary>
+        </member>
+        <member name="F:Blockcore.Controllers.NodeController.network">
+            <summary>Specification of the network the node runs on.</summary>
+        </member>
+        <member name="F:Blockcore.Controllers.NodeController.blockStore">
+            <summary>An interface implementation for the blockstore.</summary>
+        </member>
+        <member name="F:Blockcore.Controllers.NodeController.asyncProvider">
+            <summary>Provider for creating and managing background async loop tasks.</summary>
+        </member>
+        <member name="M:Blockcore.Controllers.NodeController.Status">
+            <summary>
+            Gets general information about this full node including the version,
+            protocol version, network name, coin ticker, and consensus height.
+            </summary>
+            <returns>A <see cref="T:Blockcore.Controllers.Models.StatusModel"/> with information about the node.</returns>
+        </member>
+        <member name="M:Blockcore.Controllers.NodeController.GetBlockHeader(System.String,System.Boolean)">
+            <summary>
+            Gets the block header of a block identified by a block hash.
+            </summary>
+            <param name="hash">The hash of the block to retrieve.</param>
+            <param name="isJsonFormat">A flag that specifies whether to return the block header in the JSON format. Defaults to true. A value of false is currently not supported.</param>
+            <returns>Json formatted <see cref="T:Blockcore.Controllers.Models.BlockHeaderModel"/>. <c>null</c> if block not found. Returns <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> formatted error if fails.</returns>
+            <exception cref="T:System.NotImplementedException">Thrown if isJsonFormat = false</exception>"
+            <exception cref="T:System.ArgumentException">Thrown if hash is empty.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if logger is not provided.</exception>
+            <remarks>Binary serialization is not supported with this method.</remarks>
+        </member>
+        <member name="M:Blockcore.Controllers.NodeController.GetRawTransactionAsync(System.String,System.Boolean,System.String)">
+            <summary>
+            Gets a raw transaction that is present on this full node.
+            This method first searches the transaction pool and then tries the block store.
+            </summary>
+            <param name="trxid">The transaction ID (a hash of the trancaction).</param>
+            <param name="verbose">A flag that specifies whether to return verbose information about the transaction.</param>
+            <param name="blockHash">The hash of the block in which to look for the transaction.</param>
+            <returns>Json formatted <see cref="T:Blockcore.Controllers.Models.TransactionBriefModel"/> or <see cref="T:Blockcore.Controllers.Models.TransactionVerboseModel"/>. <c>null</c> if transaction not found. Returns <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> formatted error if otherwise fails.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if fullNode, network, or chain are not available.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if trxid is empty or not a valid<see cref="T:Blockcore.NBitcoin.uint256"/>.</exception>
+            <remarks>Requires txindex=1, otherwise only txes that spend or create UTXOs for a wallet can be returned.</remarks>
+        </member>
+        <member name="M:Blockcore.Controllers.NodeController.DecodeRawTransaction(Blockcore.Controllers.Models.DecodeRawTransactionModel)">
+            <summary>
+            Gets a JSON representation for a given transaction in hex format.
+            </summary>
+            <param name="request">A class containing the necessary parameters for a block search request.</param>
+            <returns>The JSON representation of the transaction.</returns>
+        </member>
+        <member name="M:Blockcore.Controllers.NodeController.ValidateAddress(System.String)">
+            <summary>
+            Validates a bech32 or base58 bitcoin address.
+            </summary>
+            <param name="address">A Bitcoin address to validate in a string format.</param>
+            <returns>Json formatted <see cref="T:Blockcore.Controllers.Models.ValidatedAddress"/> containing a boolean indicating address validity. Returns <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> formatted error if fails.</returns>
+            <exception cref="T:System.ArgumentException">Thrown if address provided is empty.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if network is not provided.</exception>
+        </member>
+        <member name="M:Blockcore.Controllers.NodeController.GetTxOutAsync(System.String,System.UInt32,System.Boolean)">
+            <summary>
+            Gets the unspent outputs of a specific vout in a transaction.
+            API implementation of RPC call.
+            </summary>
+            <param name="trxid">The transaction ID as a hash string.</param>
+            <param name="vout">The vout to get the unspent outputs for.</param>
+            <param name="includeMemPool">A flag that specifies whether to include transactions in the mempool.</param>
+            <returns>Json formatted <see cref="T:Blockcore.Controllers.Models.GetTxOutModel"/>. <c>null</c> if no unspent outputs given parameters. Returns <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> formatted error if fails.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if network or chain not provided.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if trxid is empty or not a valid <see cref="T:Blockcore.NBitcoin.uint256"/></exception>
+        </member>
+        <member name="M:Blockcore.Controllers.NodeController.Shutdown(System.Boolean)">
+            <summary>
+            Triggers a shutdown of this node.
+            </summary>
+            <param name="corsProtection">This body parameter is here to prevent a Cross Origin Resource Sharing
+            (CORS) call from triggering method execution. CORS relaxes security and you can read more about this
+            <a href="https://docs.microsoft.com/en-us/aspnet/core/security/cors?view=aspnetcore-2.1">here</a>.</param>
+            <remarks>
+            <seealso cref="!:https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#Simple_requests"/>
+            </remarks>
+            <returns><see cref="T:Microsoft.AspNetCore.Mvc.OkResult"/></returns>
+        </member>
+        <member name="M:Blockcore.Controllers.NodeController.UpdateLogLevel(Blockcore.Controllers.Models.LogRulesRequest)">
+            <summary>
+            Changes the log levels for the specified loggers.
+            </summary>
+            <param name="request">The request containing the loggers to modify.</param>
+            <returns><see cref="T:Microsoft.AspNetCore.Mvc.OkResult"/></returns>
+        </member>
+        <member name="M:Blockcore.Controllers.NodeController.GetLogRules">
+            <summary>
+            Get the enabled log rules.
+            </summary>
+            <returns>A list of log rules.</returns>
+        </member>
+        <member name="M:Blockcore.Controllers.NodeController.GetAsyncLoops">
+            <summary>
+            Get the currently running async loops/delegates/tasks for diagnostic purposes.
+            </summary>
+            <returns>A list of running async loops/delegates/tasks.</returns>
+        </member>
+        <member name="M:Blockcore.Controllers.NodeController.GetTransactionBlock(Blockcore.NBitcoin.uint256,Blockcore.IFullNode,Blockcore.Consensus.Chain.ChainIndexer)">
+            <summary>
+            Retrieves a transaction block given a valid hash.
+            This function is used by other methods in this class and not explicitly by RPC/API.
+            </summary>
+            <param name="trxid">A valid uint256 hash</param>
+            <param name="fullNode">The full node. Used to access <see cref="T:Blockcore.Interfaces.IBlockStore"/>.</param>
+            <param name="chain">The full node's chain. Used to get <see cref="T:Blockcore.Consensus.Chain.ChainedHeader"/> block.</param>
+            <returns>A <see cref="T:Blockcore.Consensus.Chain.ChainedHeader"/> for the given transaction hash. Returns <c>null</c> if fails.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if fullnode is not provided.</exception>
+        </member>
+        <member name="M:Blockcore.Controllers.NodeController.GetNetworkDifficulty(Blockcore.Interfaces.INetworkDifficulty)">
+            <summary>
+            Retrieves the difficulty target of the full node's network.
+            </summary>
+            <param name="networkDifficulty">The network difficulty interface.</param>
+            <returns>A network difficulty <see cref="T:Blockcore.NBitcoin.Target"/>. Returns <c>null</c> if fails.</returns>
+        </member>
+        <member name="M:Blockcore.Controllers.NodeController.GetTransactionBlock(Blockcore.NBitcoin.uint256)">
+            <summary>
+            Retrieves the block that the transaction is in.
+            </summary>
+            <param name="trxid">The transaction id.</param>
+            <returns>Returns the <see cref="T:Blockcore.Consensus.Chain.ChainedHeader"/> that the transaction is in. Returns <c>null</c> if not found.</returns>
+        </member>
+        <member name="P:Blockcore.Controllers.IRestApiClientBase.EndpointUrl">
+            <summary>Api endpoint URL that client uses to make calls.</summary>
+        </member>
+        <member name="T:Blockcore.Controllers.RestApiClientBase">
+            <summary>Client for making API calls for methods provided by controllers.</summary>
+        </member>
+        <member name="F:Blockcore.Controllers.RestApiClientBase.endpointUrl">
+            <summary>URL of API endpoint.</summary>
+        </member>
+        <member name="F:Blockcore.Controllers.RestApiClientBase.AttemptDelayMs">
+            <summary>Delay between retries.</summary>
+        </member>
+        <member name="P:Blockcore.Controllers.RestApiClientBase.EndpointUrl">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Controllers.JsonContent">
+            <summary>
+            Helper class to interpret a string as json.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Controllers.HttpClientFactory">
+            <summary>
+            TODO: this should be removed when compatible with full node API, instead, we should use
+            services.AddHttpClient from Microsoft.Extensions.Http
+            </summary>
+        </member>
+        <member name="M:Blockcore.Controllers.HttpClientFactory.CreateClient(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Utilities.ModelStateErrors.ModelStateErrors.BuildErrorResponse(Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary)">
+            <summary>
+            Builds an <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> containing errors contained in the <see cref="P:Microsoft.AspNetCore.Mvc.ControllerBase.ModelState"/>.
+            </summary>
+            <returns>A result containing the errors.</returns>
+        </member>
+    </members>
+</doc>

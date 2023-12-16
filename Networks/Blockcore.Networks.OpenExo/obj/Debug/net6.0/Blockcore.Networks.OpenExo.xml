@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Blockcore.Networks.OpenExo</name>
+    </assembly>
+    <members>
+        <member name="T:OpenExo.Networks.Consensus.OpenExoPosConsensusOptions">
+            <inheritdoc />
+        </member>
+        <member name="F:OpenExo.Networks.Consensus.OpenExoPosConsensusOptions.OpenExoCoinstakeMinConfirmationActivationHeightMainnet">
+            <summary>Coinstake minimal confirmations softfork activation height for mainnet.</summary>
+        </member>
+        <member name="F:OpenExo.Networks.Consensus.OpenExoPosConsensusOptions.OpenExoCoinstakeMinConfirmationActivationHeightTestnet">
+            <summary>Coinstake minimal confirmations softfork activation height for testnet.</summary>
+        </member>
+        <member name="T:OpenExo.Networks.Deployments.OpenExoBIP9Deployments">
+            <summary>
+            BIP9 deployments for the Blockcore sample coin network.
+            </summary>
+        </member>
+        <member name="M:OpenExo.Networks.Deployments.OpenExoBIP9Deployments.#ctor">
+            <summary>
+            Constructs the BIP9 deployments array.
+            </summary>
+        </member>
+        <member name="M:OpenExo.Networks.Deployments.OpenExoBIP9Deployments.GetFlags(System.Int32)">
+            <summary>
+            Gets the deployment flags to set when the deployment activates.
+            </summary>
+            <param name="deployment">The deployment number.</param>
+            <returns>The deployment flags.</returns>
+        </member>
+        <member name="T:OpenExo.Networks.Policies.OpenExoStandardScriptsRegistry">
+            <summary>
+            Blockcore sample coin-specific standard transaction definitions.
+            </summary>
+        </member>
+        <member name="T:OpenExo.Networks.Rules.OpenExoBugFixPosFutureDriftRule">
+            <summary>
+            A rule that will verify the block time drift is according to the PoS consensus rules for the <see cref="T:OpenExo.Networks.OpenExoMain"/> network (and its test networks).
+            New networks must use the <see cref="T:Blockcore.Features.Consensus.Rules.CommonRules.PosFutureDriftRule"/>.
+            </summary>
+        </member>
+        <member name="F:OpenExo.Networks.Rules.OpenExoBugFixPosFutureDriftRule.DriftingBugFixTimestamp">
+            <summary>Drifting Bug Fix, hardfork on Wed May 16,2018 00:00:00 GMT.</summary>
+        </member>
+        <member name="F:OpenExo.Networks.Rules.OpenExoBugFixPosFutureDriftRule.BugFutureDriftSeconds">
+            <summary>Old future drift in seconds before the hardfork.</summary>
+        </member>
+        <member name="M:OpenExo.Networks.Rules.OpenExoBugFixPosFutureDriftRule.GetFutureDrift(System.Int64)">
+            <summary>
+            Gets future drift for the provided timestamp.
+            </summary>
+            <remarks>
+            Future drift is maximal allowed block's timestamp difference over adjusted time.
+            If this difference is greater block won't be accepted.
+            </remarks>
+            <param name="time">UNIX timestamp.</param>
+            <returns>Value of the future drift.</returns>
+        </member>
+        <member name="M:OpenExo.Networks.Rules.OpenExoBugFixPosFutureDriftRule.IsDriftReduced(System.Int64)">
+            <summary>
+            Checks whether the future drift should be reduced after provided timestamp.
+            </summary>
+            <param name="time">UNIX timestamp.</param>
+            <returns><c>true</c> if for this timestamp future drift should be reduced, <c>false</c> otherwise.</returns>
+        </member>
+        <member name="T:OpenExo.Networks.Rules.OpenExoHeaderVersionRule">
+            <summary>
+            Checks if <see cref="T:OpenExo.Networks.OpenExoMain"/> network block's header has a valid block version.
+            </summary>
+        </member>
+        <member name="M:OpenExo.Networks.Rules.OpenExoHeaderVersionRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadVersion">Thrown if block's version is outdated or otherwise invalid.</exception>
+        </member>
+    </members>
+</doc>

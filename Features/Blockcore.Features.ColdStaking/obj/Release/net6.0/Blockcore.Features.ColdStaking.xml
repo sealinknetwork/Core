@@ -1,0 +1,593 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Blockcore.Features.ColdStaking</name>
+    </assembly>
+    <members>
+        <member name="T:Blockcore.Features.ColdStaking.Api.Controllers.ColdStakingController">
+            <summary>
+            Controller providing operations for cold staking.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.ColdStaking.Api.Controllers.ColdStakingController.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.Api.Controllers.ColdStakingController.GetColdStakingInfo(Blockcore.Features.ColdStaking.Api.Models.GetColdStakingInfoRequest)">
+            <summary>
+            Gets general information related to cold staking.
+            </summary>
+            <param name="request">A <see cref="T:Blockcore.Features.ColdStaking.Api.Models.GetColdStakingInfoRequest"/> object containing the
+            parameters  required to obtain cold staking information.</param>
+            <returns>A <see cref="T:Blockcore.Features.ColdStaking.Api.Models.GetColdStakingInfoResponse"/> object containing the cold staking information.</returns>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.Api.Controllers.ColdStakingController.CreateColdStakingAccount(Blockcore.Features.ColdStaking.Api.Models.CreateColdStakingAccountRequest)">
+            <summary>
+            Creates a cold staking account.
+            </summary>
+            <remarks>This method is used to create cold staking accounts on each machine/wallet, if required,
+            prior to calling <see cref="M:Blockcore.Features.ColdStaking.Api.Controllers.ColdStakingController.GetColdStakingAddress(Blockcore.Features.ColdStaking.Api.Models.GetColdStakingAddressRequest)"/>.</remarks>
+            <param name="request">A <see cref="T:Blockcore.Features.ColdStaking.Api.Models.CreateColdStakingAccountRequest"/> object containing the parameters
+            required for creating the cold staking account.</param>
+            <returns>A <see cref="!:CreateColdStakingAccountResponse>"/> object containing the account name.</returns>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.Api.Controllers.ColdStakingController.GetColdStakingAddress(Blockcore.Features.ColdStaking.Api.Models.GetColdStakingAddressRequest)">
+            <summary>
+            Gets a cold staking address. Assumes that the cold staking account exists.
+            </summary>
+            <remarks>This method is used to generate cold staking addresses on each machine/wallet
+            which will then be used with <see cref="M:Blockcore.Features.ColdStaking.Api.Controllers.ColdStakingController.SetupColdStaking(Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingRequest)"/>.</remarks>
+            <param name="request">A <see cref="T:Blockcore.Features.ColdStaking.Api.Models.GetColdStakingAddressRequest"/> object containing the parameters
+            required for generating the cold staking address.</param>
+            <returns>A <see cref="!:GetColdStakingAddressResponse>"/> object containing the cold staking address.</returns>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.Api.Controllers.ColdStakingController.SetupColdStaking(Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingRequest)">
+            <summary>
+            Spends funds from a normal wallet addresses to the cold staking script. It is expected that this
+            spend will be detected by both the hot wallet and cold wallet and allow cold staking to occur using this
+            transaction's output as input.
+            </summary>
+            <param name="request">A <see cref="T:Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingRequest"/> object containing the cold staking setup parameters.</param>
+            <returns>A <see cref="T:Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingResponse"/> object containing the hex representation of the transaction.</returns>
+            <seealso cref="!:ColdStakingManager.GetColdStakingScript(ScriptId, ScriptId)"/>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.Api.Controllers.ColdStakingController.SetupOfflineStaking(Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingRequest)">
+            <summary>
+            Spends funds from a normal wallet addresses to the cold staking script. It is expected that this
+            spend will be detected by both the hot wallet and cold wallet and allow cold staking to occur using this
+            transaction's output as input.
+            </summary>
+            <param name="request">A <see cref="T:Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingRequest"/> object containing the cold staking setup parameters.</param>
+            <returns>A <see cref="T:Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingResponse"/> object containing the hex representation of the transaction.</returns>
+            <seealso cref="!:ColdStakingManager.GetColdStakingScript(ScriptId, ScriptId)"/>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.Api.Controllers.ColdStakingController.ColdStakingWithdrawal(Blockcore.Features.ColdStaking.Api.Models.ColdStakingWithdrawalRequest)">
+            <summary>
+            Spends funds from the cold staking wallet account back to a normal wallet addresses. It is expected that this
+            spend will be detected by both the hot wallet and cold wallet and reduce the amount available for cold staking.
+            </summary>
+            <param name="request">A <see cref="T:Blockcore.Features.ColdStaking.Api.Models.ColdStakingWithdrawalRequest"/> object containing the cold staking withdrawal parameters.</param>
+            <returns>A <see cref="T:Blockcore.Features.ColdStaking.Api.Models.ColdStakingWithdrawalResponse"/> object containing the hex representation of the transaction.</returns>
+            <seealso cref="!:ColdStakingManager.GetColdStakingScript(ScriptId, ScriptId)"/>
+        </member>
+        <member name="T:Blockcore.Features.ColdStaking.Api.Controllers.ColdStakingWalletRPCController">
+            <summary> All functionality is in WalletRPCController, just inherit the functionality in this feature.</summary>
+        </member>
+        <member name="T:Blockcore.Features.ColdStaking.Api.Models.GetColdStakingInfoRequest">
+            <summary>
+            The data structure used by a client to obtain information related to cold staking.
+            Refer to <see cref="M:Blockcore.Features.ColdStaking.Api.Controllers.ColdStakingController.GetColdStakingInfo(Blockcore.Features.ColdStaking.Api.Models.GetColdStakingInfoRequest)"/>.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.GetColdStakingInfoRequest.WalletName">
+            <summary>The wallet name.</summary>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.Api.Models.GetColdStakingInfoRequest.ToString">
+            <summary>Creates a string containing the properties of this object.</summary>
+            <returns>A string containing the properties of the object.</returns>
+        </member>
+        <member name="T:Blockcore.Features.ColdStaking.Api.Models.GetColdStakingInfoResponse">
+            <summary>
+            The data structure received by a client obtaining information relating to cold staking.
+            Refer to <see cref="T:Blockcore.Features.ColdStaking.Api.Models.GetColdStakingInfoRequest"/>.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.GetColdStakingInfoResponse.ColdWalletAccountExists">
+            <summary>Set if the cold wallet account exists.</summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.GetColdStakingInfoResponse.HotWalletAccountExists">
+            <summary>Set if the hot wallet account exists.</summary>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.Api.Models.GetColdStakingInfoResponse.ToString">
+            <summary>Creates a string containing the properties of this object.</summary>
+            <returns>A string containing the properties of the object.</returns>
+        </member>
+        <member name="T:Blockcore.Features.ColdStaking.Api.Models.CreateColdStakingAccountRequest">
+            <summary>
+            The data structure used by a client creating a cold staking account.
+            Refer to <see cref="M:Blockcore.Features.ColdStaking.Api.Controllers.ColdStakingController.CreateColdStakingAccount(Blockcore.Features.ColdStaking.Api.Models.CreateColdStakingAccountRequest)"/>.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.CreateColdStakingAccountRequest.WalletName">
+            <summary>The wallet name.</summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.CreateColdStakingAccountRequest.WalletPassword">
+            <summary>The wallet password.</summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.CreateColdStakingAccountRequest.IsColdWalletAccount">
+            <summary>Determines from which of the cold staking accounts the address will be taken.</summary>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.Api.Models.CreateColdStakingAccountRequest.ToString">
+            <summary>Creates a string containing the properties of this object.</summary>
+            <returns>A string containing the properties of the object.</returns>
+        </member>
+        <member name="T:Blockcore.Features.ColdStaking.Api.Models.CreateColdStakingAccountResponse">
+            <summary>
+            The response data structure received by a client creating a cold staking account.
+            Refer to <see cref="T:Blockcore.Features.ColdStaking.Api.Models.CreateColdStakingAccountRequest"/>.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.CreateColdStakingAccountResponse.AccountName">
+            <summary>The name of the account that was created or perhaps already existed.</summary>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.Api.Models.CreateColdStakingAccountResponse.ToString">
+            <summary>Creates a string containing the properties of this object.</summary>
+            <returns>A string containing the properties of the object.</returns>
+        </member>
+        <member name="T:Blockcore.Features.ColdStaking.Api.Models.GetColdStakingAddressRequest">
+            <summary>
+            The data structure used by a client requesting a cold staking address.
+            Refer to <see cref="M:Blockcore.Features.ColdStaking.Api.Controllers.ColdStakingController.GetColdStakingAddress(Blockcore.Features.ColdStaking.Api.Models.GetColdStakingAddressRequest)"/>.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.GetColdStakingAddressRequest.WalletName">
+            <summary>The wallet name.</summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.GetColdStakingAddressRequest.IsColdWalletAddress">
+            <summary>Determines from which of the cold staking accounts the address will be taken.</summary>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.Api.Models.GetColdStakingAddressRequest.ToString">
+            <summary>Creates a string containing the properties of this object.</summary>
+            <returns>A string containing the properties of the object.</returns>
+        </member>
+        <member name="T:Blockcore.Features.ColdStaking.Api.Models.GetColdStakingAddressResponse">
+            <summary>
+            The response data structure received by a client after requesting a cold staking address.
+            Refer to <see cref="T:Blockcore.Features.ColdStaking.Api.Models.GetColdStakingAddressRequest"/>.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.GetColdStakingAddressResponse.Address">
+            <summary>A Base58 cold staking address from the hot or cold wallet accounts.</summary>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.Api.Models.GetColdStakingAddressResponse.ToString">
+            <summary>Creates a string containing the properties of this object.</summary>
+            <returns>A string containing the properties of the object.</returns>
+        </member>
+        <member name="T:Blockcore.Features.ColdStaking.Api.Models.ColdStakingWithdrawalRequest">
+            <summary>
+            The data structure used by a client requesting that a cold staking cancellation be performed.
+            Refer to <see cref="M:Blockcore.Features.ColdStaking.Api.Controllers.ColdStakingController.ColdStakingWithdrawal(Blockcore.Features.ColdStaking.Api.Models.ColdStakingWithdrawalRequest)"/>.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.ColdStakingWithdrawalRequest.ReceivingAddress">
+            <summary>The Base58 receiving address.</summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.ColdStakingWithdrawalRequest.WalletName">
+            <summary>The name of the wallet from which we select coins for cold staking cancellation.</summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.ColdStakingWithdrawalRequest.WalletPassword">
+            <summary>The password of the wallet from which we select coins for cold staking cancellation.</summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.ColdStakingWithdrawalRequest.Amount">
+            <summary>The amount of coins selected for cold staking cancellation.</summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.ColdStakingWithdrawalRequest.Fees">
+            <summary>The fees for the cold staking cancellation transaction.</summary>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.Api.Models.ColdStakingWithdrawalRequest.ToString">
+            <summary>Creates a string containing the properties of this object.</summary>
+            <returns>A string containing the properties of the object.</returns>
+        </member>
+        <member name="T:Blockcore.Features.ColdStaking.Api.Models.ColdStakingWithdrawalResponse">
+            <summary>
+            The response data structure received by a client after requesting that a cold staking cancellation be performed.
+            Refer to <see cref="T:Blockcore.Features.ColdStaking.Api.Models.ColdStakingWithdrawalRequest"/>.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.ColdStakingWithdrawalResponse.TransactionHex">
+            <summary>The transaction bytes as a hexadecimal string.</summary>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.Api.Models.ColdStakingWithdrawalResponse.ToString">
+            <summary>Creates a string containing the properties of this object.</summary>
+            <returns>A string containing the properties of the object.</returns>
+        </member>
+        <member name="T:Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingRequest">
+            <summary>
+            The data structure used by a client requesting that a cold staking setup be performed.
+            Refer to <see cref="M:Blockcore.Features.ColdStaking.Api.Controllers.ColdStakingController.SetupColdStaking(Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingRequest)"/>.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingRequest.ColdWalletAddress">
+            <summary>The Base58 cold wallet address.</summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingRequest.HotWalletAddress">
+            <summary>The Base58 hot wallet address.</summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingRequest.WalletName">
+            <summary>The name of the wallet from which we select coins for cold staking.</summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingRequest.WalletPassword">
+            <summary>The password of the wallet from which we select coins for cold staking.</summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingRequest.WalletAccount">
+            <summary>The wallet account from which we select coins for cold staking.</summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingRequest.Amount">
+            <summary>The amount of coins selected for cold staking.</summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingRequest.Fees">
+            <summary>The fees for the cold staking setup transaction.</summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingRequest.PayToScript">
+            <summary>
+            Use script outputs (P2SH and P2WSH) for cold staking
+            </summary>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingRequest.ToString">
+            <summary>Creates a string containing the properties of this object.</summary>
+            <returns>A string containing the properties of the object.</returns>
+        </member>
+        <member name="T:Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingResponse">
+            <summary>
+            The response data structure received by a client after requesting that a cold staking setup be performed.
+            Refer to <see cref="T:Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingRequest"/>.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingResponse.TransactionHex">
+            <summary>The transaction bytes as a hexadecimal string.</summary>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.Api.Models.SetupColdStakingResponse.ToString">
+            <summary>Creates a string containing the properties of this object.</summary>
+            <returns>A string containing the properties of the object.</returns>
+        </member>
+        <member name="T:Blockcore.Features.ColdStaking.ColdStakingAddressLookup">
+            <summary>
+            This class extends the <see cref="T:Blockcore.Features.Wallet.Types.ScriptToAddressLookup"/> base class by handling cold staking scripts.
+            </summary>
+            <remarks>
+            When looking up addresses we ensure that both the public key hashes found in the cold staking script
+            are matched to the <see cref="!:ScriptToAddressLookup.scriptToAddressLookup"/> collection.
+            Similarly when recording addresses we first identify which of the public key hashes
+            matches the address being recorded and only record the address against that key.
+            </remarks>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingAddressLookup.TryGetValue(Blockcore.Consensus.ScriptInfo.Script,Blockcore.Features.Wallet.Types.HdAddress@)">
+            <inheritdoc/>
+            <remarks>The public key hashes in the cold staking script are individually mapped to addresses so search using both.</remarks>
+        </member>
+        <member name="P:Blockcore.Features.ColdStaking.ColdStakingAddressLookup.Item(Blockcore.Consensus.ScriptInfo.Script)">
+            <inheritdoc/>
+            <remarks>The public key hashes in the cold staking script are individually mapped to addresses.</remarks>
+        </member>
+        <member name="T:Blockcore.Features.ColdStaking.ColdStakingBuilderExtension">
+            <summary>
+            Extends the <see cref="T:Blockcore.Consensus.TransactionInfo.TransactionBuilder" /> functionality to play nice with cold staking script.
+            This is loosely based on the <see cref="T:Blockcore.NBitcoin.BuilderExtensions.P2PKHBuilderExtension" /> with the difference that our
+            scriptSigs take an additional parameter to identify which public key hash to use (hot or cold).
+            </summary>
+        </member>
+        <member name="F:Blockcore.Features.ColdStaking.ColdStakingBuilderExtension.usesColdPubKey">
+            <summary>Uses coldPubKey (when <c>true</c>) or the hotPubKey (when <c>false</c>).</summary>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingBuilderExtension.#ctor(System.Boolean)">
+            <summary>
+            Constructs an object for use with staking or cold staking withdrawal transactions.
+            </summary>
+            <param name="staking">Set to <c>true</c> when staking. Set to <c>false</c> when spending from cold staking addresses.</param>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingBuilderExtension.CanCombineScriptSig(Blockcore.Networks.Network,Blockcore.Consensus.ScriptInfo.Script,Blockcore.Consensus.ScriptInfo.Script,Blockcore.Consensus.ScriptInfo.Script)">
+            <inheritdoc />
+            <remarks>Combining is not defined for cold staking scripts.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingBuilderExtension.CanDeduceScriptPubKey(Blockcore.Networks.Network,Blockcore.Consensus.ScriptInfo.Script)">
+            <inheritdoc />
+            <remarks>It is not possible to construct the original scriptPubKey from a cold staking scriptSig.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingBuilderExtension.CanEstimateScriptSigSize(Blockcore.Networks.Network,Blockcore.Consensus.ScriptInfo.Script)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingBuilderExtension.CanGenerateScriptSig(Blockcore.Networks.Network,Blockcore.Consensus.ScriptInfo.Script)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingBuilderExtension.CombineScriptSig(Blockcore.Networks.Network,Blockcore.Consensus.ScriptInfo.Script,Blockcore.Consensus.ScriptInfo.Script,Blockcore.Consensus.ScriptInfo.Script)">
+            <inheritdoc />
+            <remarks>Combining is not defined for cold staking scripts.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingBuilderExtension.DeduceScriptPubKey(Blockcore.Networks.Network,Blockcore.Consensus.ScriptInfo.Script)">
+            <inheritdoc />
+            <remarks>It is not possible to construct the original scriptPubKey from a cold staking scriptSig.</remarks>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingBuilderExtension.EstimateScriptSigSize(Blockcore.Networks.Network,Blockcore.Consensus.ScriptInfo.Script)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingBuilderExtension.GenerateScriptSig(Blockcore.Networks.Network,Blockcore.Consensus.ScriptInfo.Script,Blockcore.NBitcoin.BuilderExtensions.IKeyRepository,Blockcore.NBitcoin.BuilderExtensions.ISigner)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.ColdStaking.ColdStakingFeature">
+            <summary>
+            Feature for cold staking which eliminates the need to keep the coins in the hot wallet.
+            </summary>
+            <remarks>
+            <para>In order to produce blocks on Stratis network, a miner has to be online with running
+            node and have its wallet open. This is necessary because at each time slot, the miner is
+            supposed to check whether one of its UTXOs is eligible to be used as so-called coinstake kernel
+            input and if so, it needs to use the private key associated with this UTXO in order to produce
+            the coinstake transaction.</para>
+            <para>The chance of a UTXO being eligible for producing a coinstake transaction grows linearly
+            with the number of coins that the UTXO presents. This implies that the biggest miners on the
+            network are required to keep the coins in a hot wallet. This is dangerous in case the machine
+            where the hot wallet runs is compromised.</para>
+            <para>Cold staking is a mechanism that eliminates the need to keep the coins in the hot wallet.
+            With cold staking implemented, the miner still needs to be online and running a node with an open
+            wallet, but the coins that are used for staking can be safely stored in cold storage. Therefore
+            the open hot wallet does not need to hold any significant amount of coins, or it can even be
+            completely empty.</para>
+            </remarks>
+            <seealso cref="!:ColdStakingManager.GetColdStakingScript(NBitcoin.ScriptId, NBitcoin.ScriptId)"/>
+            <seealso cref="T:Blockcore.Builder.Feature.FullNodeFeature"/>
+        </member>
+        <member name="F:Blockcore.Features.ColdStaking.ColdStakingFeature.walletSyncManager">
+            <summary>The synchronization manager for the wallet, tasked with keeping the wallet synced with the network.</summary>
+        </member>
+        <member name="F:Blockcore.Features.ColdStaking.ColdStakingFeature.connectionManager">
+            <summary>The connection manager.</summary>
+        </member>
+        <member name="F:Blockcore.Features.ColdStaking.ColdStakingFeature.nodeSettings">
+            <summary>The settings for the node.</summary>
+        </member>
+        <member name="F:Blockcore.Features.ColdStaking.ColdStakingFeature.walletSettings">
+            <summary>The settings for the wallet.</summary>
+        </member>
+        <member name="F:Blockcore.Features.ColdStaking.ColdStakingFeature.loggerFactory">
+            <summary>The logger factory used to create instance loggers.</summary>
+        </member>
+        <member name="F:Blockcore.Features.ColdStaking.ColdStakingFeature.logger">
+            <summary>The instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.ColdStaking.ColdStakingFeature.coldStakingManager">
+            <summary>The cold staking manager.</summary>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingFeature.#ctor(Blockcore.Features.Wallet.Interfaces.IWalletSyncManager,Blockcore.Features.Wallet.Interfaces.IWalletManager,Blockcore.Features.Wallet.Interfaces.IAddressBookManager,Blockcore.Connection.IConnectionManager,Blockcore.Configuration.NodeSettings,Blockcore.Features.Wallet.WalletSettings,Microsoft.Extensions.Logging.ILoggerFactory,Blockcore.Utilities.INodeStats)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Blockcore.Features.ColdStaking.ColdStakingFeature"/> class.
+            </summary>
+            <param name="walletSyncManager">The synchronization manager for the wallet, tasked with keeping the wallet synced with the network.</param>
+            <param name="walletManager">The wallet manager.</param>
+            <param name="addressBookManager">The address book manager.</param>
+            <param name="signals">The signals responsible for receiving blocks and transactions from the network.</param>
+            <param name="chain">The chain of blocks.</param>
+            <param name="connectionManager">The connection manager.</param>
+            <param name="nodeSettings">The settings for the node.</param>
+            <param name="walletSettings">The settings for the wallet.</param>
+            <param name="loggerFactory">The factory used to create instance loggers.</param>
+            <param name="nodeStats">The node stats object used to register node stats.</param>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingFeature.PrintHelp(Blockcore.Networks.Network)">
+            <summary>
+            Prints command-line help.
+            </summary>
+            <param name="network">The network to extract values from.</param>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingFeature.BuildDefaultConfigurationFile(System.Text.StringBuilder,Blockcore.Networks.Network)">
+            <summary>
+            Get the default configuration.
+            </summary>
+            <param name="builder">The string builder to add the settings to.</param>
+            <param name="network">The network to base the defaults off.</param>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingFeature.InitializeAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingFeature.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Features.ColdStaking.FullNodeBuilderColdStakingExtension">
+            <summary>
+            A class providing extension methods for <see cref="T:Blockcore.Builder.IFullNodeBuilder"/>.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Thrown if this is not a Stratis network.</exception>
+        </member>
+        <member name="T:Blockcore.Features.ColdStaking.ColdStakingManager">
+            <summary>
+            The manager class for implementing cold staking as covered in more detail in the remarks of
+            the <see cref="T:Blockcore.Features.ColdStaking.ColdStakingFeature"/> class.
+            This class provides the methods used by the <see cref="T:Blockcore.Features.ColdStaking.Api.Controllers.ColdStakingController"/>
+            which in turn provides the API methods for accessing this functionality.
+            </summary>
+            <remarks>
+            The following functionality is implemented in this class:
+            <list type="bullet">
+            <item><description>Generating cold staking address via the <see cref="M:Blockcore.Features.ColdStaking.ColdStakingManager.GetFirstUnusedColdStakingAddress(System.String,System.Boolean)"/> method. These
+            addresses are used for generating the cold staking setup.</description></item>
+            <item><description>Creating a build context for generating the cold staking setup via the <see
+            cref="M:Blockcore.Features.ColdStaking.ColdStakingManager.GetColdStakingSetupTransaction(Blockcore.Features.Wallet.Interfaces.IWalletTransactionHandler,System.String,System.String,System.String,System.String,System.String,Blockcore.NBitcoin.Money,Blockcore.NBitcoin.Money,System.Boolean,System.Boolean)"/> method.</description></item>
+            </list>
+            </remarks>
+        </member>
+        <member name="F:Blockcore.Features.ColdStaking.ColdStakingManager.ColdWalletAccountIndex">
+            <summary>The account index of the cold wallet account.</summary>
+        </member>
+        <member name="F:Blockcore.Features.ColdStaking.ColdStakingManager.ColdWalletAccountName">
+            <summary>The account name of the cold wallet account.</summary>
+        </member>
+        <member name="F:Blockcore.Features.ColdStaking.ColdStakingManager.HotWalletAccountIndex">
+            <summary>The account index of the hot wallet account.</summary>
+        </member>
+        <member name="F:Blockcore.Features.ColdStaking.ColdStakingManager.HotWalletAccountName">
+            <summary>The account name of the hot wallet account.</summary>
+        </member>
+        <member name="F:Blockcore.Features.ColdStaking.ColdStakingManager.logger">
+            <summary>Instance logger.</summary>
+        </member>
+        <member name="F:Blockcore.Features.ColdStaking.ColdStakingManager.dateTimeProvider">
+            <summary>Provider of time functions.</summary>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingManager.#ctor(Blockcore.Networks.Network,Blockcore.Consensus.Chain.ChainIndexer,Blockcore.Features.Wallet.WalletSettings,Blockcore.Configuration.DataFolder,Blockcore.Features.Wallet.Interfaces.IWalletFeePolicy,Blockcore.AsyncWork.IAsyncProvider,Blockcore.Utilities.INodeLifetime,Blockcore.Interfaces.IScriptAddressReader,Microsoft.Extensions.Logging.ILoggerFactory,Blockcore.Utilities.IDateTimeProvider,Blockcore.Signals.ISignals,Blockcore.Interfaces.IBroadcasterManager,Blockcore.Features.BlockStore.IUtxoIndexer)">
+            <summary>
+            Constructs the cold staking manager which is used by the cold staking controller.
+            </summary>
+            <param name="network">The network that the manager is running on.</param>
+            <param name="chainIndexer">Thread safe class representing a chain of headers from genesis.</param>
+            <param name="walletSettings">The wallet settings.</param>
+            <param name="dataFolder">Contains path locations to folders and files on disk.</param>
+            <param name="walletFeePolicy">The wallet fee policy.</param>
+            <param name="asyncProvider">Factory for creating and also possibly starting application defined tasks inside async loop.</param>
+            <param name="nodeLifeTime">Allows consumers to perform cleanup during a graceful shutdown.</param>
+            <param name="scriptAddressReader">A reader for extracting an address from a <see cref="T:Blockcore.Consensus.ScriptInfo.Script"/>.</param>
+            <param name="loggerFactory">The logger factory to use to create the custom logger.</param>
+            <param name="dateTimeProvider">Provider of time functions.</param>
+            <param name="broadcasterManager">The broadcaster manager.</param>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingManager.CreateAddressFromScriptLookup">
+            <summary>
+            Overrides the default <see cref="M:Blockcore.Features.Wallet.WalletManager.CreateAddressFromScriptLookup"/>.
+            </summary>
+            <returns>A new <see cref="T:Blockcore.Features.ColdStaking.ColdStakingAddressLookup"/> object for use by this class.</returns>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingManager.GetValidStakingTemplates">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingManager.GetSpendableTransactionsInWalletForStaking(System.String,System.Int32)">
+            <summary>
+            Gets all the unspent transactions in a wallet from the accounts participating in staking.
+            </summary>
+            <param name="walletName">Name of the wallet to get the transactions from.</param>
+            <param name="confirmations">Number of confirmation required.</param>
+            <returns>An enumeration of <see cref="T:Blockcore.Features.Wallet.Types.UnspentOutputReference"/> objects.</returns>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingManager.GetColdStakingInfo(System.String)">
+            <summary>
+            Returns information related to cold staking.
+            </summary>
+            <param name="walletName">The wallet to return the information for.</param>
+            <returns>A <see cref="T:Blockcore.Features.ColdStaking.Api.Models.GetColdStakingInfoResponse"/> object containing the information.</returns>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingManager.GetColdStakingAccount(Blockcore.Features.Wallet.Types.Wallet,System.Boolean)">
+            <summary>
+            Gets a cold staking account.
+            </summary>
+            <remarks>
+            <para>In order to keep track of cold staking addresses and balances we are using <see cref="T:Blockcore.Features.Wallet.Types.HdAccount"/>'s
+            with indexes starting from the value defined in <see cref="!:Wallet.SpecialPurposeAccountIndexesStart"/>.
+            </para><para>
+            We are using two such accounts, one when the wallet is in the role of cold wallet, and another one when
+            the wallet is in the role of hot wallet. For this reason we specify the required account when calling this
+            method.
+            </para></remarks>
+            <param name="wallet">The wallet where we wish to create the account.</param>
+            <param name="isColdWalletAccount">Indicates whether we need the cold wallet account (versus the hot wallet account).</param>
+            <returns>The cold staking account or <c>null</c> if the account does not exist.</returns>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingManager.GetOrCreateColdStakingAccount(System.String,System.Boolean,System.String)">
+            <summary>
+            Creates a cold staking account and ensures that it has at least one address.
+            If the account already exists then the existing account is returned.
+            </summary>
+            <remarks>
+            <para>In order to keep track of cold staking addresses and balances we are using <see cref="T:Blockcore.Features.Wallet.Types.HdAccount"/>'s
+            with indexes starting from the value defined in <see cref="!:Wallet.SpecialPurposeAccountIndexesStart"/>.
+            </para><para>
+            We are using two such accounts, one when the wallet is in the role of cold wallet, and another one when
+            the wallet is in the role of hot wallet. For this reason we specify the required account when calling this
+            method.
+            </para></remarks>
+            <param name="walletName">The name of the wallet where we wish to create the account.</param>
+            <param name="isColdWalletAccount">Indicates whether we need the cold wallet account (versus the hot wallet account).</param>
+            <param name="walletPassword">The wallet password which will be used to create the account.</param>
+            <returns>The new or existing cold staking account.</returns>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingManager.RecoverWallet(System.String,System.String,System.String,System.DateTime,System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Boolean})">
+            <summary>
+            Add cold staking cold account when a wallet is recovered, this means every recovered wallet will automatical
+            track addresses under the <see cref="F:Blockcore.Features.ColdStaking.ColdStakingManager.ColdWalletAccountIndex"/> HD account.
+            </summary>
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingManager.GetFirstUnusedColdStakingAddress(System.String,System.Boolean)">
+            <summary>
+            Gets the first unused cold staking address. Creates a new address if required.
+            </summary>
+            <param name="walletName">The name of the wallet providing the cold staking address.</param>
+            <param name="isColdWalletAddress">Indicates whether we need the cold wallet address (versus the hot wallet address).</param>
+            <returns>The cold staking address or <c>null</c> if the required account does not exist.</returns>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingManager.GetColdStakingSetupTransaction(Blockcore.Features.Wallet.Interfaces.IWalletTransactionHandler,System.String,System.String,System.String,System.String,System.String,Blockcore.NBitcoin.Money,Blockcore.NBitcoin.Money,System.Boolean,System.Boolean)">
+            <summary>
+            Creates cold staking setup <see cref="T:Blockcore.Consensus.TransactionInfo.Transaction"/>.
+            </summary>
+            <remarks>
+            The <paramref name="coldWalletAddress"/> and <paramref name="hotWalletAddress"/> would be expected to be
+            from different wallets and typically also different physical machines under normal circumstances. The following
+            rules are enforced by this method and would lead to a <see cref="T:Blockcore.Features.Wallet.Exceptions.WalletException"/> otherwise:
+            <list type="bullet">
+            <item><description>The cold and hot wallet addresses are expected to belong to different wallets.</description></item>
+            <item><description>Either the cold or hot wallet address must belong to a cold staking account in the wallet identified
+            by <paramref name="walletName"/></description></item>
+            <item><description>The account specified in <paramref name="walletAccount"/> can't be a cold staking account.</description></item>
+            </list>
+            </remarks>
+            <param name="walletTransactionHandler">The wallet transaction handler. Contains the <see cref="M:Blockcore.Features.Wallet.WalletTransactionHandler.BuildTransaction(Blockcore.Features.Wallet.TransactionBuildContext)"/> method.</param>
+            <param name="coldWalletAddress">The cold wallet address generated by <see cref="!:GetColdStakingAddress"/>.</param>
+            <param name="hotWalletAddress">The hot wallet address generated by <see cref="!:GetColdStakingAddress"/>.</param>
+            <param name="walletName">The name of the wallet.</param>
+            <param name="walletAccount">The wallet account.</param>
+            <param name="walletPassword">The wallet password.</param>
+            <param name="amount">The amount to cold stake.</param>
+            <param name="feeAmount">The fee to pay for the cold staking setup transaction.</param>
+            <param name="payToScript">Indicate script staking (P2SH or P2WSH outputs).</param>
+            <returns>The <see cref="T:Blockcore.Consensus.TransactionInfo.Transaction"/> for setting up cold staking.</returns>
+            <exception cref="T:Blockcore.Features.Wallet.Exceptions.WalletException">Thrown if any of the rules listed in the remarks section of this method are broken.</exception>
+            
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingManager.GetColdStakingWithdrawalTransaction(Blockcore.Features.Wallet.Interfaces.IWalletTransactionHandler,System.String,System.String,System.String,Blockcore.NBitcoin.Money,Blockcore.NBitcoin.Money)">
+            <summary>
+            Creates a cold staking withdrawal <see cref="T:Blockcore.Consensus.TransactionInfo.Transaction"/>.
+            </summary>
+            <remarks>
+            Cold staking withdrawal is performed on the wallet that is in the role of the cold staking cold wallet.
+            </remarks>
+            <param name="walletTransactionHandler">The wallet transaction handler used to build the transaction.</param>
+            <param name="receivingAddress">The address that will receive the withdrawal.</param>
+            <param name="walletName">The name of the wallet in the role of cold wallet.</param>
+            <param name="walletPassword">The wallet password.</param>
+            <param name="amount">The amount to remove from cold staking.</param>
+            <param name="feeAmount">The fee to pay for cold staking transaction withdrawal.</param>
+            <returns>The <see cref="T:Blockcore.Consensus.TransactionInfo.Transaction"/> for cold staking withdrawal.</returns>
+            <exception cref="T:Blockcore.Features.Wallet.Exceptions.WalletException">Thrown if the receiving address is in a cold staking account in this wallet.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if the receiving address is invalid.</exception>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingManager.GetSpendableTransactionsInColdWallet(System.String,System.Boolean,System.Int32)">
+            <summary>
+            Gets the spendable transactions associated with cold wallet addresses.
+            </summary>
+            <param name="walletName">The name of the wallet.</param>
+            <param name="isColdWalletAccount">The cold staking account to get the transactions for.</param>
+            <param name="confirmations">The number of confirmations.</param>
+            <returns>An enumeration of <see cref="T:Blockcore.Features.Wallet.Types.UnspentOutputReference"/> items.</returns>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingManager.TransactionFoundInternal(Blockcore.Features.Wallet.Types.Wallet,Blockcore.Consensus.ScriptInfo.Script,System.Func{Blockcore.Features.Wallet.Types.HdAccount,System.Boolean})">
+            <summary>
+            Checks if the script contains a cold staking address and if so maintains the buffer.
+            </summary>
+            <param name="script">The script (possibly a cold staking script) to check.</param>
+            <param name="accountFilter">The account filter.</param>
+        </member>
+        <member name="M:Blockcore.Features.ColdStaking.ColdStakingManager.ProcessTransaction(Blockcore.Consensus.TransactionInfo.Transaction,System.Nullable{System.Int32},Blockcore.Consensus.BlockInfo.Block,System.Boolean)">
+            <summary>
+            The purpose of this method is to try to identify the P2SH and P2WSH that are coldstake outputs for this wallet
+            We look for an opreturn script that is created when setting up a P2SH and P2WSH cold stake trx
+            if we find any then try to find the keys and track the script before calling in to the main wallet.
+            </summary>
+            <inheritdoc/>
+        </member>
+    </members>
+</doc>

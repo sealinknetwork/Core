@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Bitcoin.Cli</name>
+    </assembly>
+    <members>
+        <member name="M:Bitcoin.Cli.Program.Main(System.String[])">
+            <summary>
+            The expected sequence of arguments:
+            <list>
+            <item>
+            1, [network-name] [options] [rpc-command] [rpc-params].
+            </item>
+            <item>
+            2, [network-name] [options] [api-controller "/" api-command] [api-params].
+            </item>
+            </list>
+            </summary>
+        </member>
+        <member name="M:Bitcoin.Cli.Program.ExceptionToString(System.Exception)">
+            <summary>
+            Determine both the exception message and any inner exception messages.
+            </summary>
+            <param name="exception">The exception object.</param>
+            <returns>Returns the exception message plus any inner exceptions.</returns>
+        </member>
+    </members>
+</doc>

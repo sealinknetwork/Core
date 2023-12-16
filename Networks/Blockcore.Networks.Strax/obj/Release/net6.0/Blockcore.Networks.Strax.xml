@@ -1,0 +1,202 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Blockcore.Networks.Strax</name>
+    </assembly>
+    <members>
+        <member name="T:Blockcore.Networks.Strax.Deployments.StraxBIP9Deployments">
+            <summary>
+            BIP9 deployments for the Strax network.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.Strax.Deployments.StraxBIP9Deployments.#ctor">
+            <summary>
+            Constructs the BIP9 deployments array.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.Strax.Deployments.StraxBIP9Deployments.GetFlags(System.Int32)">
+            <summary>
+            Gets the deployment flags to set when the deployment activates.
+            </summary>
+            <param name="deployment">The deployment number.</param>
+            <returns>The deployment flags.</returns>
+        </member>
+        <member name="T:Blockcore.Networks.Strax.Federation.ByteArrayComparer">
+            <summary>
+            Compares two byte arrays for equality.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.Strax.Federation.Federation.#ctor(System.Collections.Generic.IEnumerable{Blockcore.NBitcoin.PubKey},System.Nullable{System.Int32})">
+            <summary>
+            Creates a new federation from a set of transaction signing keys.
+            </summary>
+            <param name="transactionSigningPubKeys">A list of transaction signing PubKeys.</param>
+            <param name="signaturesRequired">The amount of signatures required to ensure that the transaction is fully signed.</param>
+        </member>
+        <member name="M:Blockcore.Networks.Strax.Federation.IFederations.RegisterFederation(Blockcore.Networks.Strax.Federation.IFederation)">
+            <summary>
+            Registers a new federation with transaction signing keys.
+            </summary>
+            <param name="federation">The federation to be registered.</param>
+        </member>
+        <member name="T:Blockcore.Networks.Strax.Policies.StraxStandardScriptsRegistry">
+            <summary>
+            Strax-specific standard transaction definitions.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Networks.Strax.Rules.StratisHeaderVersionRule">
+            <summary>
+            Checks if <see cref="T:Blockcore.Networks.Strax.StraxMain"/> network block's header has a valid block version.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.Strax.Rules.StratisHeaderVersionRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadVersion">Thrown if block's version is outdated or otherwise invalid.</exception>
+        </member>
+        <member name="T:Blockcore.Networks.Strax.Rules.StraxCoinstakeRule">
+            <summary>Context checks on a Strax POS block.</summary>
+        </member>
+        <member name="F:Blockcore.Networks.Strax.Rules.StraxCoinstakeRule.PosParent">
+            <summary>Allow access to the POS parent.</summary>
+        </member>
+        <member name="M:Blockcore.Networks.Strax.Rules.StraxCoinstakeRule.Initialize">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Networks.Strax.Rules.StraxCoinstakeRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadStakeBlock">The coinbase output (first transaction) is not empty.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadStakeBlock">The second transaction is not a coinstake transaction.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadMultipleCoinstake">There are multiple coinstake tranasctions in the block.</exception>
+        </member>
+        <member name="T:Blockcore.Networks.Strax.Rules.StraxCoinViewMempoolRule">
+            <summary>
+            Validates the transaction with the coin view.
+            Checks if already in coin view, and missing and unavailable inputs.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.Strax.Rules.StraxCoinViewMempoolRule.CheckTransaction(Blockcore.Features.MemoryPool.MempoolValidationContext)">
+            <remarks>Also see <see cref="T:Blockcore.Networks.Strax.Rules.StraxCoinviewRule"/></remarks>>
+        </member>
+        <member name="T:Blockcore.Networks.Strax.Rules.StraxCoinviewRule">
+            <summary>
+            Strax PoS overrides for certain coinview rule checks.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.Strax.Rules.StraxCoinviewRule.CheckBlockReward(Blockcore.Consensus.Rules.RuleContext,Blockcore.NBitcoin.Money,System.Int32,Blockcore.Consensus.BlockInfo.Block)">
+            <inheritdoc />
+        </member>
+        <member name="T:Blockcore.Networks.Strax.Rules.StraxColdStakingRule">
+            <summary>
+            This rule performs further coldstaking transaction validation when cold staking balances are spent with a
+            cold staking "hotPubKey" inside of a cold staking transaction. The cold staking "hotPubKey" is the pubKey
+            that allows spending only to the same address.
+            </summary>
+            <remarks><para>
+            This code will perform further validation for transactions that spend the new scriptPubKey containing the
+            new <see cref="F:Blockcore.Consensus.ScriptInfo.OpcodeType.OP_CHECKCOLDSTAKEVERIFY"/> opcode using a hotPubKeyHash inside of a coinstake
+            transaction. Those are the conditions under which the <see cref="!:PosTransaction.IsColdCoinStake"/> flag will
+            be set and it is therefore the flag we use to determine if these rules should be applied. Due to a check
+            being done inside of the implementation of the <see cref="F:Blockcore.Consensus.ScriptInfo.OpcodeType.OP_CHECKCOLDSTAKEVERIFY"/> opcode this
+            flag can only be set for coinstake transactions after the opcode implementation has been activated (at a
+            specified block height). The opcode activation flag is <see cref="F:Blockcore.Consensus.ScriptInfo.ScriptVerify.CheckColdStakeVerify"/> and
+            it is set in <see cref="P:Blockcore.Base.Deployments.DeploymentFlags.ScriptFlags"/> when the block height is greater than or equal to <see
+            cref="!:PosConsensusOptions.ColdStakingActivationHeight"/>.
+            </para><para>
+            The following conditions are enforced for cold staking transactions. This rule implements all but the first one:
+            <list type="number">
+            <item>Check if the transaction spending an output, which contains this instruction, is a coinstake transaction.
+            If it is not, the script fails. This has already been checked within the opcode implementation before setting
+            <see cref="!:PosTransaction.IsColdCoinStake"/> so it will not be checked here.</item>
+            <item>Check that ScriptPubKeys of all inputs of this transaction are the same. If they are not, the script
+            fails.</item>
+            <item>Check that ScriptPubKeys of all outputs of this transaction, except for the marker output (a special
+            first output of each coinstake transaction) and the pubkey output (an optional special second output that
+            contains public key in coinstake transaction), are the same as ScriptPubKeys of the inputs. If they are not,
+            the script fails.</item>
+            <item>Check that the sum of values of all inputs is smaller or equal to the sum of values of all outputs. If
+            this does not hold, the script fails.</item>
+            </list></para></remarks>
+        </member>
+        <member name="M:Blockcore.Networks.Strax.Rules.StraxColdStakingRule.RunAsync(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadColdstakeInputs">Thrown if the input scriptPubKeys mismatch.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadColdstakeOutputs">Thrown if the output scriptPubKeys mismatch.</exception>
+            <exception cref="P:Blockcore.Consensus.ConsensusErrors.BadColdstakeAmount">Thrown if the total input is smaller or equal than the sum of outputs.</exception>
+        </member>
+        <member name="T:Blockcore.Networks.Strax.Rules.StraxTransactionFeeMempoolRule">
+            <summary>
+            Checks if the transaction is paying rewards to the federation multisig.
+            If so, fee checks get skipped (as these reward claiming transactions have to be constructed without fees).
+            Transactions that do not conform to this structure must be kept out of the mempool, as trying to include them
+            in blocks for mining/staking would fail consensus validation.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Networks.Strax.Staking.MiningServiceOverride">
+            <summary>
+            Full node builder allows constructing a full node using specific components.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Networks.Strax.StraxBaseNetwork">
+            <summary>
+            Contains properties used by the Strax network definitions that are not present in the base network class.
+            </summary>
+        </member>
+        <member name="P:Blockcore.Networks.Strax.StraxBaseNetwork.CirrusRewardDummyAddress">
+            <summary> This is used for reward distribution transactions. </summary>
+        </member>
+        <member name="P:Blockcore.Networks.Strax.StraxPosBlockHeader.CurrentVersion">
+            <inheritdoc />
+        </member>
+        <member name="F:Blockcore.Networks.Strax.StraxPosBlockHeader.hashStateRoot">
+            <summary>
+            Root of the state trie after execution of this block. 
+            </summary>
+        </member>
+        <member name="F:Blockcore.Networks.Strax.StraxPosBlockHeader.receiptRoot">
+            <summary>
+            Root of the receipt trie after execution of this block.
+            </summary>
+        </member>
+        <member name="F:Blockcore.Networks.Strax.StraxPosBlockHeader.logsBloom">
+            <summary>
+            Bitwise-OR of all the blooms generated from all of the smart contract transactions in the block.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.Strax.StraxPosBlockHeader.ReadWriteHashingStream(Blockcore.NBitcoin.BitcoinStream)">
+            <summary>Populates stream with items that will be used during hash calculation.</summary>
+        </member>
+        <member name="P:Blockcore.Networks.Strax.StraxPosBlockHeader.HeaderSize">
+            <summary>Gets the total header size - including the <see cref="F:Blockcore.Consensus.BlockInfo.BlockHeader.Size"/> - in bytes.</summary>
+        </member>
+        <member name="M:Blockcore.Networks.Strax.StraxConsensusFactory.TryCreateNew``1">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Networks.Strax.StraxConsensusFactory.CreateBlock">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Networks.Strax.StraxConsensusFactory.CreateBlockHeader">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Networks.Strax.StraxConsensusFactory.CreateTransaction">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Networks.Strax.StraxConsensusFactory.CreateTransaction(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Blockcore.Networks.Strax.StraxConsensusFactory.CreateTransaction(System.Byte[])">
+            <inheritdoc />
+        </member>
+        <member name="F:Blockcore.Networks.Strax.StraxNetwork.StratisMaxTimeOffsetSeconds">
+            <summary> Stratis maximal value for the calculated time offset. If the value is over this limit, the time syncing feature will be switched off. </summary>
+        </member>
+        <member name="F:Blockcore.Networks.Strax.StraxNetwork.StratisDefaultMaxTipAgeInSeconds">
+            <summary> Stratis default value for the maximum tip age in seconds to consider the node in initial block download (2 hours). </summary>
+        </member>
+        <member name="F:Blockcore.Networks.Strax.StraxNetwork.StraxRootFolderName">
+            <summary> The name of the root folder containing the different Stratis blockchains (StratisMain, StratisTest, StratisRegTest). </summary>
+        </member>
+        <member name="F:Blockcore.Networks.Strax.StraxNetwork.StraxDefaultConfigFilename">
+            <summary> The default name used for the Strax configuration file. </summary>
+        </member>
+    </members>
+</doc>

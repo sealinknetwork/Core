@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Blockcore.Networks.XRC</name>
+    </assembly>
+    <members>
+        <member name="F:Blockcore.Networks.XRC.Consensus.XRCCoinType.CoinTypes.XRCMain">
+            <summary>
+            XRhodium Main Network
+            </summary>
+        </member>
+        <member name="F:Blockcore.Networks.XRC.Consensus.XRCCoinType.CoinTypes.XRCTest">
+            <summary>
+            Testnet
+            </summary>
+        </member>
+        <member name="F:Blockcore.Networks.XRC.Consensus.XRCCoinType.CoinTypes.XRCReg">
+            <summary>
+            RegTest
+            </summary>
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Consensus.XRCConsensus.CoinbaseMaturity">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Consensus.XRCConsensus.PremineReward">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Consensus.XRCConsensus.PremineHeight">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Consensus.XRCConsensus.ProofOfWorkReward">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Consensus.XRCConsensus.ProofOfStakeReward">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Consensus.XRCConsensus.MaxReorgLength">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Consensus.XRCConsensus.MaxMoney">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Consensus.XRCConsensus.PosNoRetargeting">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Consensus.XRCConsensus.PowNoRetargeting">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Consensus.XRCConsensus.MinimumChainWork">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Consensus.XRCConsensus.CoinType">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Consensus.XRCConsensus.LastPOWBlock">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Consensus.XRCConsensus.IsProofOfStake">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Consensus.XRCConsensus.PosEmptyCoinbase">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Consensus.XRCConsensus.PosUseTimeFieldInKernalHash">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Consensus.XRCConsensus.ProofOfStakeTimestampMask">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Consensus.XRCConsensus.DefaultAssumeValid">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Consensus.XRCConsensus.ConsensusFactory">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Consensus.XRCConsensus.ConsensusRules">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Consensus.XRCConsensus.MempoolRules">
+            <inheritdoc />
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Crypto.XRCHashX11.Instance">
+            <summary>
+            using the instance method is not thread safe.
+            to calling the hashing method in a multi threaded environment use the create() method
+            </summary>
+        </member>
+        <member name="P:Blockcore.Networks.XRC.Crypto.XRCHashX13.Instance">
+            <summary>
+            using the instance method is not thread safe.
+            to calling the hashing method in a multi threaded environment use the create() method
+            </summary>
+        </member>
+        <member name="T:Blockcore.Networks.XRC.Deployments.XRCBIP9Deployments">
+            <summary>
+            BIP9 deployments for the Stratis network.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.XRC.Deployments.XRCBIP9Deployments.#ctor">
+            <summary>
+            Constructs the BIP9 deployments array.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.XRC.Deployments.XRCBIP9Deployments.GetFlags(System.Int32)">
+            <summary>
+            Gets the deployment flags to set when the deployment activates.
+            </summary>
+            <param name="deployment">The deployment number.</param>
+            <returns>The deployment flags.</returns>
+        </member>
+        <member name="T:Blockcore.Networks.XRC.Policies.XRCStandardScriptsRegistry">
+            <summary>
+            Stratis-specific standard transaction definitions.
+            </summary>
+        </member>
+        <member name="T:Blockcore.Networks.XRC.Rules.XRCHeaderVersionRule">
+            <summary>
+            Checks if <see cref="T:Blockcore.Networks.XRC.XRCMain"/> network block's header has a valid block version.
+            </summary>
+        </member>
+        <member name="M:Blockcore.Networks.XRC.Rules.XRCHeaderVersionRule.Run(Blockcore.Consensus.Rules.RuleContext)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>
