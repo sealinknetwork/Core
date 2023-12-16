@@ -51,3 +51,14 @@
 /Networks/Blockcore.Networks.BCP/obj
 /Node/Blockcore.Node/bin
 /Node/Blockcore.Node/obj
+*.cache
+*.editorconfig
+*.dll
+*.CopyComplete
+*.cache
+*.cache
+*.txt
+*.dll
+*.json
+*.cache
+*.dll

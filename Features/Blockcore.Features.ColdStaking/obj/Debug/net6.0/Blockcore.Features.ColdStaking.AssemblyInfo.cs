@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Blockcore")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.1.41.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.1.41")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.1.41+02d7c2394a38d8fe8e064c45514c5bb5321aa581")]
 [assembly: System.Reflection.AssemblyProductAttribute("Blockcore.Features.ColdStaking")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Blockcore.Features.ColdStaking")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.1.41.0")]

@@ -46,7 +46,7 @@ namespace SealinkNetwork
          HashGenesisBlock = "00000d1869963a0fea271c544af7cec203cbf287cf1168a0d529936f0b69bc7a",
          HashMerkleRoot = "8e3770235cdab1c484ef2e928a51c471030220b1f69142c7487f85ed001cf810",
          DNS = new[] { "seed.sealink.network" },
-         Nodes = new[] { "97.74.86.57", "72.167.150.174" },
+         Nodes = new[] { "97.74.86.57", "72.167.150.174", "92.205.231.104" },
          Checkpoints = new Dictionary<int, CheckpointInfo>
          {
             // TODO: Add checkpoints as the network progresses.

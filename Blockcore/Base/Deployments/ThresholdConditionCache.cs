@@ -73,6 +73,7 @@ namespace Blockcore.Base.Deployments
         public List<ThresholdStateModel> GetThresholdStateMetrics(ChainedHeader indexPrev, ThresholdState[] thresholdStates)
         {
             var thresholdStateModels = new List<ThresholdStateModel>();
+            //if (indexPrev == null) return thresholdStateModels;
             ThresholdState[] array = new ThresholdState[this.consensus.BIP9Deployments.Length];
 
             for (int deploymentIndex = 0; deploymentIndex < array.Length; deploymentIndex++)
