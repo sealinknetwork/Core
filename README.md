@@ -43,6 +43,8 @@ Getting Started Guide
 - Open Browser, input http://localhost:15003
 
 ### API ###
+- DocUrl http://localhost:15003/docs/index.html
+
 - Get Mnemonic
   curl -X 'GET' 'http://localhost:15003/api/Wallet/mnemonic?language=English&wordCount=12' -H 'accept: */*'
   
