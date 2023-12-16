@@ -25,19 +25,24 @@ Introduction
 
 Getting Started Guide
 -----------
-Windows
+
+
+### Windows ###
+
 - Install .NET 6 https://dotnet.microsoft.com/en-us/download/dotnet/6.0
 - Dwonload last Sealink Node. 
 - UnZip file, find the Blockcore.Node.exe, click to runing node.
 - Open Browser, input http://localhost:15003
 
-Liunx
+
+
+### Liunx ###
 - Install .NET 6 https://learn.microsoft.com/zh-cn/dotnet/core/install/linux-scripted-manual#set-environment-variables-system-wide
 - Dwonload last Sealink Node.
 - Unzip file,run dotnet Blockcore.Node.dll
 - Open Browser, input http://localhost:15003
 
-API
+### API ###
 - Get Mnemonic
   curl -X 'GET' 'http://localhost:15003/api/Wallet/mnemonic?language=English&wordCount=12' -H 'accept: */*'
   
