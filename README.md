@@ -36,3 +36,46 @@ Liunx
 - Dwonload last Sealink Node.
 - Unzip file,run dotnet Blockcore.Node.dll
 - Open Browser, input http://localhost:15003
+
+API
+- Get Mnemonic
+  curl -X 'GET' 'http://localhost:15003/api/Wallet/mnemonic?language=English&wordCount=12' -H 'accept: */*'
+  
+- Create Wallet
+  curl -X 'POST' \
+  'http://localhost:15003/api/Wallet/create' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json-patch+json' \
+  -d '{
+  "mnemonic": "string",
+  "password": "string",
+  "passphrase": "string",
+  "name": "string",
+  "purpose": 0
+}'
+
+- Get wallet balance
+curl -X 'GET' \
+  'http://localhost:15003/api/Wallet/balance?WalletName=1&AccountName=account%200' \
+  -H 'accept: */*'
+
+- Start staking
+  curl -X 'POST' \
+  'http://localhost:15003/api/Staking/startstaking' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json-patch+json' \
+  -d '{
+  "password": "1",
+  "name": "1" --wallet name
+
+}'
+
+- Stop staking
+  curl -X 'POST' \
+  'http://localhost:15003/api/Staking/stopstaking' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json-patch+json' \
+  -d 'true'
+
+- Get chain status
+  curl -X 'GET' 'http://localhost:15003/api/Node/status' -H 'accept: */*'
