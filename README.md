@@ -19,15 +19,16 @@ Introduction
 
 **What is Sealink?**
 
-- Sealink is a platform to build Layer 1 consensus networks based on the Bitcoin protocol, built on the [.NET Core](https://dotnet.github.io/) framework and written entirely in C#. 
+- Sealink is a platform to build Layer 1 consensus networks based on the Bitcoin protocol [ blockcore.net ], built on the [.NET Core](https://dotnet.github.io/) framework and written entirely in C#. 
 - Sealink aims to maintain an alternative C# Bitcoin implementation, based on the [NBitcoin](https://github.com/MetacoSA/NBitcoin) & [Stratis](https://github.com/stratisproject/StratisBitcoinFullNode) projects.
 - Sealink is neither a coin or a for profit business.
 
 Getting Started Guide
 -----------
 Windows
-- Dwonload New Release.
-- UnZip file, find Blockcore.Node.exe, double click to runing node.
+- Install .NET 6 https://dotnet.microsoft.com/en-us/download/dotnet/6.0
+- Dwonload last Sealink Node. 
+- UnZip file, find the Blockcore.Node.exe, click to runing node.
 - Open Browser, input http://localhost:15003
 
 Liunx
