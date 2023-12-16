@@ -1,7 +1,7 @@
 
 <p align="center">
   <p align="center">
-    <img src="https://sealink.network/img/logo.png" height="100" alt="Sealink" />
+    <img src="https://sealink.network/img/logo.png" height="50" alt="Sealink" />
   </p>
   <h3 align="center">
     About Sealink Network
