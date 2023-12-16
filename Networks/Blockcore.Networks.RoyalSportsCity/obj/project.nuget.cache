@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "nBd8nLyDmexoCvsBdi2Wlb405EU9c9cgdBckMDquXEEghJI8iZvAZvc7vfA7Q0lRnRkrS3TymbJAy78nFylItg==",
+  "dgSpecHash": "oMUvuuXbBOt8BfYA1xOed/rJbF8hvC5nFaOXRX6sLmY1SawYI7iN85Gg0869XIglMc9gRPaha+k8HW3D335nvA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Networks\\Blockcore.Networks.RoyalSportsCity\\Blockcore.Networks.RoyalSportsCity.csproj",
+  "projectFilePath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Networks\\Blockcore.Networks.RoyalSportsCity\\Blockcore.Networks.RoyalSportsCity.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Administrator\\.nuget\\packages\\concurrenthashset\\1.3.0\\concurrenthashset.1.3.0.nupkg.sha512",
     "C:\\Users\\Administrator\\.nuget\\packages\\dbreeze\\1.107.0\\dbreeze.1.107.0.nupkg.sha512",

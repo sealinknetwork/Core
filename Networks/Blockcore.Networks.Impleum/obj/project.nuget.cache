@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "WR1ZZLgfGvvb6UEJnK/S9wa3A7Cku0eIGjc2CX19HjUMFg9IgqhTodC7VlzFyikMJ+aSigehM53yk5OBAL5e1g==",
+  "dgSpecHash": "xIfAsRRZDdmTqyyHLGgOb7OND323vnyTP9xisROQXgXVLZpT8t1iOJUS+b95XzdoItCuU6/v2OrToQ98YGgZJQ==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Networks\\Blockcore.Networks.Impleum\\Blockcore.Networks.Impleum.csproj",
+  "projectFilePath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Networks\\Blockcore.Networks.Impleum\\Blockcore.Networks.Impleum.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Administrator\\.nuget\\packages\\concurrenthashset\\1.3.0\\concurrenthashset.1.3.0.nupkg.sha512",
     "C:\\Users\\Administrator\\.nuget\\packages\\dbreeze\\1.107.0\\dbreeze.1.107.0.nupkg.sha512",

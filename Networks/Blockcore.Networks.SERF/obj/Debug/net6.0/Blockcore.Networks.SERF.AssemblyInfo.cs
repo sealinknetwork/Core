@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Blockcore")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.1.41.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.1.41+3033abfdda408b9da7f2897df6b19a84d88bb155")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.1.41+ab41bcfae09d7f3e95913ea382fe1e4012b017cd")]
 [assembly: System.Reflection.AssemblyProductAttribute("Blockcore.Networks.SERF")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Blockcore.Networks.SERF")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.1.41.0")]

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "WUIbktUl4+c72nB62sNT7jx/2Xjk6KfthDfhk9VQNdvzaFwYMuURp6WlCVlAtjrnER3fN6x3D/sPaWHDJakiGQ==",
+  "dgSpecHash": "GQg70G7ul/RLJ3+M0mci9PLCP0K0RotmNu6Nx3v/UVTOX37ojsEeve1lYFZsCsKCqxWmeO1p/QQAGy8NeQ5y6w==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Networks\\Blockcore.Networks.Strax\\Blockcore.Networks.Strax.csproj",
+  "projectFilePath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Networks\\Blockcore.Networks.Strax\\Blockcore.Networks.Strax.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Administrator\\.nuget\\packages\\concurrenthashset\\1.3.0\\concurrenthashset.1.3.0.nupkg.sha512",
     "C:\\Users\\Administrator\\.nuget\\packages\\dapper\\2.0.123\\dapper.2.0.123.nupkg.sha512",

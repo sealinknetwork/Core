@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "l82P9wUCNw3V0pV+jYE7pBNHGq8U58+DtGi/VWnauU5n+jpkM1MU63ej53I2AScPu/FVIztxmTW9t7hzilwOrA==",
+  "dgSpecHash": "ngt3mmS27U5i5ypIMaDrV52yLWXPFG9/5O5UGatELg1Ww8UA7j/A/A9SJ6nAxlHoOa21eRy21/enhYscCAf9EA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Networks\\Blockcore.Networks.SeniorBlockCoin\\Blockcore.Networks.SeniorBlockCoin.csproj",
+  "projectFilePath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Networks\\Blockcore.Networks.SeniorBlockCoin\\Blockcore.Networks.SeniorBlockCoin.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Administrator\\.nuget\\packages\\concurrenthashset\\1.3.0\\concurrenthashset.1.3.0.nupkg.sha512",
     "C:\\Users\\Administrator\\.nuget\\packages\\dbreeze\\1.107.0\\dbreeze.1.107.0.nupkg.sha512",

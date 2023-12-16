@@ -18,7 +18,7 @@ namespace SealinkNetwork
          Magic = "01-4D-59-43",
          CoinType = 51997, // SLIP-0044: https://github.com/satoshilabs/slips/blob/master/slip-0044.md,
          PremineReward = 0x989680,//
-          PoWBlockReward = 10,
+         PoWBlockReward = 10,
          PoSBlockReward = 500,
          LastPowBlock = 3500000,
          GenesisText = "There's a difference between knowing the path and walking the path.", // The New York Times, 2020-04-16
@@ -46,7 +46,7 @@ namespace SealinkNetwork
          HashGenesisBlock = "00000d1869963a0fea271c544af7cec203cbf287cf1168a0d529936f0b69bc7a",
          HashMerkleRoot = "8e3770235cdab1c484ef2e928a51c471030220b1f69142c7487f85ed001cf810",
          DNS = new[] { "seed.sealink.network" },
-         Nodes = new[] { "97.74.86.57" },
+         Nodes = new[] { "97.74.86.57", "72.167.150.174" },
          Checkpoints = new Dictionary<int, CheckpointInfo>
          {
             // TODO: Add checkpoints as the network progresses.
@@ -72,7 +72,7 @@ namespace SealinkNetwork
          HashGenesisBlock = "00005fa2cbd7e87d85d9216b0601d7d28dd8390b0244dec0a4fdd5e0e828b3c3",
          HashMerkleRoot = "2e28235fe524bca841ab6e688ae6a46115c7d2418328ec2f2de67d910b7aa3a9",
          DNS = new[] { "seed.sealink.network" },
-         Nodes = new[] { "97.74.86.57" },
+         Nodes = new[] { "97.74.86.57", "72.167.150.174" },
          Checkpoints = new Dictionary<int, CheckpointInfo>
          {
             // TODO: Add checkpoints as the network progresses.

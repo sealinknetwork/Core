@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Administrator\\Source\\Repos\\node\\Networks\\Blockcore.Networks.SeniorBlockCoin\\Blockcore.Networks.SeniorBlockCoin.csproj": {}
+    "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Networks\\Blockcore.Networks.SeniorBlockCoin\\Blockcore.Networks.SeniorBlockCoin.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Administrator\\Source\\Repos\\node\\Blockcore\\Blockcore.csproj": {
+    "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Blockcore\\Blockcore.csproj": {
       "version": "1.1.41",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Administrator\\Source\\Repos\\node\\Blockcore\\Blockcore.csproj",
+        "projectUniqueName": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Blockcore\\Blockcore.csproj",
         "projectName": "Blockcore.Core",
-        "projectPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Blockcore\\Blockcore.csproj",
+        "projectPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Blockcore\\Blockcore.csproj",
         "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Blockcore\\obj\\",
+        "outputPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Blockcore\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -108,14 +108,14 @@
         }
       }
     },
-    "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.Consensus\\Blockcore.Features.Consensus.csproj": {
+    "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.Consensus\\Blockcore.Features.Consensus.csproj": {
       "version": "1.1.41",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.Consensus\\Blockcore.Features.Consensus.csproj",
+        "projectUniqueName": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.Consensus\\Blockcore.Features.Consensus.csproj",
         "projectName": "Blockcore.Features.Consensus",
-        "projectPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.Consensus\\Blockcore.Features.Consensus.csproj",
+        "projectPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.Consensus\\Blockcore.Features.Consensus.csproj",
         "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.Consensus\\obj\\",
+        "outputPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.Consensus\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -132,11 +132,11 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "C:\\Users\\Administrator\\Source\\Repos\\node\\Blockcore\\Blockcore.csproj": {
-                "projectPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Blockcore\\Blockcore.csproj"
+              "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Blockcore\\Blockcore.csproj": {
+                "projectPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Blockcore\\Blockcore.csproj"
               },
-              "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.NodeHost\\Blockcore.Features.NodeHost.csproj": {
-                "projectPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.NodeHost\\Blockcore.Features.NodeHost.csproj"
+              "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.NodeHost\\Blockcore.Features.NodeHost.csproj": {
+                "projectPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.NodeHost\\Blockcore.Features.NodeHost.csproj"
               }
             }
           }
@@ -185,14 +185,14 @@
         }
       }
     },
-    "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.MemoryPool\\Blockcore.Features.MemoryPool.csproj": {
+    "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.MemoryPool\\Blockcore.Features.MemoryPool.csproj": {
       "version": "1.1.41",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.MemoryPool\\Blockcore.Features.MemoryPool.csproj",
+        "projectUniqueName": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.MemoryPool\\Blockcore.Features.MemoryPool.csproj",
         "projectName": "Blockcore.Features.MemoryPool",
-        "projectPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.MemoryPool\\Blockcore.Features.MemoryPool.csproj",
+        "projectPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.MemoryPool\\Blockcore.Features.MemoryPool.csproj",
         "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.MemoryPool\\obj\\",
+        "outputPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.MemoryPool\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -209,11 +209,11 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "C:\\Users\\Administrator\\Source\\Repos\\node\\Blockcore\\Blockcore.csproj": {
-                "projectPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Blockcore\\Blockcore.csproj"
+              "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Blockcore\\Blockcore.csproj": {
+                "projectPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Blockcore\\Blockcore.csproj"
               },
-              "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.Consensus\\Blockcore.Features.Consensus.csproj": {
-                "projectPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.Consensus\\Blockcore.Features.Consensus.csproj"
+              "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.Consensus\\Blockcore.Features.Consensus.csproj": {
+                "projectPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.Consensus\\Blockcore.Features.Consensus.csproj"
               }
             }
           }
@@ -254,14 +254,14 @@
         }
       }
     },
-    "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.NodeHost\\Blockcore.Features.NodeHost.csproj": {
+    "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.NodeHost\\Blockcore.Features.NodeHost.csproj": {
       "version": "1.1.41",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.NodeHost\\Blockcore.Features.NodeHost.csproj",
+        "projectUniqueName": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.NodeHost\\Blockcore.Features.NodeHost.csproj",
         "projectName": "Blockcore.Features.NodeHost",
-        "projectPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.NodeHost\\Blockcore.Features.NodeHost.csproj",
+        "projectPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.NodeHost\\Blockcore.Features.NodeHost.csproj",
         "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.NodeHost\\obj\\",
+        "outputPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.NodeHost\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -278,8 +278,8 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "C:\\Users\\Administrator\\Source\\Repos\\node\\Blockcore\\Blockcore.csproj": {
-                "projectPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Blockcore\\Blockcore.csproj"
+              "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Blockcore\\Blockcore.csproj": {
+                "projectPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Blockcore\\Blockcore.csproj"
               }
             }
           }
@@ -356,14 +356,14 @@
         }
       }
     },
-    "C:\\Users\\Administrator\\Source\\Repos\\node\\Networks\\Blockcore.Networks.SeniorBlockCoin\\Blockcore.Networks.SeniorBlockCoin.csproj": {
+    "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Networks\\Blockcore.Networks.SeniorBlockCoin\\Blockcore.Networks.SeniorBlockCoin.csproj": {
       "version": "1.1.41",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Administrator\\Source\\Repos\\node\\Networks\\Blockcore.Networks.SeniorBlockCoin\\Blockcore.Networks.SeniorBlockCoin.csproj",
+        "projectUniqueName": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Networks\\Blockcore.Networks.SeniorBlockCoin\\Blockcore.Networks.SeniorBlockCoin.csproj",
         "projectName": "Blockcore.Networks.SeniorBlockCoin",
-        "projectPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Networks\\Blockcore.Networks.SeniorBlockCoin\\Blockcore.Networks.SeniorBlockCoin.csproj",
+        "projectPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Networks\\Blockcore.Networks.SeniorBlockCoin\\Blockcore.Networks.SeniorBlockCoin.csproj",
         "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Networks\\Blockcore.Networks.SeniorBlockCoin\\obj\\",
+        "outputPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Networks\\Blockcore.Networks.SeniorBlockCoin\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -380,17 +380,17 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "C:\\Users\\Administrator\\Source\\Repos\\node\\Blockcore\\Blockcore.csproj": {
-                "projectPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Blockcore\\Blockcore.csproj"
+              "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Blockcore\\Blockcore.csproj": {
+                "projectPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Blockcore\\Blockcore.csproj"
               },
-              "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.Consensus\\Blockcore.Features.Consensus.csproj": {
-                "projectPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.Consensus\\Blockcore.Features.Consensus.csproj"
+              "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.Consensus\\Blockcore.Features.Consensus.csproj": {
+                "projectPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.Consensus\\Blockcore.Features.Consensus.csproj"
               },
-              "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.MemoryPool\\Blockcore.Features.MemoryPool.csproj": {
-                "projectPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.MemoryPool\\Blockcore.Features.MemoryPool.csproj"
+              "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.MemoryPool\\Blockcore.Features.MemoryPool.csproj": {
+                "projectPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.MemoryPool\\Blockcore.Features.MemoryPool.csproj"
               },
-              "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.NodeHost\\Blockcore.Features.NodeHost.csproj": {
-                "projectPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.NodeHost\\Blockcore.Features.NodeHost.csproj"
+              "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.NodeHost\\Blockcore.Features.NodeHost.csproj": {
+                "projectPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.NodeHost\\Blockcore.Features.NodeHost.csproj"
               }
             }
           }

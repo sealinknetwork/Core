@@ -124,7 +124,7 @@ else
     string StatusMining { get; set; }
     string Alert { get; set; }
     int BlockCount { get; set; }
-    
+
     protected override void OnInitialized()
     {
         StatusMining = "Ready to Mine";
@@ -215,9 +215,9 @@ else
         await Task.Delay(1000);
         StatusMining = "Stop";
         Alert = "";
-        IsStarting = false;
         this.powMining?.StopMining();
         MiningNotification.MiningChanged(this, false);
+        IsStarting = false;
     }
 
     internal WalletAccountReference GetAccount()

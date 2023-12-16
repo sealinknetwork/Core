@@ -15,6 +15,7 @@
     <Content Include="favicon.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Features\Blockcore.Features.ColdStaking\Blockcore.Features.ColdStaking.csproj" />
     <ProjectReference Include="..\..\Networks\BlockCore.Networks.Cybits\Blockcore.Networks.Cybits.csproj" />
     <ProjectReference Include="..\..\Features\Blockcore.Features.Notifications\Blockcore.Features.Notifications.csproj" />
     <ProjectReference Include="..\..\Features\Blockcore.Features.WalletWatchOnly\Blockcore.Features.WalletWatchOnly.csproj" />
@@ -34,7 +35,6 @@
     <ProjectReference Include="..\..\Features\Blockcore.Features.Dns\Blockcore.Features.Dns.csproj" />
     <ProjectReference Include="..\..\Features\Blockcore.Features.NodeHost\Blockcore.Features.NodeHost.csproj" />
     <ProjectReference Include="..\..\Features\Blockcore.Features.BlockStore\Blockcore.Features.BlockStore.csproj" />
-    <ProjectReference Include="..\..\Features\Blockcore.Features.ColdStaking\Blockcore.Features.ColdStaking.csproj" />
     <ProjectReference Include="..\..\Features\Blockcore.Features.Diagnostic\Blockcore.Features.Diagnostic.csproj" />
     <ProjectReference Include="..\..\Features\Blockcore.Features.Miner\Blockcore.Features.Miner.csproj" />
     <ProjectReference Include="..\..\Features\Blockcore.Features.RPC\Blockcore.Features.RPC.csproj" />
@@ -50,6 +50,7 @@
     <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.310801">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="RockDb.Native" Version="6.12.1" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.1.1" />

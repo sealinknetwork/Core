@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "0Gl9F+M4qjG0aIf+SxyUmjVv8nBvWEf4rwhS0L4AOxupe3hX4fGidf+vIJQ4rj5SKmGLOxM1N82InHV8XdxRRg==",
+  "dgSpecHash": "qlnhRDwd08lUka2rI+UQxNJmROxDu7C0sfi0Hnud6Jg6TCmXTv1iHLGo7KALP+L1V7+HX81dT6pg3e5TSJGn7g==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.ColdStaking\\Blockcore.Features.ColdStaking.csproj",
+  "projectFilePath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.ColdStaking\\Blockcore.Features.ColdStaking.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Administrator\\.nuget\\packages\\concurrenthashset\\1.3.0\\concurrenthashset.1.3.0.nupkg.sha512",
     "C:\\Users\\Administrator\\.nuget\\packages\\dapper\\2.0.123\\dapper.2.0.123.nupkg.sha512",

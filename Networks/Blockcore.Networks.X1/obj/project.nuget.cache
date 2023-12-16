@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Kpd6w6zdFRarGNx+5EWxWF2OAhn2XKryUZS+w8ygbpuhrAGYyllKAbeduKsGHu2NoD6jS9aYNle34vogcePvrA==",
+  "dgSpecHash": "eXmyLq0OGL6Wx2mMGWQLareMujeSyvKsNikX/E9Kba15GWClbS7Wp12Lkk4Y+AVpZv/RuW/O33jFMWzYB+Sqxw==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Networks\\Blockcore.Networks.X1\\Blockcore.Networks.X1.csproj",
+  "projectFilePath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Networks\\Blockcore.Networks.X1\\Blockcore.Networks.X1.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Administrator\\.nuget\\packages\\cloo.clsharp\\1.0.1\\cloo.clsharp.1.0.1.nupkg.sha512",
     "C:\\Users\\Administrator\\.nuget\\packages\\concurrenthashset\\1.3.0\\concurrenthashset.1.3.0.nupkg.sha512",

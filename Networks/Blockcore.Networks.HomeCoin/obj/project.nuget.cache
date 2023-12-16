@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "SUrOr9uNMqhDzeGZ6P57QJklb5g8d93DFGhuH3x4bO5k1zEKRh6xHz0vftS+ZdANr+O7xVD9D4JwNy57wRPfEQ==",
+  "dgSpecHash": "GZSXMwEsA9DMy2OVBUaN0JqRAnMBX7Stz7W7PYrSpS4R/Blxhgobc0KcM72ZNHD4NsyT5AOwFPazydaTsjulJw==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Networks\\Blockcore.Networks.HomeCoin\\Blockcore.Networks.HomeCoin.csproj",
+  "projectFilePath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Networks\\Blockcore.Networks.HomeCoin\\Blockcore.Networks.HomeCoin.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Administrator\\.nuget\\packages\\concurrenthashset\\1.3.0\\concurrenthashset.1.3.0.nupkg.sha512",
     "C:\\Users\\Administrator\\.nuget\\packages\\dapper\\2.0.123\\dapper.2.0.123.nupkg.sha512",

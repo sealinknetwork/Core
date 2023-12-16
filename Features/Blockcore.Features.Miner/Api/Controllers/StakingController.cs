@@ -6,6 +6,7 @@ using System.Security;
 using Blockcore.Consensus.ScriptInfo;
 using Blockcore.Features.Miner.Api.Models;
 using Blockcore.Features.Miner.Interfaces;
+using Blockcore.Features.Wallet.Api.Models;
 using Blockcore.Features.Wallet.Interfaces;
 using Blockcore.Features.Wallet.Types;
 using Blockcore.NBitcoin;
@@ -139,6 +140,11 @@ namespace Blockcore.Features.Miner.Api.Controllers
                 {
                     throw new SecurityException(ex.Message);
                 }
+
+
+                var items = this.walletManager.GetSpendableTransactionsInWalletForStaking(request.Name, 1);
+                var amountConfirmed = items.Where(s => s.Confirmations > 0).Sum(s => s.Transaction.Amount);
+                if (amountConfirmed < 0x48C27395000) return ErrorHelpers.BuildErrorResponse(HttpStatusCode.BadRequest, "Wallet error", "Balance is not enough");
 
                 this.fullNode.NodeFeature<MiningFeature>(true).StartStaking(request.Name, request.Password);
 

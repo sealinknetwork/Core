@@ -7536,11 +7536,11 @@
   "project": {
     "version": "1.1.41",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.ColdStaking\\Blockcore.Features.ColdStaking.csproj",
+      "projectUniqueName": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.ColdStaking\\Blockcore.Features.ColdStaking.csproj",
       "projectName": "Blockcore.Features.ColdStaking",
-      "projectPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.ColdStaking\\Blockcore.Features.ColdStaking.csproj",
+      "projectPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.ColdStaking\\Blockcore.Features.ColdStaking.csproj",
       "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.ColdStaking\\obj\\",
+      "outputPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.ColdStaking\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -7557,11 +7557,11 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "projectReferences": {
-            "C:\\Users\\Administrator\\Source\\Repos\\node\\Blockcore\\Blockcore.csproj": {
-              "projectPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Blockcore\\Blockcore.csproj"
+            "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Blockcore\\Blockcore.csproj": {
+              "projectPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Blockcore\\Blockcore.csproj"
             },
-            "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.Wallet\\Blockcore.Features.Wallet.csproj": {
-              "projectPath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Features\\Blockcore.Features.Wallet\\Blockcore.Features.Wallet.csproj"
+            "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.Wallet\\Blockcore.Features.Wallet.csproj": {
+              "projectPath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Features\\Blockcore.Features.Wallet\\Blockcore.Features.Wallet.csproj"
             }
           }
         }

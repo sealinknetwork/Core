@@ -25,8 +25,8 @@ namespace Blockcore.Node
                 "-server",
                 "-rpcallowip=127.0.0.1",
                 "-rpcbind=127.0.0.1",
-                "-rpcpassword=rpcpassword",
-                "-rpcuser=rpcuser",
+                "-rpcpassword=123456",
+                "-rpcuser=sealink",
                 "-enableWS=true"
                 };
 

@@ -7468,6 +7468,11 @@
         <member name="P:Blockcore.IFullNode.State">
             <summary>Provides current state of the node.</summary>
         </member>
+        <member name="P:Blockcore.IFullNode.Ntype">
+            <summary>
+            node type
+            </summary>
+        </member>
         <member name="P:Blockcore.IFullNode.StartTime">
             <summary>Time the node started.</summary>
         </member>
@@ -7522,6 +7527,11 @@
         </member>
         <member name="F:Blockcore.FullNodeState.Disposed">
             <summary>Assigned when <see cref="!:IFullNode.Dispose"/> finished executing.</summary>
+        </member>
+        <member name="T:Blockcore.NodeType">
+            <summary>
+            节点类型
+            </summary>
         </member>
         <member name="T:Blockcore.Interfaces.IBlockStore">
             <summary>

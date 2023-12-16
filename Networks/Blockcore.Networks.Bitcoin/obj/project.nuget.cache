@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "RmmJPPw7/qoc9x4uuUF9/uYWCSst/Dslzzt82jnLNc55ZvBNURuX2qGNGEtWkrqjCw5ihhfhEV+uDgiJ/m3kug==",
+  "dgSpecHash": "9qSyZcqPIQSG7b1KaIxVX+mxSL/0T7GgXhe3altMd+IEWtNk5YiK2K5ov2Xoa2Ne/S1jELqFNjg0GMcWkOK23A==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Networks\\Blockcore.Networks.Bitcoin\\Blockcore.Networks.Bitcoin.csproj",
+  "projectFilePath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Networks\\Blockcore.Networks.Bitcoin\\Blockcore.Networks.Bitcoin.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Administrator\\.nuget\\packages\\concurrenthashset\\1.3.0\\concurrenthashset.1.3.0.nupkg.sha512",
     "C:\\Users\\Administrator\\.nuget\\packages\\dbreeze\\1.107.0\\dbreeze.1.107.0.nupkg.sha512",

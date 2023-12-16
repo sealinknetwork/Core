@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "j7hnzZi3gFX2hcHq6FuI3S8Poi6Ug3lPobzFtijOR9rVX7k41m6CF/wxru9gWjpg6HYEAEputCZzAHAr6kzpgQ==",
+  "dgSpecHash": "4kvM2NJZ9jrdFzrXs2hRbBn+s0B9jVLj4LYltsR244c9KDG0mSM+04Lzx1MEX88UMUlXXhtYw9JsSdlnaQtV9w==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Administrator\\Source\\Repos\\node\\Networks\\Blockcore.Networks.XRC\\Blockcore.Networks.XRC.csproj",
+  "projectFilePath": "C:\\Users\\Administrator\\Documents\\GitHub\\core\\Networks\\Blockcore.Networks.XRC\\Blockcore.Networks.XRC.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Administrator\\.nuget\\packages\\concurrenthashset\\1.3.0\\concurrenthashset.1.3.0.nupkg.sha512",
     "C:\\Users\\Administrator\\.nuget\\packages\\dbreeze\\1.107.0\\dbreeze.1.107.0.nupkg.sha512",

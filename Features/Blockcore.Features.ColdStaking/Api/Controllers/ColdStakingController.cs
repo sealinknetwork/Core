@@ -22,6 +22,7 @@ namespace Blockcore.Features.ColdStaking.Api.Controllers
     [ApiController]
     [ApiVersion("1")]
     [Route("api/[controller]")]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class ColdStakingController : Microsoft.AspNetCore.Mvc.Controller
     {
         public ColdStakingManager ColdStakingManager { get; private set; }
