@@ -1,4 +1,3 @@
-
 <p align="center">
   <p align="center">
     <img src="https://sealink.network/img/logo.png" height="50" alt="Sealink" />
@@ -32,83 +31,108 @@ Getting Started Guide
 
 ### Windows ###
 
-- Install .NET 6 https://dotnet.microsoft.com/en-us/download/dotnet/6.0
+- Install .NET 6 [Link](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
 - Dwonload last Sealink Node. 
 - UnZip file, find the Blockcore.Node.exe, click to runing node.
 - Open Browser, input http://localhost:15003
 
-
-
 ### Liunx ###
-- Install .NET 6 https://learn.microsoft.com/zh-cn/dotnet/core/install/linux-scripted-manual#set-environment-variables-system-wide
-- sudo apt-get install build-essential
-- sudo apt-get install libgflags-dev
-- sudo apt-get install libsnappy-dev
-- sudo apt-get install zlib1g-dev
-- sudo apt-get install libbz2-dev
-- sudo apt-get install liblz4-dev
-- sudo apt-get install libzstd-dev
+- Install .NET 6 [Link](https://learn.microsoft.com/zh-cn/dotnet/core/install/linux-scripted-manual#set-environment-variables-system-wide)
+
+- Install libs
+
+  ```shell
+  sudo apt-get install build-essential
+  sudo apt-get install libgflags-dev
+  sudo apt-get install libsnappy-dev
+  sudo apt-get install zlib1g-dev
+  sudo apt-get install libbz2-dev
+  sudo apt-get install liblz4-dev
+  sudo apt-get install libzstd-dev
+  ```
+
 - Dwonload Sealink Node.
+
 - Unzip file,run dotnet Blockcore.Node.dll
+
 - Open Browser, input http://localhost:15003
 
 ### API ###
-- DocUrl http://localhost:15003/docs/index.html
+- DocUrl [http://localhost:15003/docs/index.html](http://localhost:15003/docs/index.html)
 
 - Get Mnemonic
+
+  ```shell
   curl -X 'GET' 'http://localhost:15003/api/Wallet/mnemonic?language=English&wordCount=12' -H 'accept: */*'
-  
+  ```
+
 - Create Wallet
-  curl -X 'POST' \
-  'http://localhost:15003/api/Wallet/create' \
-  -H 'accept: */*' \
-  -H 'Content-Type: application/json-patch+json' \
-  -d '{
-  "mnemonic": "string",
-  "password": "string",
-  "passphrase": "string",
-  "name": "string",
-  "purpose": 0
-}'
+
+  ```shell
+  curl -X 'POST' 'http://localhost:15003/api/Wallet/create' \
+    -H 'accept: */*' \
+    -H 'Content-Type: application/json-patch+json' \
+    -d '{
+    "mnemonic": "string",
+    "password": "string",
+    "passphrase": "string",
+    "name": "string",
+    "purpose": 0
+  }'
+  ```
 
 - Get wallet balance
-curl -X 'GET' \
-  'http://localhost:15003/api/Wallet/balance?WalletName=1&AccountName=account%200' \
-  -H 'accept: */*'
+
+  ```shell
+  curl -X 'GET' 'http://localhost:15003/api/Wallet/balance?WalletName=1&AccountName=account%200'
+    -H 'accept: */*' 
+  ```
 
 - Start mining
-  curl -X 'POST' \
-  'http://localhost:15003/api/Mining/generate' \
-  -H 'accept: */*' \
-  -H 'Content-Type: application/json-patch+json' \
-  -d '{
-  "blockCount": 1
-}'
+
+  ```shell
+  curl -X 'POST'   'http://localhost:15003/api/Mining/generate' \
+    -H 'accept: */*' \
+    -H 'Content-Type: application/json-patch+json' \
+    -d '{
+    "blockCount": 1
+  }'
+  ```
 
 - Stop mining
-  curl -X 'POST' \
-  'http://localhost:15003/api/Mining/stopmining' \
+
+  ```shell
+  curl -X 'POST' 'http://localhost:15003/api/Mining/stopmining' \
   -H 'accept: */*' \
   -H 'Content-Type: application/json-patch+json' \
   -d 'true'
+  ```
 
 - Start staking
-  curl -X 'POST' \
-  'http://localhost:15003/api/Staking/startstaking' \
-  -H 'accept: */*' \
-  -H 'Content-Type: application/json-patch+json' \
-  -d '{
-  "password": "1",
-  "name": "1" --wallet name
 
-}'
+  ```shell
+  - curl -X 'POST' 'http://localhost:15003/api/Staking/startstaking' \
+    -H 'accept: */*' \
+    -H 'Content-Type: application/json-patch+json' \
+    -d '{
+    "password": "1",
+    "name": "1" --wallet name
+  }'
+  ```
 
 - Stop staking
-  curl -X 'POST' \
-  'http://localhost:15003/api/Staking/stopstaking' \
+  
+  ```shell
+  curl -X 'POST' 'http://localhost:15003/api/Staking/stopstaking' \
   -H 'accept: */*' \
   -H 'Content-Type: application/json-patch+json' \
   -d 'true'
-
+  ```
+  
 - Get chain status
+  
+  ```shell
   curl -X 'GET' 'http://localhost:15003/api/Node/status' -H 'accept: */*'
+  ```
+  
+  
