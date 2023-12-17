@@ -25,7 +25,10 @@ Introduction
 
 Getting Started Guide
 -----------
-
+Add Node 
+72.167.148.221
+92.205.231.104
+97.74.86.57
 
 ### Windows ###
 
