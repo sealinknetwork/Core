@@ -41,6 +41,13 @@ Getting Started Guide
 
 ### Liunx ###
 - Install .NET 6 https://learn.microsoft.com/zh-cn/dotnet/core/install/linux-scripted-manual#set-environment-variables-system-wide
+- sudo apt-get install build-essential
+- sudo apt-get install libgflags-dev
+- sudo apt-get install libsnappy-dev
+- sudo apt-get install zlib1g-dev
+- sudo apt-get install libbz2-dev
+- sudo apt-get install liblz4-dev
+- sudo apt-get install libzstd-dev
 - Dwonload Sealink Node.
 - Unzip file,run dotnet Blockcore.Node.dll
 - Open Browser, input http://localhost:15003
