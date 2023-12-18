@@ -39,8 +39,10 @@ Getting Started Guide
 
 
 
-### Liunx ###
+### Linux ###
 - Install .NET 6 https://learn.microsoft.com/zh-cn/dotnet/core/install/linux-scripted-manual#set-environment-variables-system-wide
+- Intstall Rocksdb dependencies
+- sudo apt-get update
 - sudo apt-get install build-essential
 - sudo apt-get install libgflags-dev
 - sudo apt-get install libsnappy-dev
