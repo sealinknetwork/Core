@@ -43,7 +43,7 @@ Getting Started Guide
 - Install .NET 6 https://learn.microsoft.com/zh-cn/dotnet/core/install/linux-scripted-manual#set-environment-variables-system-wide
   
 - Intstall Rocksdb dependencies
-apt-get update 
+- apt-get update 
     && apt-get install -y curl libsnappy-dev libc-dev libc6-dev libc6 unzip 
     && apt-get clean 
     && rm -rf /var/lib/apt/lists/*
