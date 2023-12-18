@@ -44,9 +44,9 @@ Getting Started Guide
   
 - Intstall Rocksdb dependencies
 - apt-get update 
-    && apt-get install -y curl libsnappy-dev libc-dev libc6-dev libc6 unzip 
-    && apt-get clean 
-    && rm -rf /var/lib/apt/lists/*
+- apt-get install -y curl libsnappy-dev libc-dev libc6-dev libc6 unzip 
+- apt-get clean
+- rm -rf /var/lib/apt/lists/*
   
 - Dwonload Sealink Node.
 - Unzip file,run dotnet Blockcore.Node.dll
