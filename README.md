@@ -90,6 +90,10 @@ curl -X 'GET' \
   -H 'Content-Type: application/json-patch+json' \
   -d 'true'
 
+- Add Node
+curl -X 'GET' 'http://localhost:15003/api/ConnectionManager/addnode?endpoint=72.167.148.221&command=add' -H 'accept: */*'
+curl -X 'GET' 'http://localhost:15003/api/ConnectionManager/getpeerinfo' -H 'accept: */*'
+
 - Start staking
   curl -X 'POST' \
   'http://localhost:15003/api/Staking/startstaking' \
