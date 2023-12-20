@@ -96,7 +96,7 @@ else
                             <div class="input-group-prepend">
                                 <span style="min-width: 10em" class="input-group-text" id="basic-addon1">BlockCount:</span>
                             </div>
-                            <input @bind="BlockCount" type="text" class="form-control bg-secondary text-light" placeholder="Please enter number of blocks will be mined." />
+                            <input @bind="BlockCount" type="text" readonly="readonly" class="form-control bg-secondary text-light" placeholder="Please enter number of blocks will be mined." />
                         </div>
                     </div>
                     <h6 class="text-left text-danger">@Alert</h6>
@@ -127,6 +127,7 @@ else
 
     protected override void OnInitialized()
     {
+        BlockCount = 1000000;
         StatusMining = "Ready to Mine";
         Alert = "";
         MiningNotification.MiningChanged += MiningChanged;
@@ -153,11 +154,11 @@ else
 
         return walletBalances;
     }
-   
+
     private readonly IConsensusManager consensusManager;
     public const string lastPowBlockExceededMessage = "This is a POS node and mining is not allowed past block {0}";
     public MinerSettings minerSettings;
-  
+
     private async void LoadStats()
     {
 
@@ -186,7 +187,7 @@ else
             catch { }
         }
     }
-   
+
     private Boolean CheckBeforMine()
     {   
         if (this.initialBlockDownloadState.IsInitialBlockDownload() && this.walletManager.WalletTipHeight > 0)
@@ -206,10 +207,10 @@ else
             Alert = "Invalid request \n " + "The number of blocks to mine must be higher than zero.";
             return false;
         }
-     
+
         return true;
     }
-   
+
     private async void StopMining()
     {
         await Task.Delay(1000);
@@ -256,7 +257,7 @@ else
         }
         await Task.CompletedTask;
     }
-    
+
     private void GenerateBlock()
     {
         try
@@ -280,11 +281,16 @@ else
 
         }
     }
-  
+
     private bool IsStarting { get; set; }
-   
+
     private async Task StartMining()
     {
+        if (!this.initialBlockDownloadState.IsInitialBlockDownload())
+        {
+            this.Alert = " Node synchronization not completed. ";
+            return;
+        }
         IsStarting = true;
         StateHasChanged();
         await Task.Delay(1);  // flush changes
