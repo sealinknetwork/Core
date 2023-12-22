@@ -25,7 +25,11 @@ Introduction
 
 Getting Started Guide
 -----------
-
+### Add Node ###
+- 97.74.83.32
+- 92.205.231.104
+- 72.167.148.221
+- 97.74.86.57
 
 ### Windows ###
 
@@ -36,9 +40,16 @@ Getting Started Guide
 
 
 
-### Liunx ###
+### Linux ###
 - Install .NET 6 https://learn.microsoft.com/zh-cn/dotnet/core/install/linux-scripted-manual#set-environment-variables-system-wide
-- Dwonload last Sealink Node.
+  
+- Intstall Rocksdb dependencies
+- apt-get update 
+- apt-get install -y curl libsnappy-dev libc-dev libc6-dev libc6 unzip 
+- apt-get clean
+- rm -rf /var/lib/apt/lists/*
+  
+- Dwonload Sealink Node.
 - Unzip file,run dotnet Blockcore.Node.dll
 - Open Browser, input http://localhost:15003
 
@@ -81,6 +92,10 @@ curl -X 'GET' \
   -H 'accept: */*' \
   -H 'Content-Type: application/json-patch+json' \
   -d 'true'
+
+- Add Node
+curl -X 'GET' 'http://localhost:15003/api/ConnectionManager/addnode?endpoint=72.167.148.221&command=add' -H 'accept: */*'
+curl -X 'GET' 'http://localhost:15003/api/ConnectionManager/getpeerinfo' -H 'accept: */*'
 
 - Start staking
   curl -X 'POST' \
