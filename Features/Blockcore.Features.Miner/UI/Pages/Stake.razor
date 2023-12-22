@@ -357,7 +357,7 @@ else
             var items = this.WalletManager.GetSpendableTransactionsInWalletForStaking(walletName, 1);
 
             var amountConfirmed = items.Where(s => s.Confirmations > 0).Sum(s => s.Transaction.Amount);
-            if (amountConfirmed < 0x48C27395000) continue;
+            // if (amountConfirmed < 0x48C27395000) continue;
             var amountUnconfirmed = items.Where(s => s.Confirmations <= 0).Sum(s => s.Transaction.Amount);
 
             walletBalances.Add(walletName, (Money.Satoshis(amountConfirmed), Money.Satoshis(amountUnconfirmed)));

@@ -286,7 +286,7 @@ else
 
     private async Task StartMining()
     {
-        if (this.walletManager.WalletTipHeight<100)
+        if (this.walletManager.WalletTipHeight<0)
         {
             this.Alert = " Node synchronization not completed. ";
             return;
