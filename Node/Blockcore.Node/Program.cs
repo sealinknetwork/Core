@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Blockcore.Builder;
 using Blockcore.Configuration;
@@ -12,9 +16,20 @@ using Blockcore.Features.Miner;
 using Blockcore.Features.NodeHost;
 using Blockcore.Features.RPC;
 using Blockcore.Utilities;
+using Blockcore.Utilities.Extensions;
+using Newtonsoft.Json;
+using SealinkNetwork;
 
 namespace Blockcore.Node
 {
+    public class peer
+    {
+        public string addr { get; set; }
+        public string subVer { get; set; }
+        public string startingHeight { get; set; }
+        public string version { get; set; }
+    }
+
     public class Program
     {
         public static async Task Main(string[] args)
@@ -30,6 +45,7 @@ namespace Blockcore.Node
                 "-enableWS=true"
                 };
 
+
                 var nodeSettings = new NodeSettings(networksSelector: SealinkNetwork.Networks.Networks.SealinkNetwork, args: args);
 
                 IFullNodeBuilder nodeBuilder = new FullNodeBuilder()
@@ -43,7 +59,8 @@ namespace Blockcore.Node
                     .AddRPC()
                     .UseDiagnosticFeature();
 
-                IFullNode node = nodeBuilder.Build();
+
+                FullNode node = (FullNode)nodeBuilder.Build();
 
 
                 if (node != null)
@@ -69,6 +86,31 @@ namespace Blockcore.Node
                             }
                         }
                     }
+
+                    //check first load , download peers
+                    try
+                    {
+                        var http = new HttpClient();
+                        HttpResponseMessage resp = await http.GetAsync("https://explorer.sealink.network/smartnode/peers");
+                        if (resp.StatusCode == HttpStatusCode.OK)
+                        {
+                            var content = await resp.Content.ReadAsStringAsync();
+                            List<peer> peers = JsonConvert.DeserializeObject<List<peer>>(content);
+                            if (peers.Count > 0)
+                            {
+
+                                foreach (peer peer in peers)
+                                {
+                                    var arrs = peer.addr.Split(':');
+                                    //if (strpeers.Find(a => a.Equals(arrs[0])) != null) continue;
+                                    node.ConnectionManager.ConnectionSettings.AddAddNode(new IPEndPoint(IPAddress.Parse(arrs[0]), int.Parse(arrs[1])));
+                                }
+                            }
+                        }
+                    }
+                    catch { }
+
+
                     await node.RunAsync();
                 }
             }

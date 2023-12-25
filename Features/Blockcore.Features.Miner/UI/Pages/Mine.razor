@@ -96,7 +96,7 @@ else
                             <div class="input-group-prepend">
                                 <span style="min-width: 10em" class="input-group-text" id="basic-addon1">BlockCount:</span>
                             </div>
-                            <input @bind="BlockCount" type="text" readonly="readonly" class="form-control bg-secondary text-light" placeholder="Please enter number of blocks will be mined." />
+                            <input value="@BlockCount" type="text" readonly="readonly" class="form-control bg-secondary text-light" placeholder="Please enter number of blocks will be mined." />
                         </div>
                     </div>
                     <h6 class="text-left text-danger">@Alert</h6>
@@ -123,11 +123,10 @@ else
     Boolean MiningEnabled { get; set; }
     string StatusMining { get; set; }
     string Alert { get; set; }
-    int BlockCount { get; set; }
+    int BlockCount { get { return 10000000; } }
 
     protected override void OnInitialized()
     {
-        BlockCount = 1000000;
         StatusMining = "Ready to Mine";
         Alert = "";
         MiningNotification.MiningChanged += MiningChanged;

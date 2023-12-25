@@ -53,7 +53,7 @@ namespace Blockcore.Persistence
         public virtual void Initialize()
         {
             List<string> persistenceAssemblies = Directory.GetFiles(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "*.Persistence.*.dll").ToList();
-            List<string> loadedPersistenceAssemblies = AppDomain.CurrentDomain.GetAssemblies().Select(a => a.Location).Where(path => path.Contains(".Persistence.")).ToList();
+            List<string> loadedPersistenceAssemblies = AppDomain.CurrentDomain.GetAssemblies().Where(a=>!a.IsDynamic).Select(a => a.Location).Where(path => path.Contains(".Persistence.")).ToList();
 
             List<string> unloadedPersistenceAssemblies = persistenceAssemblies.Except(loadedPersistenceAssemblies).ToList();
 
