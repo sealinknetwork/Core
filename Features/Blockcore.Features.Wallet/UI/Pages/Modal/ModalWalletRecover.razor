@@ -22,7 +22,7 @@
                             <textarea @bind="Mnemonic" class="form-control bg-secondary text-light" rows="3" placeholder="Please enter your mnemonic seed words. The mnemonic is your wallet, and must be kept safe and secure.">@Mnemonic</textarea>
                         </div>
                     </div>
-                    <div class="form-group row">
+                    <div class="form-group row" style="display:none">
                         <label class="col-sm-2 col-form-label">
                             <span class="text">Passphrase</span>
                         </label>
@@ -45,14 +45,14 @@
                             <span class="text">Format</span>
                         </label>
                         <div class="col-sm-10">
-                            <select @bind="SelectedPurpose" type="text" class="form-control bg-secondary text-light">
-                                <option value=""></option>
-                                @{
+                            <select @bind="SelectedPurpose" disabled type="text" class="form-control bg-secondary text-light">
+                                <option selected="selected" value="Legacy">Legacy</option>
+                               @*  @{
                                     @foreach (var prp in Purposes)
                                     {          
                                         <option value="@prp">@prp</option>
                                     }
-                                }
+                                } *@
                             </select>
                         </div>
                     </div>
@@ -130,9 +130,9 @@ else
     }
     private async Task RecoverWallet()
     {
-        if (SelectedPurpose == "Legacy") Purpose = 44;
-        if (SelectedPurpose == "Segwit") Purpose = 84;
-
+        //if (SelectedPurpose == "Legacy") Purpose = 44;
+        //if (SelectedPurpose == "Segwit") Purpose = 84;
+        Purpose = 44;
         if (string.IsNullOrEmpty(this.Mnemonic)) { this.Alert = "Ensure that you have entered your Mnemonic"; return; }
         if (string.IsNullOrEmpty(this.WalletName)) { this.Alert = "Please enter a wallet name"; return; }
         if (string.IsNullOrEmpty(this.Password)) { this.Alert = "Please enter a password"; return; }
