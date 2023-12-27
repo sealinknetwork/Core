@@ -25,11 +25,6 @@ Introduction
 
 Getting Started Guide
 -----------
-### Add Node ###
-- 97.74.83.32
-- 92.205.231.104
-- 72.167.148.221
-- 97.74.86.57
 
 ### Windows ###
 
