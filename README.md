@@ -48,6 +48,16 @@ Getting Started Guide
 - Unzip file,run dotnet Blockcore.Node.dll
 - Open Browser, input http://localhost:15003
 
+
+### Mining&Staking ####
+- Setting, Enable Mining, Enable SmartNode
+![image](https://github.com/sealinknetwork/Core/assets/153339478/045d8a50-96ac-4e56-b217-ea11660e95c3)
+
+- Staking(need slk)
+![image](https://github.com/sealinknetwork/Core/assets/153339478/d2fbcd54-f2df-4b12-8eee-c0dfda71b312)
+
+
+
 ### API ###
 - DocUrl http://localhost:15003/docs/index.html
 
