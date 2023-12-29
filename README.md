@@ -37,16 +37,21 @@ Getting Started Guide
 
 ### Linux ###
 - Install .NET 6 https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual#set-environment-variables-system-wide
-  
-- Install Rocksdb dependencies
+- Set environment variables system-wide
+- export DOTNET_ROOT=$HOME/.dotnet
+- export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools
+
+### Install Rocksdb dependencies ###
 - apt-get update 
 - apt-get install -y curl libsnappy-dev libc-dev libc6-dev libc6 unzip 
 - apt-get clean
 - rm -rf /var/lib/apt/lists/*
-  
+
+### Run Node ###
 - Dwonload Sealink Node.
 - Unzip file,run dotnet Blockcore.Node.dll
 - Open Browser, input http://localhost:15003
+
 
 
 ### Mining&Staking ####
