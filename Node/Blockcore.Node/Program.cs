@@ -36,15 +36,7 @@ namespace Blockcore.Node
         {
             try
             {
-                args = new string[] {
-                "-server",
-                "-rpcallowip=127.0.0.1",
-                "-rpcbind=127.0.0.1",
-                "-rpcpassword=123456",
-                "-rpcuser=sealink",
-                "-enableWS=true"
-                };
-
+                args = new string[] { };
 
                 var nodeSettings = new NodeSettings(networksSelector: SealinkNetwork.Networks.Networks.SealinkNetwork, args: args);
 
