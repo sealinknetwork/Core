@@ -49,7 +49,8 @@ Getting Started Guide
 
 ### Run Node ###
 - Dwonload Sealink Node.
-- Unzip file,run dotnet Blockcore.Node.dll
+- Unzip file https://github.com/sealinknetwork/Core/releases
+- Run dotnet Blockcore.Node.dll
 - Open Browser, input http://localhost:15003
 
 
