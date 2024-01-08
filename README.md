@@ -48,9 +48,8 @@ Getting Started Guide
 - rm -rf /var/lib/apt/lists/*
 
 ### Run Node ###
-- Dwonload Sealink Node.
-- Unzip file https://github.com/sealinknetwork/Core/releases
-- Run dotnet Blockcore.Node.dll
+- Dwonload Sealink Node.https://github.com/sealinknetwork/Core/releases
+- Unzip file,Run dotnet Blockcore.Node.dll
 - Open Browser, input http://localhost:15003
 
 
